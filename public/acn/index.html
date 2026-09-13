@@ -38,8 +38,10 @@
   .back{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);text-decoration:none;}
   .back:hover{color:var(--ink);}
   .back svg{width:14px;height:14px;}
-  .wordmark{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:19px;letter-spacing:.02em;}
+  .wordmark{text-align:right;}
+  .wordmark .top{display:flex;align-items:center;justify-content:flex-end;gap:9px;font-family:'Sora',sans-serif;font-weight:700;font-size:19px;letter-spacing:.02em;}
   .wordmark .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px rgba(92,222,135,.16);}
+  .wordmark .spelled{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;color:var(--muted-2);margin-top:3px;}
 
   .hero{
     display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center;
@@ -128,7 +130,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
       DoubleL
     </a>
-    <div class="wordmark"><span class="dot"></span>ACN</div>
+    <div class="wordmark">
+      <div class="top"><span class="dot"></span>ACN</div>
+      <span class="spelled">Agent Clearing Network</span>
+    </div>
   </header>
 
   <div class="hero">

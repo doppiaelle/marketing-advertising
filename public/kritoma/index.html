@@ -1,10 +1,10 @@
 <title>Kritoma</title>
 <style>
   :root{
-    --ink:#030d25;
-    --surface:#0a1731;
-    --surface-2:#0d2140;
-    --line:#1c2f52;
+    --ink:#130810;
+    --surface:#1e0f1c;
+    --surface-2:#271224;
+    --line:#3c1a34;
     --ivory:#fffbea;
     --muted:#8090ad;
     --muted-2:#5a6b8c;
@@ -26,11 +26,15 @@
   .wrap{max-width:1080px;margin:0 auto;}
   a{color:inherit;}
 
-  header{display:flex;align-items:center;justify-content:space-between;padding-block:26px;border-bottom:1px solid var(--line);}
-  .back{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);text-decoration:none;}
+  header{position:relative;display:flex;align-items:center;justify-content:flex-start;padding-block:26px;border-bottom:1px solid var(--line);}
+  .back{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);text-decoration:none;position:relative;z-index:1;}
   .back:hover{color:var(--ivory);}
   .back svg{width:14px;height:14px;}
-  .wordmark{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:.04em;color:var(--ivory);}
+  .wordmark{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:.28em;color:var(--ivory);
+  }
+  @media (max-width:520px){ .wordmark{position:static;transform:none;margin-left:auto;} }
 
   .hero{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center;padding-block:80px 60px;}
   @media (max-width:880px){ .hero{grid-template-columns:1fr;padding-block:48px 36px;gap:40px;} }

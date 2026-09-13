@@ -4,8 +4,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0A111F; --surface:#111B2D; --surface-alt:#162236; --sidebar:#080E1A;
-    --border:#1E3050; --border-light:#162540;
+    --bg:#0D0F12; --surface:#161A1F; --surface-alt:#1D2229; --sidebar:#0A0C0F;
+    --border:#2A3038; --border-light:#20252C;
     --text:#E4E9F1; --muted:#8B93A3; --muted-2:#5A6578;
     --accent:#5BA3E6; --accent-soft:#152840;
     --critical:#EF5350; --high:#FF7043; --medium:#FFD54F; --low:#66BB6A;
@@ -26,9 +26,12 @@
   .back{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);text-decoration:none;}
   .back:hover{color:var(--text);}
   .back svg{width:14px;height:14px;}
+  .header-left{display:flex;align-items:center;gap:12px;}
+  .crumb{color:var(--muted-2);font-size:14px;}
   .wordmark{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;}
   .shield{width:26px;height:26px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .shield svg{width:15px;height:15px;}
+  .hosted-badge{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-2);border:1px solid var(--border);padding:7px 12px;border-radius:100px;white-space:nowrap;}
 
   .hero{display:grid;grid-template-columns:1fr 1.05fr;gap:56px;align-items:center;padding-block:80px 60px;}
   @media (max-width:900px){ .hero{grid-template-columns:1fr;padding-block:48px 36px;gap:40px;} }
@@ -98,14 +101,18 @@
 
 <div class="wrap">
   <header>
-    <a class="back" href="https://official.doppiaelletech.workers.dev/#progetti">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-      DoubleL
-    </a>
-    <div class="wordmark">
-      <span class="shield"><svg viewBox="0 0 28 28" fill="none"><path d="M14 5L7 10v8l7 5 7-5v-8l-7-5z" stroke="#fff" stroke-width="1.8"/><path d="M14 10v8M10 12l4 3 4-3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      VulnTracker
+    <div class="header-left">
+      <a class="back" href="https://official.doppiaelletech.workers.dev/#progetti">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        DoubleL
+      </a>
+      <span class="crumb">/</span>
+      <div class="wordmark">
+        <span class="shield"><svg viewBox="0 0 28 28" fill="none"><path d="M14 5L7 10v8l7 5 7-5v-8l-7-5z" stroke="#fff" stroke-width="1.8"/><path d="M14 10v8M10 12l4 3 4-3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        VulnTracker
+      </div>
     </div>
+    <span class="hosted-badge">Self-hosted build</span>
   </header>
 
   <div class="hero">
