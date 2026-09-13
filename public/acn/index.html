@@ -1,0 +1,231 @@
+<title>Agent Clearing Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070a08;
+    --glow:#153023;
+    --surface:#101915;
+    --surface-2:#152019;
+    --line:rgba(167,214,186,.14);
+    --line-solid:#1e2c25;
+    --ink:#f5faf7;
+    --muted:#9db8a8;
+    --muted-2:#5f7669;
+    --mint:#5cde87;
+    --mint-deep:#1f6b46;
+    --amber:#e8b95c;
+  }
+  *{box-sizing:border-box;}
+  html{color-scheme:dark;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    background-image:
+      radial-gradient(900px 500px at 12% -6%, var(--glow), transparent 58%),
+      radial-gradient(700px 420px at 100% 10%, rgba(92,222,135,.06), transparent 55%);
+    font-family:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    padding:0 24px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+  a{color:inherit;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-block:26px;border-bottom:1px solid var(--line);
+  }
+  .back{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);text-decoration:none;}
+  .back:hover{color:var(--ink);}
+  .back svg{width:14px;height:14px;}
+  .wordmark{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:19px;letter-spacing:.02em;}
+  .wordmark .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px rgba(92,222,135,.16);}
+
+  .hero{
+    display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center;
+    padding-block:84px 60px;
+  }
+  @media (max-width:880px){ .hero{grid-template-columns:1fr;padding-block:52px 36px;gap:40px;} }
+
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--mint);margin-bottom:22px;
+  }
+  .eyebrow::before{content:"//";color:var(--muted-2);}
+  h1{
+    font-family:'Sora',sans-serif;font-weight:600;font-size:clamp(32px,4.4vw,50px);
+    line-height:1.1;letter-spacing:-.01em;margin:0 0 20px;text-wrap:balance;
+  }
+  h1 span{color:var(--mint);}
+  .lede{font-size:16.5px;line-height:1.7;color:var(--muted);max-width:48ch;margin:0 0 28px;}
+  .tags{display:flex;flex-wrap:wrap;gap:10px;}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);border:1px solid var(--line-solid);background:var(--surface);padding:7px 13px;border-radius:6px;}
+
+  /* ledger mock */
+  .ledger{
+    background:var(--surface);border:1px solid var(--line-solid);border-radius:16px;
+    max-width:380px;margin-inline:auto;overflow:hidden;
+    box-shadow:0 40px 90px -30px rgba(0,0,0,.75);
+  }
+  .ledger-top{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line-solid);}
+  .ledger-title{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:600;}
+  .ledger-title svg{width:15px;height:15px;color:var(--mint);}
+  .net{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.06em;}
+  .net i{width:6px;height:6px;border-radius:50%;background:var(--mint);display:inline-block;}
+  .ledger-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 18px;border-bottom:1px solid var(--line-solid);}
+  .ledger-row:last-child{border-bottom:none;}
+  .agents{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink);}
+  .agents b{color:var(--muted-2);font-weight:400;}
+  .amount{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--ink);text-align:right;}
+  .status{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:100px;display:inline-block;margin-top:4px;}
+  .status.settled{background:rgba(92,222,135,.14);color:var(--mint);}
+  .status.pending{background:rgba(232,185,92,.14);color:var(--amber);}
+  .ledger-foot{padding:12px 18px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted-2);text-align:center;border-top:1px dashed var(--line-solid);}
+
+  section{padding-block:56px;border-top:1px solid var(--line);}
+  .kicker{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);margin-bottom:14px;}
+  h2{font-family:'Sora',sans-serif;font-weight:600;font-size:clamp(22px,2.8vw,30px);margin:0 0 40px;letter-spacing:-.005em;max-width:28ch;text-wrap:balance;}
+
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line-solid);border:1px solid var(--line-solid);border-radius:14px;overflow:hidden;}
+  @media (max-width:900px){ .grid4{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:520px){ .grid4{grid-template-columns:1fr;} }
+  .feat{background:var(--surface);padding:26px 22px;}
+  .feat .idx{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-2);margin-bottom:14px;}
+  .feat h3{font-size:15px;margin:0 0 8px;font-weight:600;font-family:'Sora',sans-serif;}
+  .feat p{font-size:12.8px;line-height:1.65;color:var(--muted);margin:0;}
+
+  .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative;}
+  @media (max-width:780px){ .flow{grid-template-columns:1fr;gap:28px;} }
+  .flow-step{padding:24px 24px 24px 0;position:relative;}
+  .flow-step:not(:last-child)::after{
+    content:"→";position:absolute;right:-4px;top:24px;color:var(--muted-2);font-size:18px;
+  }
+  @media (max-width:780px){ .flow-step:not(:last-child)::after{content:"↓";right:auto;left:0;top:auto;bottom:-24px;} }
+  .flow-step .tag-sm{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:block;}
+  .flow-step h3{font-size:15.5px;margin:0 0 8px;font-weight:600;font-family:'Sora',sans-serif;}
+  .flow-step p{font-size:13px;line-height:1.65;color:var(--muted);margin:0;}
+
+  .cta-box{
+    display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+    background:var(--surface);border:1px solid var(--line-solid);border-radius:18px;padding:34px 38px;
+  }
+  .cta-box h3{font-family:'Sora',sans-serif;font-weight:600;font-size:19px;margin:0 0 8px;}
+  .cta-box p{font-size:13px;color:var(--muted);margin:0;max-width:46ch;}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--amber);border:1px solid var(--line-solid);padding:9px 16px;border-radius:100px;white-space:nowrap;}
+  .pill i{width:7px;height:7px;border-radius:50%;background:var(--amber);display:inline-block;box-shadow:0 0 0 3px rgba(232,185,92,.16);}
+
+  footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-block:32px 48px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted-2);}
+  footer a{color:var(--muted);text-decoration:none;}
+  footer a:hover{color:var(--ink);}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand img{height:22px;width:auto;display:block;}
+</style>
+
+<div class="wrap">
+  <header>
+    <a class="back" href="https://official.doppiaelletech.workers.dev/#progetti">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      DoubleL
+    </a>
+    <div class="wordmark"><span class="dot"></span>ACN</div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <div class="eyebrow">AI agents · Blockchain clearing</div>
+      <h1>Infrastructure for <span>agent collaboration</span>.</h1>
+      <p class="lede">Agent Clearing Network is DoubleL's research direction for exchanges between AI agents — agents that identify each other, agree on terms, and settle what they owe without a person clearing the deal by hand.</p>
+      <div class="tags">
+        <span class="tag">Agents</span>
+        <span class="tag">Agreements</span>
+        <span class="tag">Clearing</span>
+        <span class="tag">Payments</span>
+      </div>
+    </div>
+
+    <div class="ledger">
+      <div class="ledger-top">
+        <div class="ledger-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6z"/></svg>Clearing Ledger</div>
+        <span class="net"><i></i>Testnet</span>
+      </div>
+      <div class="ledger-row">
+        <div class="agents">agent<b>-07a3</b> ⇄ agent<b>-19f2</b><br><span class="status settled">Settled</span></div>
+        <div class="amount">120.00 <span class="mono" style="color:var(--muted-2)">USDC</span></div>
+      </div>
+      <div class="ledger-row">
+        <div class="agents">agent<b>-4c1e</b> ⇄ agent<b>-07a3</b><br><span class="status pending">Pending</span></div>
+        <div class="amount">45.50 <span class="mono" style="color:var(--muted-2)">USDC</span></div>
+      </div>
+      <div class="ledger-row">
+        <div class="agents">agent<b>-19f2</b> ⇄ agent<b>-88bd</b><br><span class="status settled">Settled</span></div>
+        <div class="amount">312.10 <span class="mono" style="color:var(--muted-2)">USDC</span></div>
+      </div>
+      <div class="ledger-foot">Example ledger — illustrative data, not a live network</div>
+    </div>
+  </div>
+
+  <section>
+    <div class="kicker">What the workspace holds</div>
+    <h2>Agents, agreements and payments — one workspace.</h2>
+    <div class="grid4">
+      <div class="feat">
+        <div class="idx">01</div>
+        <h3>Agents</h3>
+        <p>Every AI agent acting on someone's behalf gets a verifiable identity — so a clearing always knows who's on each side of it.</p>
+      </div>
+      <div class="feat">
+        <div class="idx">02</div>
+        <h3>Agreements</h3>
+        <p>Terms of an exchange are written in a form agents can read and act on directly, not buried in a contract a human has to interpret.</p>
+      </div>
+      <div class="feat">
+        <div class="idx">03</div>
+        <h3>Clearing</h3>
+        <p>A blockchain-based layer confirms an agreement's conditions were met before anything moves — auditable by construction, not by policy.</p>
+      </div>
+      <div class="feat">
+        <div class="idx">04</div>
+        <h3>Payments</h3>
+        <p>Once a clearing settles, value moves between agents automatically — no invoice, no manual approval step in between.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">How a clearing runs</div>
+    <h2>From agreement to settlement, without a human in the loop.</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <span class="tag-sm">Step 1</span>
+        <h3>Two agents agree</h3>
+        <p>An exchange is proposed and accepted between agents — what's owed, by whom, under what condition.</p>
+      </div>
+      <div class="flow-step">
+        <span class="tag-sm">Step 2</span>
+        <h3>Terms go on-chain</h3>
+        <p>The agreement is recorded where neither side can quietly rewrite it after the fact.</p>
+      </div>
+      <div class="flow-step">
+        <span class="tag-sm">Step 3</span>
+        <h3>Clearing executes</h3>
+        <p>Once conditions are verified, the ledger updates and payment moves — the record and the transfer happen together.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="cta-box">
+      <div>
+        <h3>ACN is an active research project inside DoubleL.</h3>
+        <p>It's not a shipped product yet — it's how we're testing whether agent-to-agent clearing can work without a human settling the deal. Want to talk about the space or collaborate on it? Get in touch with the DoubleL team.</p>
+      </div>
+      <span class="pill"><i></i>Research preview</span>
+    </div>
+  </section>
+
+  <footer>
+    <div class="brand"><img src="../assets/doublel-logo.png" alt="DoubleL"><span>ACN is a DoubleL project</span></div>
+    <a href="https://official.doppiaelletech.workers.dev/">official.doppiaelletech.workers.dev</a>
+  </footer>
+</div>
