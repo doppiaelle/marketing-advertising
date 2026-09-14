@@ -22,6 +22,21 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Verify static product pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          for page in index ll-platform acn focus vulntracker kritoma; do
+            if [ "$page" = "index" ]; then
+              test -f public/index.html
+            else
+              test -f "public/$page/index.html"
+            fi
+          done
+          test -f public/assets/product-pages.css
+          test -f public/assets/product-pages.js
+          test -f public/assets/ll-platform.css
+          ! grep -RniE '<video|intro\.mp4|Access Studio|Sign in with GitHub|Local access' public/ll-platform
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
