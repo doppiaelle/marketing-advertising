@@ -1,65 +1,59 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DoubleL — Product pages</title>
-<style>
-  :root{
-    --ink:#090d0a; --paper:#f3f5ed; --lime:#bded81; --muted:#a8b4a8; --line:#1d221e;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;background:var(--ink);color:var(--paper);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
-    padding:0 24px;
-  }
-  .wrap{max-width:920px;margin:0 auto;padding-block:72px;}
-  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
-  h1{font-size:clamp(28px,4vw,42px);margin:0 0 16px;line-height:1.15;}
-  p.lede{color:var(--muted);max-width:56ch;line-height:1.6;margin:0 0 48px;}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
-  @media (max-width:640px){.grid{grid-template-columns:1fr;}}
-  a.card{
-    display:block;padding:28px 26px;background:#0e120f;text-decoration:none;color:inherit;
-    transition:background .15s ease;
-  }
-  a.card:hover{background:#131813;}
-  a.card h2{font-size:17px;margin:0 0 8px;color:var(--paper);}
-  a.card p{font-size:13px;color:var(--muted);margin:0;line-height:1.55;}
-  a.card .go{color:var(--lime);font-size:12px;margin-top:14px;display:inline-block;}
-  footer{margin-top:56px;font-size:12.5px;color:var(--muted);}
-  footer a{color:var(--muted);}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore the products and creative ventures built by DoubleL.">
+  <title>Products — DoubleL</title>
+  <link rel="stylesheet" href="assets/product-pages.css">
+  <script defer src="assets/product-pages.js"></script>
 </head>
-<body>
-  <div class="wrap">
-    <div class="eyebrow">DoubleL — Product pages</div>
-    <h1>What we're building.</h1>
-    <p class="lede">One page per product — what it does and who it's for, without leading straight into the product itself.</p>
-    <div class="grid">
-      <a class="card" href="/focus/">
+<body class="hub-page">
+  <header class="site-header">
+    <div class="site-shell site-header-inner">
+      <strong class="product-brand">Product stories <small>by DoubleL</small></strong>
+      <a class="all-products" href="https://official.doppiaelletech.workers.dev/#progetti">DoubleL solutions</a>
+    </div>
+  </header>
+
+  <main class="site-shell">
+    <div class="hub-intro">
+      <p class="eyebrow">DoubleL — Products &amp; ventures</p>
+      <h1>What we're building.</h1>
+      <p>One focused page for each project: what it is, how it works and where it is going before you decide to open the product itself.</p>
+    </div>
+
+    <div class="hub-grid" aria-label="DoubleL products">
+      <a class="hub-card" href="acn/">
+        <small>AI agents · Blockchain</small>
+        <h2>ACN</h2>
+        <p>Signed agreements, escrow, verification and settlement between autonomous agents.</p>
+        <strong>Explore →</strong>
+      </a>
+      <a class="hub-card" href="focus/">
+        <small>Everyday assistant · AI</small>
         <h2>Focus</h2>
-        <p>Everyday assistant — notes, shopping, finances and appointments in one conversation.</p>
-        <span class="go">View page →</span>
+        <p>Notes, shopping, personal finances and appointments in one private daily hub.</p>
+        <strong>Explore →</strong>
       </a>
-      <a class="card" href="/acn/">
-        <h2>Agent Clearing Network</h2>
-        <p>Research direction for blockchain-based clearing between AI agents.</p>
-        <span class="go">View page →</span>
-      </a>
-      <a class="card" href="/kritoma/">
-        <h2>Kritoma</h2>
-        <p>Trading card game — physical cards, digital matches.</p>
-        <span class="go">View page →</span>
-      </a>
-      <a class="card" href="/vulntracker/">
+      <a class="hub-card" href="vulntracker/">
+        <small>Security · Self-hosted</small>
         <h2>VulnTracker</h2>
-        <p>Self-hosted vulnerability management for security teams.</p>
-        <span class="go">View page →</span>
+        <p>A local-first workflow for findings, ownership, deadlines and remediation.</p>
+        <strong>Explore →</strong>
+      </a>
+      <a class="hub-card" href="kritoma/">
+        <small>Trading card game</small>
+        <h2>Kritoma</h2>
+        <p>Twelve worlds, three choices and a deck shaped by what you leave behind.</p>
+        <strong>Explore →</strong>
       </a>
     </div>
-    <footer>Back to <a href="https://official.doppiaelletech.workers.dev/">official.doppiaelletech.workers.dev</a></footer>
-  </div>
+  </main>
+
+  <footer class="site-shell site-footer">
+    <div class="footer-by"><span>Product stories by</span><a href="https://official.doppiaelletech.workers.dev/" aria-label="Official DoubleL website"><img src="assets/doublel-logo.png" alt="DoubleL"></a></div>
+    <span>© 2026 DoubleL</span>
+  </footer>
 </body>
 </html>

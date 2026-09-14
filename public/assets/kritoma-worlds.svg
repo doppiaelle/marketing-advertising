@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="law" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M200 60v130M150 190h100M120 80h160M120 80l-26 52h52zM280 80l-26 52h52z"/>
+      <circle cx="200" cy="70" r="9" fill="currentColor" opacity=".25"/>
+      <path d="M94 132a26 26 0 0 0 52 0M254 132a26 26 0 0 0 52 0" stroke-width="1.6" opacity=".6"/>
+    </g>
+  </symbol>
+  <symbol id="tech" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <circle cx="200" cy="120" r="20"/><circle cx="200" cy="120" r="5" fill="currentColor"/>
+      <path d="M200 120L70 60M200 120L330 60M200 120L60 180M200 120L340 180M200 120L200 30M200 120L200 210" opacity=".6"/>
+      <circle cx="70" cy="60" r="7"/><circle cx="330" cy="60" r="7"/><circle cx="60" cy="180" r="7"/><circle cx="340" cy="180" r="7"/><circle cx="200" cy="30" r="7"/><circle cx="200" cy="210" r="7"/>
+      <path d="M40 120h120M240 120h120" opacity=".3" stroke-dasharray="6 8"/>
+    </g>
+  </symbol>
+  <symbol id="finance" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round">
+      <path d="M50 195h300" opacity=".4"/>
+      <rect x="80" y="140" width="34" height="55" fill="currentColor" opacity=".14"/><rect x="130" y="110" width="34" height="85" fill="currentColor" opacity=".14"/><rect x="180" y="150" width="34" height="45" fill="currentColor" opacity=".14"/><rect x="230" y="85" width="34" height="110" fill="currentColor" opacity=".14"/><rect x="280" y="55" width="34" height="140" fill="currentColor" opacity=".14"/>
+      <path d="M70 165l55-30 50 22 55-52 60-30M290 75h-34m34 0v34" stroke-width="3"/>
+    </g>
+  </symbol>
+  <symbol id="medicine" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-linecap="round">
+      <path d="M40 125h70l18-40 26 82 24-58 18 16h30" stroke-width="3"/>
+      <path d="M300 70v90M255 115h90" stroke-width="10" opacity=".25"/><circle cx="300" cy="115" r="55" stroke-width="1.6" opacity=".4"/>
+    </g>
+  </symbol>
+  <symbol id="engineering" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <circle cx="140" cy="120" r="42"/><circle cx="140" cy="120" r="14"/><path d="M140 78v-14M170 90l10-10M182 120h14M170 150l10 10M140 162v14M110 150l-10 10M98 120H84M110 90l-10-10" stroke-width="9" opacity=".7"/>
+      <circle cx="268" cy="92" r="27"/><circle cx="268" cy="92" r="9"/><path d="M268 65V54M291 79l10-6M291 105l10 6M268 119v11M245 105l-10 6M245 79l-10-6" stroke-width="8" opacity=".7"/>
+      <path d="M255 175l45-70 45 70" opacity=".5"/>
+    </g>
+  </symbol>
+  <symbol id="arts" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M96 190l14-56 46-46 22 22-46 46zM110 134l22 22M96 190l24-8"/>
+      <path d="M186 128a46 40 0 1 1 62 37c-14 5-6 14-14 18a46 40 0 0 1-48-55z"/>
+      <circle cx="208" cy="112" r="7" fill="currentColor" opacity=".5"/><circle cx="232" cy="102" r="7" fill="currentColor" opacity=".5"/><circle cx="256" cy="114" r="7" fill="currentColor" opacity=".5"/><circle cx="240" cy="140" r="7" fill="currentColor" opacity=".5"/>
+      <path d="M300 74V32l42-10v42" opacity=".75"/><ellipse cx="292" cy="74" rx="10" ry="7.5" fill="currentColor" opacity=".4"/><ellipse cx="334" cy="64" rx="10" ry="7.5" fill="currentColor" opacity=".4"/>
+    </g>
+  </symbol>
+  <symbol id="sports" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round">
+      <path d="M60 200h280" opacity=".4"/><rect x="160" y="92" width="72" height="108" fill="currentColor" opacity=".16"/><rect x="88" y="132" width="72" height="68" fill="currentColor" opacity=".1"/><rect x="232" y="152" width="72" height="48" fill="currentColor" opacity=".1"/>
+      <circle cx="196" cy="56" r="22"/><path d="M196 34v44M174 56h44M180 40l32 32M212 40l-32 32" opacity=".35"/><path d="M124 116l12-14 12 14M256 138l12-14 12 14" opacity=".6"/>
+    </g>
+  </symbol>
+  <symbol id="food" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M118 208h124a18 18 0 0 0 18-18v-58H100v58a18 18 0 0 0 18 18zM88 132h184"/><path d="M262 148h22a16 16 0 0 1 0 32h-22" opacity=".7"/><path d="M150 112c-14-14 8-22-4-38M180 108c-16-18 10-26-4-44M212 112c-14-14 8-22-4-38" opacity=".6"/>
+      <path d="M330 206V130M330 136c-14 0-18-8-18-14 8 0 18 4 18 14zM330 136c14 0 18-8 18-14-8 0-18 4-18 14zM330 150c-14 0-18-8-18-14 8 0 18 4 18 14zM330 150c14 0 18-8 18-14-8 0-18 4-18 14zM330 164c-14 0-18-8-18-14 8 0 18 4 18 14zM330 164c14 0 18-8 18-14-8 0-18 4-18 14z" opacity=".75"/>
+    </g>
+  </symbol>
+  <symbol id="science" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M172 40h44M180 40v44l-42 84a16 16 0 0 0 14 24h96a16 16 0 0 0 14-24l-42-84V40M152 148h88"/>
+      <circle cx="172" cy="168" r="6" fill="currentColor" opacity=".3"/><circle cx="196" cy="180" r="9" fill="currentColor" opacity=".3"/><circle cx="220" cy="164" r="5" fill="currentColor" opacity=".3"/><circle cx="206" cy="152" r="4" fill="currentColor" opacity=".3"/>
+      <g transform="translate(310 108)" opacity=".6" stroke-width="1.8"><ellipse rx="52" ry="20"/><ellipse rx="52" ry="20" transform="rotate(60)"/><ellipse rx="52" ry="20" transform="rotate(120)"/><circle r="7" fill="currentColor"/></g>
+    </g>
+  </symbol>
+  <symbol id="security" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M200 34l72 26v56c0 44-30 82-72 96-42-14-72-52-72-96V60zM200 62l46 17v39c0 30-19 55-46 66-27-11-46-36-46-66V79z"/><path d="M186 118l10 12 22-26" stroke-width="4"/>
+      <path d="M62 96a34 34 0 0 0 0 60M338 96a34 34 0 0 1 0 60M38 96a58 58 0 0 0 0 60M362 96a58 58 0 0 1 0 60" opacity=".35"/>
+    </g>
+  </symbol>
+  <symbol id="media" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="176" y="34" width="48" height="86" rx="24"/><path d="M148 100a52 52 0 0 0 104 0M200 152v34M172 186h56" stroke-width="3"/>
+      <path d="M114 60a26 26 0 0 0 0 56M286 60a26 26 0 0 1 0 56M90 60a50 50 0 0 0 0 56M310 60a50 50 0 0 1 0 56" opacity=".35"/>
+      <path d="M40 44h34M40 44v30M360 44h-34M360 44v30M40 208h34M40 208v-30M360 208h-34M360 208v-30" opacity=".45" stroke-width="3"/>
+    </g>
+  </symbol>
+  <symbol id="nature" viewBox="0 0 400 240">
+    <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M200 200v-84" stroke-width="5"/><path d="M200 152l-40-30M200 132l38-28M200 176l-30-22M200 166l34-24" opacity=".65"/>
+      <circle cx="200" cy="86" r="40" fill="currentColor" opacity=".12"/><circle cx="150" cy="112" r="28" fill="currentColor" opacity=".12"/><circle cx="252" cy="108" r="32" fill="currentColor" opacity=".12"/>
+      <path d="M120 200h160M200 200l-34 26M200 200l30 24M200 200v28" opacity=".4"/><path d="M330 196c-26 0-40-18-40-36 18 0 40 12 40 36zM330 196v-24" opacity=".6"/>
+    </g>
+  </symbol>
+</svg>

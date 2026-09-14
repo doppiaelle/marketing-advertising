@@ -1,41 +1,48 @@
-# product-pages
+# DoubleL product pages
 
-Pagine informative dei prodotti DoubleL (Focus, ACN, Kritoma, VulnTracker):
-spiegano cosa fa ogni prodotto senza portare all'app vera. Sito statico,
-deployato come Cloudflare Worker (assets-only), stesso meccanismo del sito
-principale `official.doppiaelletech.workers.dev` — repo separato, non tocca
-`DOUBLEL-SITE`.
+Pagine informative dei prodotti DoubleL: Focus, ACN, Kritoma e VulnTracker.
+Il sito è statico e viene pubblicato dalla CI GitHub Pages all'indirizzo:
+
+`https://doppiaelle.github.io/marketing-advertising/`
+
+Il repository resta separato da `DOUBLEL-SITE`, che collega ciascuna scheda
+prodotto alla relativa pagina informativa. Gli eventuali link alle applicazioni
+reali compaiono qui, non nella landing principale.
 
 ## Struttura
 
-```
+```text
 public/
-  index.html          hub con i link alle 4 pagine
+  index.html
   focus/index.html
   acn/index.html
-  kritoma/index.html      (placeholder, in lavorazione)
-  vulntracker/index.html  (placeholder, in lavorazione)
+  kritoma/index.html
+  vulntracker/index.html
   assets/doublel-logo.png
-wrangler.toml
+  assets/kritoma-logo.png
+  assets/kritoma-worlds.svg
+  assets/product-pages.css
+  assets/product-pages.js
 ```
 
-## Deploy
+Tutte le pagine condividono una base CSS mobile-first e la stessa navigazione:
+nome del prodotto in testata, accesso all'indice e firma «by DoubleL» nel footer.
+Le pagine sono documenti HTML statici, senza controlli applicativi. Un piccolo
+script condiviso gestisce soltanto le animazioni progressive e riattivabili allo
+scroll, rispettando la preferenza di sistema per la riduzione del movimento.
 
-Richiede un account Cloudflare con Workers abilitato (login locale con
-`wrangler login`, non servono token condivisi in questo repo).
+## Deploy principale
 
-```bash
-npm install -g wrangler   # se non già installato
-wrangler login
-wrangler deploy
-```
+Il workflow `.github/workflows/pages.yml` pubblica `public/` su GitHub Pages a
+ogni push su `main`. È disponibile anche l'avvio manuale da GitHub Actions.
 
-Il primo deploy assegna un URL tipo `product-pages.<tuo-subdomain>.workers.dev`.
-Per un dominio/percorso diverso (es. un sottodominio di doppiaelletech.dev),
-va configurata una route in `wrangler.toml` o dal dashboard Cloudflare.
+## Cloudflare opzionale
+
+`wrangler.toml` conserva una configurazione assets-only utilizzabile come
+canale alternativo con `wrangler deploy`. Gli URL del sito DoubleL puntano però
+alla pubblicazione GitHub Pages gestita dalla CI.
 
 ## Sviluppo locale
 
-```bash
-wrangler dev
-```
+Aprire `public/index.html` oppure servire la cartella `public/` con un server
+HTTP statico. Non sono richiesti build, dipendenze o runtime lato server.
