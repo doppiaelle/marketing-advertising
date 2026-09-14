@@ -19,6 +19,7 @@ public/
   kritoma/index.html
   vulntracker/index.html
   assets/doublel-logo.png
+  assets/acn-frog.png
   assets/kritoma-logo.png
   assets/kritoma-worlds.svg
   assets/product-pages.css
