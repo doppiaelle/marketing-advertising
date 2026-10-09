@@ -26,7 +26,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for page in index ll-platform acn focus vulntracker kritoma; do
+          for page in index ll-platform acn focus secura kritoma; do
             if [ "$page" = "index" ]; then
               test -f public/index.html
             else

@@ -1,6 +1,6 @@
 # DoubleL product pages
 
-Pagine informative dei prodotti DoubleL: LL Platform, Focus, ACN, Kritoma e VulnTracker.
+Pagine informative dei prodotti DoubleL: LL Platform, Focus, ACN, Kritoma e SecuRA.
 Il sito è statico e viene pubblicato dalla CI GitHub Pages all'indirizzo:
 
 `https://doppiaelle.github.io/marketing-advertising/`
@@ -18,7 +18,7 @@ public/
   focus/index.html
   acn/index.html
   kritoma/index.html
-  vulntracker/index.html
+  secura/index.html
   assets/doublel-logo.png
   assets/acn-frog.png
   assets/kritoma-logo.png

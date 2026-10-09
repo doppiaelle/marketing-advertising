@@ -480,7 +480,7 @@ h1 {
 .phone-nav { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 16px; gap: 4px; color: var(--quiet); font-size: 9px; text-align: center; }
 .phone-nav span:first-child { color: #8b7bff; }
 
-/* VulnTracker */
+/* SecuRA */
 .vuln-page {
   --page: #0d0f12;
   --surface: #161a1f;
