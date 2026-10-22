@@ -20,7 +20,11 @@ public/
   kritoma/index.html
   secura/index.html
   assets/doublel-logo.png
-  assets/acn-frog.png
+  assets/acn-logo-dark.png
+  assets/acn-logo-light.png
+  assets/acn.css
+  assets/acn.js
+  assets/acn-mono-latin.woff2
   assets/kritoma-logo.png
   assets/kritoma-worlds.svg
   assets/ll-hero-constellation.webp
@@ -39,6 +43,12 @@ script condiviso gestisce soltanto le animazioni progressive e riattivabili allo
 scroll, rispettando la preferenza di sistema per la riduzione del movimento.
 
 La vetrina LL Platform include un'illustrazione animata e supporto reduced-motion.
+La vetrina ACN ha uno stile autonomo e minimale, con i loghi trasparenti scuro e
+chiaro, un carattere monospace servito localmente e un esploratore del ciclo di
+clearing. I cinque passaggi sono illustrativi: non inviano richieste né eseguono
+transazioni. Con JavaScript disabilitato restano leggibili tutti i passaggi e
+l'esempio SDK. I contenuti seguono SDK 0.4.0: ispezione del buyer, dispute gestite
+dal supporto ACN e pagamenti sandbox sintetici.
 Le anteprime Studio, Console
 e Analytics sono ricostruzioni HTML/CSS delle rispettive interfacce nei repository
 LL-WEB, LL-DASHBOARD e LL-ANALYTICS, con dati esclusivamente illustrativi.

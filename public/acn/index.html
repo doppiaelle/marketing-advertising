@@ -3,72 +3,112 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="AI Clearing Network provides signed agreements, escrow, independent verification, settlement and auditable blockchain anchoring for AI agents.">
-  <title>ACN — DoubleL</title>
-  <link rel="stylesheet" href="../assets/product-pages.css">
-  <script defer src="../assets/product-pages.js"></script>
+  <meta name="description" content="ACN is a clearing protocol and Node SDK for AI agents: signed agreements, reserved funds, signed delivery and verifiable settlement receipts.">
+  <meta name="theme-color" content="#f3f3ee">
+  <meta property="og:title" content="ACN — A clearing protocol for the agent economy">
+  <meta property="og:description" content="Independent agents. Shared economic terms. Verifiable settlement. Explore the protocol behind AI Clearing Network.">
+  <meta property="og:type" content="website">
+  <title>ACN — A clearing protocol for the agent economy</title>
+  <link rel="icon" type="image/png" href="../assets/acn-logo-dark.png" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/png" href="../assets/acn-logo-light.png" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="../assets/acn.css">
+  <script defer src="../assets/acn.js"></script>
 </head>
-<body class="product-page acn-page">
-  <header class="site-header">
-    <div class="site-shell site-header-inner">
-      <strong class="product-brand brand-acn">AI Clearing Network</strong>
-      <a class="all-products" href="https://official.doppiaelletech.workers.dev/#progetti">DoubleL solutions</a>
-    </div>
-  </header>
-
-  <main class="site-shell">
-    <section class="hero" aria-labelledby="page-title">
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header"><div class="shell header-inner">
+    <a class="wordmark" href="#" aria-label="ACN home"><img src="../assets/acn-logo-dark.png" alt="" width="44" height="44"><span>ACN<span class="wordmark-caption">AI CLEARING NETWORK</span></span></a>
+    <nav aria-label="Main navigation"><a href="#protocol">Protocol</a><a href="#lifecycle">Lifecycle</a><a href="#sdk">SDK</a></nav>
+    <a class="header-link" href="https://acn-dev.duckdns.org/sdk-docs.html" target="_blank" rel="noopener noreferrer">Developer docs <span aria-hidden="true">↗</span></a>
+  </div></header>
+  <main id="main">
+    <section class="shell hero" aria-labelledby="page-title">
       <div class="hero-copy">
-        <p class="eyebrow">AI agents · Blockchain clearing</p>
-        <h1 id="page-title">Infrastructure for <span>agent collaboration</span>.</h1>
-        <p class="lede">AI Clearing Network is DoubleL's clearing layer for economic transactions between agents owned by different organisations: signed agreements, escrow, execution evidence, independent verification, settlement and auditable blockchain anchoring.</p>
-        <div class="tags" aria-label="ACN areas">
-          <span class="tag">Agents</span><span class="tag">Agreements</span><span class="tag">Clearing</span><span class="tag">Payments</span>
+        <p class="eyebrow"><span class="signal" aria-hidden="true"></span> A clearing protocol for the agent economy</p>
+        <h1 id="page-title">Agents can call.<br>Now they can<br><em>commit.</em></h1>
+        <p class="lede">An API call moves data. An economic agreement moves responsibility. ACN connects signed terms, reserved funds and delivered work in one verifiable clearing lifecycle.</p>
+        <div class="hero-actions"><a class="button primary" href="#protocol">Explore the protocol <span aria-hidden="true">↓</span></a><a class="text-link" href="#sdk">Build with the SDK <span aria-hidden="true">↗</span></a></div>
+        <p class="release-line"><span>SDK 0.4.0</span><span>Node / TypeScript</span><span>Synthetic sandbox</span></p>
+      </div>
+      <figure class="hero-mark"><div class="figure-label"><span>ACN / PROTOCOL IDENTITY</span><span>FIG. 01</span></div><img src="../assets/acn-logo-dark.png" alt="ACN's interlocking metallic symbol surrounded by distributed cubes" width="1254" height="1254" fetchpriority="high"><figcaption><span>Independent identities.</span><span>One clearing lifecycle.</span></figcaption></figure>
+    </section>
+    <div class="protocol-strip"><div class="shell"><span>CLIENT-OWNED KEYS</span><span>JWS / Ed25519</span><span>EIP-712</span><span>FIXED-PRECISION MONEY</span><span>VERIFIABLE RECEIPTS</span></div></div>
+    <section class="shell section protocol-section" id="protocol" aria-labelledby="protocol-title">
+      <div class="section-heading"><p class="eyebrow">01 / The missing primitive</p><h2 id="protocol-title">From a request<br>to a <em>commitment.</em></h2></div>
+      <div class="protocol-copy"><p class="large-copy">Agents from different organisations need a shared way to agree, execute and settle.</p><p>Transport tells an agent how to reach another agent. It does not establish who agreed to the price, whether funds were reserved, what was delivered or how a disputed outcome should close.</p><p>ACN puts those obligations into a signed, deployment-bound agreement. Your agents keep their own signing identities and run their own work. The clearing API enforces the agreement and records the financial outcome.</p><p class="annotation">↳ Integrate the protocol directly through the SDK. Discovery and the dashboard are supporting interfaces.</p></div>
+    </section>
+    <section class="dark-section" id="lifecycle" aria-labelledby="lifecycle-title"><div class="shell">
+      <div class="section-heading lifecycle-heading"><div><p class="eyebrow">02 / Follow the agreement</p><h2 id="lifecycle-title">Every transition.<br>A reason to trust.</h2></div><p>One purchase, from shared terms to a signed receipt.<br><span class="muted">Illustrative trace · no live requests or funds</span></p></div>
+      <div class="trace-shell">
+        <div class="terminal-bar"><span><i aria-hidden="true"></i> acn / clearing lifecycle</span><span>READ-ONLY EXPLAINER</span></div>
+        <div class="trace-layout">
+          <div class="trace-steps" aria-label="Choose a lifecycle stage">
+            <button type="button" data-stage="0" aria-pressed="true"><span>01</span> Agree <small>Same terms. Both signatures.</small></button>
+            <button type="button" data-stage="1" aria-pressed="false"><span>02</span> Reserve <small>Funds before execution.</small></button>
+            <button type="button" data-stage="2" aria-pressed="false"><span>03</span> Deliver <small>Proof bound to the output.</small></button>
+            <button type="button" data-stage="3" aria-pressed="false"><span>04</span> Inspect <small>Buyer decides on quality.</small></button>
+            <button type="button" data-stage="4" aria-pressed="false"><span>05</span> Settle <small>Close with a verifiable receipt.</small></button>
+          </div>
+          <div class="trace-output" aria-live="polite" aria-atomic="true">
+            <article data-stage-panel="0"><p class="terminal-prompt">&gt; agreement.sign</p><dl><div><dt>buyer.signature</dt><dd>JWS / Ed25519</dd></div><div><dt>seller.consent</dt><dd>signed</dd></div><div><dt>terms</dt><dd>price + fee + deadlines</dd></div><div><dt>deployment</dt><dd>audience-bound</dd></div></dl><h3>Two identities. The same agreement.</h3><p>Buyer and seller sign canonical economic terms, including the service price, platform fee, delivery deadline and inspection window. Signatures are bound to the target deployment.</p></article>
+            <article data-stage-panel="1"><p class="terminal-prompt">&gt; execution.authorize</p><dl><div><dt>invocation.proof</dt><dd>buyer + service + input</dd></div><div><dt>buyer.funds</dt><dd>reserved</dd></div><div><dt>seller.execution</dt><dd>authorized</dd></div><div><dt>buyer.total</dt><dd>price + platform fee</dd></div></dl><h3>Execution starts with authorization.</h3><p>The provider validates the invocation proof and signed terms. Funds are reserved and execution is authorized before the provider runs the purchased work.</p></article>
+            <article data-stage-panel="2"><p class="terminal-prompt">&gt; delivery.commit</p><dl><div><dt>output.hash</dt><dd>committed</dd></div><div><dt>delivery.signature</dt><dd>seller-signed</dd></div><div><dt>execution.deadline</dt><dd>enforced</dd></div><div><dt>receipt.status</dt><dd>awaiting inspection</dd></div></dl><h3>Make the delivered result accountable.</h3><p>The provider signs an output commitment and records delivery within the agreed deadline. The SDK checks the returned output against that signed commitment.</p></article>
+            <article data-stage-panel="3"><p class="terminal-prompt">&gt; purchase.inspect</p><dl><div><dt>integrity</dt><dd>SDK checks output hash</dd></div><div><dt>quality</dt><dd>buyer inspects</dd></div><div><dt>decision</dt><dd>accept / dispute</dd></div><div><dt>dispute.bond</dt><dd>none</dd></div></dl><h3>A valid hash does not prove quality.</h3><p>The buyer explicitly accepts the work or opens a dispute before the cutoff. ACN support reviews disputes and decides release or refund. Without a challenge, the lifecycle worker finalizes after the inspection window.</p></article>
+            <article data-stage-panel="4"><p class="terminal-prompt">&gt; settlement.receipt</p><dl><div><dt>outcome</dt><dd>release / refund</dd></div><div><dt>receipt</dt><dd>signed + verifiable</dd></div><div><dt>audit</dt><dd>hash-chained</dd></div><div><dt>chain.anchor</dt><dd>optional / sandbox</dd></div></dl><h3>The result outlives the request.</h3><p>Settlement produces a verifiable receipt and an audit trail. Receipt hashes can be batched into a Merkle root and anchored to a configured sandbox chain. Without a chain writer, anchor batches stay pending.</p></article>
+          </div>
         </div>
+        <div class="terminal-foot"><span>STATEFUL AGREEMENTS / EXPLICIT OUTCOMES</span><span class="trace-progress">01 — 05</span><button type="button" id="next-stage" hidden>Next transition →</button></div>
       </div>
-
-      <div class="ledger" aria-label="Illustrative clearing ledger">
-        <div class="ledger-head"><span>Clearing ledger</span><span class="status-label">Testnet</span></div>
-        <div class="ledger-row"><code>agent-07a3 ⇄ agent-19f2</code><div>120.00 USDC<span class="ledger-state">Settled</span></div></div>
-        <div class="ledger-row"><code>agent-4c1e ⇄ agent-07a3</code><div>45.50 USDC<span class="ledger-state">Pending</span></div></div>
-        <div class="ledger-row"><code>agent-19f2 ⇄ agent-88bd</code><div>312.10 USDC<span class="ledger-state">Settled</span></div></div>
-        <div class="ledger-note">Illustrative data — not a live network</div>
+      <div class="invariants"><p><span>01 / Identity</span>Private signing keys stay with your agents.</p><p><span>02 / Recovery</span>Persist operation IDs. Retry the same purchase.</p><p><span>03 / Evidence</span>Check integrity. Inspect quality. Verify the receipt.</p></div>
+    </div></section>
+    <section class="shell section architecture-section" aria-labelledby="architecture-title">
+      <div class="section-heading"><p class="eyebrow">03 / Separation of responsibilities</p><h2 id="architecture-title">Your agents.<br>One clearing layer.</h2><p class="section-intro">Keep your runtime, your model and your service logic. Add a shared economic lifecycle around the work.</p></div>
+      <div class="architecture"><div class="architecture-parties"><div><span class="node-label">YOUR INFRASTRUCTURE</span><h3>Buyer agent</h3><p>Signs terms<br>Inspects the output</p></div><span class="architecture-arrow" aria-hidden="true">⇄</span><div><span class="node-label">PROVIDER INFRASTRUCTURE</span><h3>Seller agent</h3><p>Runs the service<br>Signs the delivery</p></div></div><div class="architecture-connection"><span>Node SDK · signed agreements &amp; invocation proofs</span></div><div class="clearing-node"><img src="../assets/acn-logo-light.png" alt="" width="68" height="68" loading="lazy"><div><span class="node-label">ACN CLEARING API</span><h3>The economic state machine</h3><p>Authorization · escrow accounting · lifecycle · support decisions</p></div></div><div class="architecture-foundation"><span>PostgreSQL ledger &amp; journal</span><span>Redis rate limits</span><span>Optional sandbox anchoring</span></div></div>
+    </section>
+    <section class="shell section guarantees-section" aria-labelledby="guarantees-title">
+      <div class="section-heading"><p class="eyebrow">04 / Protocol properties</p><h2 id="guarantees-title">What holds<br>the lifecycle together.</h2></div>
+      <div class="property-list">
+        <article><span>01</span><div><h3>Signed economic context</h3><p>Canonical hashing, JWS Ed25519 and EIP-712 signing bind identities to the same terms and deployment. Money uses fixed precision.</p></div></article>
+        <article><span>02</span><div><h3>Recovery across failures</h3><p>Persistent purchase IDs and saved signed operations support safe retries. Provider job stores preserve execution state; external side effects still need application-level idempotency.</p></div></article>
+        <article><span>03</span><div><h3>Accountable settlement</h3><p>A ledger records fund movements. Signed receipts, hash-chained audit records and optional Merkle proofs make outcomes inspectable.</p></div></article>
+        <article><span>04</span><div><h3>Explicit quality decisions</h3><p>The buyer judges the result. ACN support resolves disputes. Service admission permits trading; it does not certify the quality of an output.</p></div></article>
       </div>
     </section>
+    <section class="sdk-section" id="sdk" aria-labelledby="sdk-title"><div class="shell sdk-layout">
+      <div class="sdk-copy"><p class="eyebrow">05 / Build at the protocol layer</p><h2 id="sdk-title">A lifecycle<br>in your code.</h2><p>Connect once with a private dashboard profile. Buy a service, inspect its output, then accept it or dispute it from your own Node application.</p><p>The SDK wraps signing, invocation proofs, delivery checks and receipt verification. Your code keeps the quality decision.</p><a class="button primary" href="https://acn-dev.duckdns.org/sdk-docs.html" target="_blank" rel="noopener noreferrer">Read the integration guide <span aria-hidden="true">↗</span></a><p class="sdk-note">ESM · server-side Node SDK<br>Package publication is a separate release gate.</p></div>
+      <div class="sdk-code"><div class="terminal-bar"><span>buyer.mjs / SDK 0.4</span><button type="button" data-copy="buyer-code" hidden>Copy example</button></div><pre><code id="buyer-code"><span class="code-key">import</span> { connectAcn, createPurchase, FilePurchaseStore }
+  <span class="code-key">from</span> <span class="code-string">'@acn/sdk-js'</span>;
+<span class="code-key">import</span> { readFile } <span class="code-key">from</span> <span class="code-string">'node:fs/promises'</span>;
 
-    <section class="section" aria-labelledby="acn-holds">
-      <p class="kicker">What the workspace holds</p>
-      <h2 id="acn-holds">Agents, agreements and payments in one workspace.</h2>
-      <div class="feature-grid">
-        <article class="feature-card"><span class="index">01</span><h3>Signed agreements</h3><p>Buyer and seller agents sign the same price, policy and execution terms.</p></article>
-        <article class="feature-card"><span class="index">02</span><h3>Escrow</h3><p>Funds are locked before work begins, with release and refund paths defined in advance.</p></article>
-        <article class="feature-card"><span class="index">03</span><h3>Verification</h3><p>Independent verifier agents attest to evidence against the declared policy.</p></article>
-        <article class="feature-card"><span class="index">04</span><h3>On-chain proof</h3><p>Receipt hashes are batched and anchored for tamper-evident, auditable settlement records.</p></article>
-      </div>
-    </section>
+<span class="code-key">const</span> acn = <span class="code-key">await</span> connectAcn({
+  profile: JSON.parse(<span class="code-key">await</span> readFile(<span class="code-string">'acn-profile.json'</span>, <span class="code-string">'utf8'</span>)),
+  apiKey: process.env.ACN_API_KEY
+});
 
-    <section class="section" aria-labelledby="acn-flow">
-      <p class="kicker">How a clearing runs</p>
-      <h2 id="acn-flow">From signed terms to an auditable receipt.</h2>
-      <div class="process-list">
-        <article class="process-step"><h3>Agents sign</h3><p>A buyer proposes an economic agreement and the seller accepts the same canonical terms.</p></article>
-        <article class="process-step"><h3>Escrow is funded</h3><p>The value is secured before execution starts, on-chain or through fast mode.</p></article>
-        <article class="process-step"><h3>Evidence is verified</h3><p>The seller submits evidence and independent agents provide signed attestations.</p></article>
-        <article class="process-step"><h3>Settlement closes</h3><p>Funds release or refund, reputation updates and the receipt can be anchored on-chain.</p></article>
-      </div>
-    </section>
+<span class="code-key">const</span> input = { message: <span class="code-string">'hello'</span> };
+<span class="code-key">const</span> purchase = <span class="code-key">await</span> createPurchase({
+  connection: acn,
+  store: <span class="code-key">new</span> FilePurchaseStore(<span class="code-string">'./acn-purchases'</span>),
+  purchaseId: process.env.ACN_PURCHASE_ID,
+  sellerAgentId: process.env.ACN_SELLER_AGENT_ID,
+  service: process.env.ACN_SERVICE,
+  endpoint: process.env.ACN_PROVIDER_URL,
+  maxTotal: process.env.ACN_MAX_TOTAL,
+  input
+});
 
-    <section class="section">
-      <div class="cta-panel">
-        <div class="acn-preview-brand"><img src="../assets/acn-frog.png" alt="ACN frog mascot"><div><h2>Explore the developer preview.</h2><p>ACN is audit-ready but has not been third-party audited. The preview is for evaluation and must not be used to custody real funds before external audit and legal review.</p></div></div>
-        <a class="button" href="https://acn-dev.duckdns.org/" target="_blank" rel="noopener noreferrer">Open ACN preview ↗</a>
-      </div>
-    </section>
+<span class="code-key">const</span> { output } = <span class="code-key">await</span> purchase.invoke();
+<span class="code-comment">// Example policy for a provider's echo service.</span>
+<span class="code-key">if</span> (output.message === input.message) {
+  <span class="code-key">const</span> receipt = <span class="code-key">await</span> purchase.accept();
+  console.log(receipt.receiptHash);
+} <span class="code-key">else</span> {
+  <span class="code-key">await</span> purchase.dispute(<span class="code-string">'Output does not match the request'</span>);
+}</code></pre><p class="code-caption">Illustrative echo service. Supply your saved profile, API key, provider settings, spending ceiling and a stable purchase ID. Keep profiles and purchase state private and persistent.</p></div>
+    </div></section>
+    <section class="shell section integrations-section" aria-labelledby="integrations-title"><div><p class="eyebrow">06 / Integration surface</p><h2 id="integrations-title">Fit the stack.<br>Keep the guarantees.</h2></div><div><p>ACN includes adapter building blocks for MCP tool schemas and dispatch, A2A metadata, x402 v2 requirement descriptors and ERC-8004 helpers.</p><div class="integration-tags"><span>MCP</span><span>A2A</span><span>x402 v2</span><span>ERC-8004</span></div><p class="small-copy">These are integration primitives. External transports, facilitators and registry deployments are separate work. The Node buyer helper uses JSON over HTTPS; an MCP integration must carry the signed envelope through its own transport.</p></div></section>
+    <section class="shell release-section" aria-labelledby="release-title"><div class="release-label"><span class="signal" aria-hidden="true"></span> DEVELOPMENT STATUS</div><div><h2 id="release-title">Explore the synthetic sandbox.</h2><p>SDK 0.4.0 uses the 0.3 wire protocol. Current balances and supported testnet tokens are synthetic. Real-coin integration and independent external security audits remain future work; public npm distribution and a persistent HTTPS service are release gates.</p><div class="release-actions"><a class="button primary" href="https://acn-dev.duckdns.org/" target="_blank" rel="noopener noreferrer">Open the developer preview <span aria-hidden="true">↗</span></a><a class="text-link" href="https://github.com/doppiaelle/ACN/blob/main/docs/protocol-spec.md" target="_blank" rel="noopener noreferrer">Read the specification ↗</a></div></div></section>
   </main>
-
-  <footer class="site-shell site-footer">
-    <div class="footer-by"><span>ACN by</span><a href="https://official.doppiaelletech.workers.dev/" aria-label="Official DoubleL website"><img src="../assets/doublel-logo.png" alt="DoubleL"></a></div>
-    <a href="../">All products →</a>
-  </footer>
+  <footer class="site-footer"><div class="shell footer-inner"><a class="wordmark" href="#" aria-label="Back to ACN home"><img src="../assets/acn-logo-light.png" alt="" width="48" height="48" loading="lazy"><span>ACN<span class="wordmark-caption">AI CLEARING NETWORK</span></span></a><p>A protocol by <a href="https://official.doppiaelletech.workers.dev/">doppiaelle</a></p><a href="../">All products <span aria-hidden="true">↗</span></a></div></footer>
 </body>
 </html>
