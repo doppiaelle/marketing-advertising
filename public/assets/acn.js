@@ -1,3 +1,22 @@
+// Respect reduced-motion and allow the continuous logo motion to be paused.
+const mark = document.querySelector('.hero-mark');
+const motionToggle = document.querySelector('.motion-toggle');
+if (mark && motionToggle) {
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const syncMotion = () => {
+    mark.classList.toggle('is-animated', !reducedMotion.matches);
+    motionToggle.hidden = reducedMotion.matches;
+  };
+  motionToggle.addEventListener('click', () => {
+    const paused = mark.classList.toggle('motion-paused');
+    motionToggle.setAttribute('aria-pressed', String(paused));
+    motionToggle.setAttribute('aria-label', paused ? 'Resume logo animation' : 'Pause logo animation');
+    motionToggle.textContent = paused ? 'Resume motion ▷' : 'Pause motion Ⅱ';
+  });
+  reducedMotion.addEventListener('change', syncMotion);
+  syncMotion();
+}
+
 // Deterministic protocol explainer. No network calls or automatic execution.
 const stages = [...document.querySelectorAll('[data-stage]')];
 const panels = [...document.querySelectorAll('[data-stage-panel]')];

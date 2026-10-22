@@ -213,6 +213,8 @@ em {
   color:#a5aca3
 }
 .hero-mark {
+  perspective:1100px;
+  perspective-origin:50% 45%;
   position:relative;
   margin:0;
   min-width:0;
@@ -242,6 +244,41 @@ em {
   max-width:510px;
   margin:auto;
   mix-blend-mode:multiply
+}
+/* Keep the supplied isometric face visible: shallow 3-axis precession preserves
+   its lighting and volume without exposing a flat, mirrored PNG reverse. */
+.hero-mark.is-animated img {
+  transform-origin:50% 52%;
+  animation:acn-mark-orbit 18s ease-in-out infinite;
+  will-change:transform;
+  filter:drop-shadow(0 16px 14px #1c281b14);
+}
+.hero-mark.motion-paused img {
+  animation-play-state:paused;
+}
+@keyframes acn-mark-orbit {
+  0%,100% { transform:translate3d(0,-3px,12px) rotateX(8deg) rotateY(-16deg) rotateZ(-4deg) scale(.94); }
+  25% { transform:translate3d(0,-10px,18px) rotateX(-6deg) rotateY(5deg) rotateZ(-1deg) scale(.94); }
+  50% { transform:translate3d(0,-3px,12px) rotateX(4deg) rotateY(16deg) rotateZ(4deg) scale(.94); }
+  75% { transform:translate3d(0,5px,8px) rotateX(10deg) rotateY(-5deg) rotateZ(1deg) scale(.94); }
+}
+.hero-demo-note {
+  margin:12px 0 0;
+  color:var(--muted);
+  font:9px/1.7 var(--mono);
+}
+.motion-toggle {
+  align-self:center;
+  min-height:44px;
+  padding:8px 0 8px 12px;
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  font:9px/1.7 var(--mono);
+  white-space:nowrap;
+}
+.motion-toggle:hover {
+  color:var(--green);
 }
 .figure-label,.hero-mark figcaption {
   display:flex;
