@@ -2,6 +2,10 @@
 
 La vetrina è `public/secura/index.html`, con fogli di stile e script dedicati `public/assets/secura.css` e `public/assets/secura.js`. Rimane un sito statico, pubblicabile dalla CI GitHub Pages esistente: nessuna dipendenza, build, API o servizio esterno aggiunto.
 
+La lingua predefinita è l’inglese nell’HTML (`lang="en"`), senza dipendere dal
+browser o da JavaScript. Sono tradotti contenuti, anteprime, metadati, nomi
+accessibili e messaggi dinamici della scansione.
+
 ## Asset
 
 Gli allegati originali sono conservati in `public/assets/secura/`:
@@ -26,7 +30,7 @@ La stessa scena HTML/SVG viene usata su desktop e mobile. Su schermi fino a 760 
 
 Non esiste un controllo di pausa. Il rendering si sospende quando la scena è fuori schermo o la pagina è nascosta, conservando la fase del ciclo; riparte automaticamente al ritorno. Reduced-motion mantiene il robot statico. Le schede della preview supportano frecce, Home ed End; il link iniziale consente di saltare la scena. Sotto il payoff compare soltanto una freccia rossa centrata, con nome accessibile «Scopri SecuRA».
 
-La dashboard è una ricostruzione illustrativa con tre viste: Dashboard, Vulnerabilità, Campagne. I numeri e i sistemi mostrati sono esempi. Nessun collegamento all'app reale.
+La dashboard è una ricostruzione illustrativa con tre viste: Dashboard, Vulnerabilities, Campaigns. I numeri e i sistemi mostrati sono esempi. Nessun collegamento all'app reale.
 
 ## Estrazione trasparente
 

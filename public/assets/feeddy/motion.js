@@ -64,7 +64,7 @@
       this.replay();
     }
     setStatus(value){if(this.status)this.status.textContent=value;}
-    setToggle(){if(this.toggleBtn){this.toggleBtn.textContent=this.playing?'Ⅱ Pausa':'▶ Riprendi';this.toggleBtn.setAttribute('aria-pressed',String(!this.playing));}}
+    setToggle(){if(this.toggleBtn){this.toggleBtn.textContent=this.playing?'Ⅱ Pause':'▶ Resume';this.toggleBtn.setAttribute('aria-pressed',String(!this.playing));}}
     resize(){
       const box=this.stage.getBoundingClientRect();
       this.width=box.width;this.height=box.height;
@@ -120,13 +120,13 @@
       if(segment.kind==='flight'){
         this.currentFlight(segment.from,segment.to,t);
         stretch=1.04+(segment.from<0?0:.13)*Math.min(1,t*2);
-        this.setStatus('Verso '+P[segment.to].name);
+        this.setStatus('Towards '+P[segment.to].name);
       } else if(segment.kind==='impact'){
         this.ballWorld={...P[segment.from]};
         this.camera={...P[segment.from]};
         // Brief pinball compression, immediately released into next flight.
         stretch=1 - .23*Math.sin(Math.PI*t);
-        this.setStatus('Impatto · '+P[segment.from].name);
+        this.setStatus('Impact · '+P[segment.from].name);
       } else {
         this.camera={...P[5]};
         this.ballWorld={...P[5]};
@@ -134,7 +134,7 @@
         this.stage.classList.add('is-revealing');
         if(!this.revealed){this.revealed=true;this.stage.dispatchEvent(new CustomEvent('feeddy:ready',{bubbles:true}));}
         if(!this.impacts.some(s=>s.final))this.impacts.push({point:P[5],born:segment.start,final:true});
-        this.setStatus(segment.kind==='hold'?'Logo Feeddy':'Feeddy');
+        this.setStatus(segment.kind==='hold'?'Feeddy logo':'Feeddy');
       }
       this.positionWorld();
       const b=this.project(this.ballWorld);
@@ -151,7 +151,7 @@
       }
       this.history=this.history.filter(h=>this.clock-h.time<=400 && h.time<=this.clock);
       this.paint();
-      if(this.clock>=LENGTH){this.playing=false;this.finished=true;this.setStatus('Logo Feeddy');this.setToggle();}
+      if(this.clock>=LENGTH){this.playing=false;this.finished=true;this.setStatus('Feeddy logo');this.setToggle();}
     }
     paint(){
       const ctx=this.ctx,w=this.width,h=this.height;
@@ -219,7 +219,7 @@
       this.setToggle();
       this.raf=requestAnimationFrame(this.tick);
     }
-    pause(){this.playing=false;if(this.raf)cancelAnimationFrame(this.raf);this.raf=0;this.lastFrame=null;this.setToggle();this.setStatus('In pausa');}
+    pause(){this.playing=false;if(this.raf)cancelAnimationFrame(this.raf);this.raf=0;this.lastFrame=null;this.setToggle();this.setStatus('Paused');}
     resume(){
       if(this.reduced)return;
       if(this.finished){this.replay();return;}
@@ -240,7 +240,7 @@
       this.stage.classList.add('is-revealing');
         if(!this.revealed){this.revealed=true;this.stage.dispatchEvent(new CustomEvent('feeddy:ready',{bubbles:true}));}
       this.ball.style.opacity='0';this.ball.style.display='none';
-      this.setStatus('Logo Feeddy');this.finished=true;this.playing=false;this.setToggle();
+      this.setStatus('Feeddy logo');this.finished=true;this.playing=false;this.setToggle();
     }
     tick(now){
       if(!this.playing)return;

@@ -21,7 +21,7 @@
   pause.addEventListener('click', () => {
     pausedByVisitor = !pausedByVisitor;
     syncPlayback();
-    pause.textContent = pausedByVisitor ? 'Riprendi animazione' : 'Pausa animazione';
+    pause.textContent = pausedByVisitor ? 'Resume animation' : 'Pause animation';
   });
   function syncPlayback() {
     const motion = stage.feeddyMotion;
@@ -42,9 +42,9 @@
 
   const tabs = [...document.querySelectorAll('[data-tab]')];
   const captions = {
-    editor: 'Componi foto, caroselli e video. Nello studio creativo trovi formati, ritaglio, testi, audio e sottotitoli. Controlli il risultato prima di usarlo.',
-    calendar: 'Passa da Mese a Settimana o Agenda. Filtra per canale, lingua, formato e stato; nel tool puoi spostare le bozze e rivedere il piano prima dell’approvazione.',
-    results: 'Ritrova metriche dei profili e dei contenuti, secondo i dati disponibili dai canali. L’inbox raccoglie commenti e richieste: il contesto resta vicino alle risposte.'
+    editor: 'Compose photos, carousels and videos. The creative studio brings formats, cropping, text, audio and subtitles together. Review the result before using it.',
+    calendar: 'Switch between Month, Week and Agenda. Filter by channel, language, format and status; in the tool you can move drafts and review the plan before approval.',
+    results: 'Find profile and content metrics based on the data available from each channel. The inbox gathers comments and requests, keeping context close to your replies.'
   };
   function selectTab(tab) {
     tabs.forEach(item => {

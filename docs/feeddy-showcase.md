@@ -3,6 +3,11 @@
 Pagina: `public/feeddy/index.html`. Usa il deploy GitHub Pages esistente di
 `public/`, senza build o dipendenze aggiuntive. L’indice prodotti include Feeddy.
 
+La lingua predefinita è l’inglese direttamente nell’HTML (`lang="en"`), anche
+senza JavaScript: testi, metadati, descrizioni accessibili e anteprime illustrative.
+Anche gli stati dell’intro e le didascalie delle tab sono in inglese. Il footer
+usa la firma testuale «by **DoubleL**», senza logo aziendale, come ACN e SecuRA.
+
 ## Identità e provenienza
 
 - Logo originale da `marketing-agent/frontend/public/brand/feeddy-logo.png`.

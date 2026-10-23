@@ -35,8 +35,8 @@
     hero.classList.add('activated');
     scanner.classList.add('is-scanning');
     status.textContent = automatic.matches
-      ? 'Scansione automatica attiva.'
-      : 'Scansione attiva. Il prossimo passo è tuo.';
+      ? 'Automatic scan active.'
+      : 'Scan active. Your next move.';
   };
   const tick = (time) => {
     animationFrame = 0;
