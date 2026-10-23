@@ -1,0 +1,33 @@
+
+/* FEEDDY / SCROLLING PINBALL / 02 — isolated CSS, no dependencies */
+.feeddy-stage { position:relative; isolation:isolate; overflow:hidden; width:100%; height:clamp(450px, 74vh, 730px); border-radius:24px; border:1px solid #272b37; background:radial-gradient(ellipse 75% 70% at 50% 45%,#171724 0%,#0d101a 55%,#070a12 100%); box-shadow:inset 0 0 100px #070a1266,0 25px 100px #0006; }
+.feeddy-stage .feeddy-atmosphere,.feeddy-stage .feeddy-final-light { position:absolute;inset:0;pointer-events:none; }
+.feeddy-stage .feeddy-atmosphere { background:radial-gradient(ellipse 44% 54% at 50% 49%,#9468470d,transparent 85%); z-index:0; }
+.feeddy-stage .feeddy-final-light { opacity:0; z-index:1; background:radial-gradient(ellipse 55% 62% at 50% 50%,#7d62563c 0%,#5b4b4524 33%,#30334110 65%,transparent 80%); transition:opacity 900ms ease; }
+.feeddy-stage.is-revealing .feeddy-final-light { opacity:1; }
+.feeddy-stage .feeddy-world { position:absolute;inset:0;z-index:2;pointer-events:none; }
+.feeddy-stage .feeddy-icon { position:absolute; width:clamp(57px, 9.5vh, 76px); height:clamp(57px, 9.5vh, 76px); transform:translate(-50%,-50%); will-change:left,top; pointer-events:none; }
+.feeddy-stage .feeddy-app-icon { width:100%; height:100%; border-radius:22%; display:grid;place-items:center; box-shadow:0 10px 25px #0007, 0 3px 12px #0003; transform:scale(1); transition:filter .18s,transform .22s cubic-bezier(.18,.8,.2,1.45); }
+.feeddy-stage .feeddy-icon svg { display:block; width:60%; height:60%; overflow:visible; }
+.feeddy-stage .feeddy-instagram .feeddy-app-icon { background:linear-gradient(138deg,#6655df 1%,#bc34a2 35%,#fa395f 66%,#ffbe59 98%); }
+.feeddy-stage .feeddy-instagram svg { width:64%;height:64%; }
+.feeddy-stage .feeddy-youtube .feeddy-app-icon { background:#fcfbfb; }
+.feeddy-stage .feeddy-youtube svg { width:65%;height:65%; }
+.feeddy-stage .feeddy-tiktok .feeddy-app-icon { background:#09090d; }
+.feeddy-stage .feeddy-tiktok svg { width:54%;height:54%; }
+.feeddy-stage .feeddy-googleads .feeddy-app-icon { background:#fcfdff; }
+.feeddy-stage .feeddy-googleads svg { width:61%;height:61%; }
+.feeddy-stage .feeddy-meta .feeddy-app-icon { background:#f8faff; }
+.feeddy-stage .feeddy-meta svg { width:72%;height:72%; }
+.feeddy-stage .feeddy-icon.is-hit .feeddy-app-icon { transform:scale(1.16); filter:drop-shadow(0 0 13px #f9c48c58); }
+.feeddy-stage .feeddy-light-canvas { position:absolute; inset:0; width:100%; height:100%; z-index:3; pointer-events:none; }
+.feeddy-stage .feeddy-ball { position:absolute;z-index:5;pointer-events:none;left:50%;top:0; width:18px;height:18px; border-radius:50%; background:radial-gradient(circle at 30% 28%,#fffefa 0%,#fff6d9 23%,#f7d69d 50%,#f0a95a 83%,#c67c36 100%); box-shadow:0 0 9px 3px #fff2c3c4,0 0 27px 8px #e8b47179,0 0 50px 14px #e4a85e35;transform:translate(-50%,-50%);will-change:left,top,opacity; }
+.feeddy-stage .feeddy-logo { position:absolute; left:50%;top:50%; width:clamp(225px, 36vh, 335px); aspect-ratio:1; z-index:4; display:grid;place-items:center; opacity:0; pointer-events:none; transform:translate(-50%,-50%) scale(.76) translateY(24px); transition:opacity 500ms ease-out,transform 980ms cubic-bezier(.16,1,.23,1); }
+.feeddy-stage .feeddy-logo img { display:block; width:100%;height:100%;object-fit:contain; filter:drop-shadow(0 11px 20px #0004); }
+.feeddy-stage.is-revealing .feeddy-logo { opacity:1;transform:translate(-50%,-50%) scale(1) translateY(0); }
+@media(max-width:600px) {
+  .feeddy-stage {height:min(77svh,710px);min-height:460px;border-radius:16px;}
+  .feeddy-stage .feeddy-icon {width:60px;height:60px;}
+  .feeddy-stage .feeddy-logo {width:min(68vw,285px);}
+}
+@media(prefers-reduced-motion:reduce) { .feeddy-stage *, .feeddy-stage *::before, .feeddy-stage *::after { animation:none!important; transition:none!important; } }

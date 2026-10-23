@@ -1,6 +1,6 @@
 # DoubleL product pages
 
-Pagine informative dei prodotti DoubleL: LL Platform, Focus, ACN, Kritoma e SecuRA.
+Pagine informative dei prodotti DoubleL: Feeddy, LL Platform, Focus, ACN, Kritoma e SecuRA.
 Il sito è statico e viene pubblicato dalla CI GitHub Pages all'indirizzo:
 
 `https://doppiaelle.github.io/marketing-advertising/`
@@ -14,6 +14,7 @@ reali compaiono qui, non nella landing principale.
 ```text
 public/
   index.html
+  feeddy/index.html
   ll-platform/index.html
   focus/index.html
   acn/index.html
@@ -87,3 +88,12 @@ e sospensione del rendering fuori schermo. Non carica video.
 La preview illustrativa comprende Dashboard, Vulnerabilità e Campagne.
 La pagina rimane interamente statica e conserva il deploy GitHub Pages esistente.
 Vedi [asset, animazioni e verifiche](docs/secura-branding.md).
+
+## Vetrina Feeddy
+
+Feeddy ha una pagina dedicata con Manrope locale, antracite e oro del tool,
+illustrazioni cartoon e anteprime interattive di editor, calendario e risultati.
+L’intro HTML fornita si riproduce automaticamente, senza cornice o controlli della
+demo, e approda al logo originale con il titolo centrato sotto. Rispetta le
+preferenze di movimento ridotto e sospende il rendering fuori vista.
+Vedi [identità, intro e collegamenti](docs/feeddy-showcase.md).
