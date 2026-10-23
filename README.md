@@ -22,6 +22,8 @@ public/
   assets/doublel-logo.png
   assets/acn-logo-dark.png
   assets/acn-logo-light.png
+  assets/acn-logo-loop.mp4
+  assets/acn-logo-poster.webp
   assets/acn.css
   assets/acn.js
   assets/acn-mono-latin.woff2
@@ -49,6 +51,12 @@ clearing. I cinque passaggi sono illustrativi: non inviano richieste né eseguon
 transazioni. Con JavaScript disabilitato restano leggibili tutti i passaggi e
 l'esempio SDK. I contenuti seguono SDK 0.4.0: ispezione del buyer, dispute gestite
 dal supporto ACN e pagamenti sandbox sintetici.
+Il logo principale usa un video H.264 muto di 4 secondi, 1080 × 1200 a 60 fps,
+con poster statico e comando pausa/ripresa. Il video viene caricato soltanto
+quando è visibile e il sistema non richiede la riduzione del movimento; si
+ferma fuori schermo o quando la pagina non è attiva. Vedi
+[preparazione e verifica del video](docs/acn-logo-video.md) per provenienza,
+interventi e limiti dell'elaborazione.
 Le anteprime Studio, Console
 e Analytics sono ricostruzioni HTML/CSS delle rispettive interfacce nei repository
 LL-WEB, LL-DASHBOARD e LL-ANALYTICS, con dati esclusivamente illustrativi.

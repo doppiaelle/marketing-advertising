@@ -1,20 +1,64 @@
-// Respect reduced-motion and allow the continuous logo motion to be paused.
-const mark = document.querySelector('.hero-mark');
+// Load and run the silent loop only when motion is allowed and the hero is
+// visible. The poster also covers blocked autoplay, media errors and no-JS use.
+const logoMedia = document.querySelector('.hero-logo-media');
+const logoVideo = document.querySelector('.hero-logo-video');
 const motionToggle = document.querySelector('.motion-toggle');
-if (mark && motionToggle) {
+if (logoMedia && logoVideo && motionToggle) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const syncMotion = () => {
-    mark.classList.toggle('is-animated', !reducedMotion.matches);
-    motionToggle.hidden = reducedMotion.matches;
+  let requested = true;
+  let inView = !('IntersectionObserver' in window);
+  let failed = false;
+  logoVideo.muted = true;
+  logoVideo.defaultMuted = true;
+
+  const updateControl = () => {
+    motionToggle.hidden = failed || reducedMotion.matches;
+    motionToggle.setAttribute('aria-pressed', String(!requested));
+    motionToggle.setAttribute('aria-label', requested ? 'Pause logo animation' : 'Resume logo animation');
+    motionToggle.textContent = requested ? 'Pause motion Ⅱ' : 'Resume motion ▷';
   };
-  motionToggle.addEventListener('click', () => {
-    const paused = mark.classList.toggle('motion-paused');
-    motionToggle.setAttribute('aria-pressed', String(paused));
-    motionToggle.setAttribute('aria-label', paused ? 'Resume logo animation' : 'Pause logo animation');
-    motionToggle.textContent = paused ? 'Resume motion ▷' : 'Pause motion Ⅱ';
+  const shouldPlay = () => requested && inView && !document.hidden && !reducedMotion.matches && !failed;
+  const syncPlayback = async () => {
+    updateControl();
+    if (!shouldPlay()) {
+      logoVideo.pause();
+      if (reducedMotion.matches || failed) logoMedia.classList.remove('video-ready');
+      return;
+    }
+    if (!logoVideo.getAttribute('src')) logoVideo.src = logoVideo.dataset.src;
+    try {
+      await logoVideo.play();
+      // A visibility/preference change can arrive while play() is pending.
+      if (!shouldPlay()) logoVideo.pause();
+    } catch (error) {
+      if (error.name === 'NotAllowedError') {
+        requested = false;
+        updateControl();
+      }
+      // A pending play interrupted by pause is expected; retain the poster.
+    }
+  };
+  logoVideo.addEventListener('playing', () => {
+    if (shouldPlay()) logoMedia.classList.add('video-ready');
   });
-  reducedMotion.addEventListener('change', syncMotion);
-  syncMotion();
+  logoVideo.addEventListener('error', () => {
+    failed = true;
+    void syncPlayback();
+  });
+  motionToggle.addEventListener('click', () => {
+    requested = !requested;
+    void syncPlayback();
+  });
+  reducedMotion.addEventListener('change', () => { void syncPlayback(); });
+  document.addEventListener('visibilitychange', () => { void syncPlayback(); });
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      inView = entries.some(entry => entry.isIntersecting);
+      void syncPlayback();
+    }, { threshold: 0.05 });
+    observer.observe(logoMedia);
+  }
+  void syncPlayback();
 }
 
 // Deterministic protocol explainer. No network calls or automatic execution.
