@@ -77,3 +77,13 @@ alla pubblicazione GitHub Pages gestita dalla CI.
 
 Aprire `public/index.html` oppure servire la cartella `public/` con un server
 HTTP statico. Non sono richiesti build, dipendenze o runtime lato server.
+
+## Vetrina SecuRA
+
+SecuRA ha un'identità dedicata bianca/argento/rosso, con font locali Oxanium e
+Manrope, logo trasparente con raggi e scena di apertura interattiva su desktop.
+Su mobile riutilizza la scena web in loop automatico, con raggi interamente visibili
+e sospensione del rendering fuori schermo. Non carica video.
+La preview illustrativa comprende Dashboard, Vulnerabilità e Campagne.
+La pagina rimane interamente statica e conserva il deploy GitHub Pages esistente.
+Vedi [asset, animazioni e verifiche](docs/secura-branding.md).

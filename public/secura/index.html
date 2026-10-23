@@ -1,74 +1,80 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="SecuRA is a self-hosted workflow for vulnerability findings, ownership, deadlines and remediation.">
-  <title>SecuRA — DoubleL</title>
-  <link rel="stylesheet" href="../assets/product-pages.css">
-  <script defer src="../assets/product-pages.js"></script>
+  <meta name="description" content="SecuRA: dalle vulnerabilità alla remediation. Import, responsabilità, SLA e audit in una piattaforma self-hosted sotto il tuo controllo.">
+  <meta name="theme-color" content="#ffffff">
+  <meta property="og:title" content="SecuRA — Il rischio, sotto controllo.">
+  <meta property="og:description" content="Una visione chiara. Dalla prima evidenza alla remediation.">
+  <meta property="og:image" content="https://doppiaelle.github.io/marketing-advertising/assets/secura/secura-lockup.png">
+  <title>SecuRA — Il rischio, sotto controllo.</title>
+  <link rel="icon" type="image/png" href="../assets/secura/secura-mark-scan.png">
+  <link rel="stylesheet" href="../assets/secura/brand.css">
+  <link rel="stylesheet" href="../assets/secura.css">
+  <noscript><style>.preview-panel[hidden]{display:block!important}.preview-tabs{display:none}</style></noscript>
+  <script defer src="../assets/secura.js"></script>
 </head>
-<body class="product-page vuln-page">
+<body>
+  <a class="skip-link" href="#overview">Vai ai contenuti</a>
   <header class="site-header">
-    <div class="site-shell site-header-inner">
-      <strong class="product-brand brand-vuln"><span>Secu</span><span class="brand-accent">RA</span></strong>
-      <a class="all-products" href="https://official.doppiaelletech.workers.dev/#progetti">DoubleL solutions</a>
-    </div>
+    <a class="brand" href="#top" aria-label="SecuRA, inizio pagina"><span class="secura-mark"><img src="../assets/secura/secura-mark-scan.png" alt="" width="1379" height="1141"></span><span class="secura-wordmark">Secu<span>RA</span></span></a>
+    <nav aria-label="Navigazione principale"><a href="#platform">Piattaforma</a><a href="#workflow">Workflow</a><a href="#control">Self-hosted</a></nav>
+    <a class="header-link" href="https://official.doppiaelletech.workers.dev/">Parliamone <span aria-hidden="true">↗</span></a>
   </header>
-
-  <main class="site-shell">
-    <section class="hero" aria-labelledby="page-title">
-      <div class="hero-copy">
-        <p class="eyebrow">Vulnerability management · Self-hosted</p>
-        <h1 id="page-title">Keep risk visible. Keep data in control.</h1>
-        <p class="lede">SecuRA gives security teams one place to import findings, assign ownership, track remediation deadlines and follow a vulnerability from discovery to closure — for environments where operational data must stay local.</p>
-        <div class="tags" aria-label="SecuRA areas">
-          <span class="tag">Lifecycle</span><span class="tag">SLA</span><span class="tag">Audit trail</span><span class="tag">Local data</span>
+  <main>
+    <section id="top" class="hero" aria-labelledby="hero-title">
+      <div class="hero-coordinate" aria-hidden="true"><span>SECURITY REMEDIATION PLATFORM</span><span>01 / DISCOVER</span></div>
+      <div class="scanner-stage" id="scanner" aria-label="Robot SecuRA: scansione interattiva su desktop e automatica su mobile">
+        <div class="scanner-scene">
+          <img class="robot" src="../assets/secura/secura-robot.png" alt="Robot argentato SecuRA con visiera scura" width="1379" height="1141" fetchpriority="high">
+          <svg class="scan-beams" viewBox="0 0 1379 1141" aria-hidden="true">
+            <defs>
+              <linearGradient id="scan-red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff243e" stop-opacity=".8"/><stop offset=".52" stop-color="#ff304b" stop-opacity=".35"/><stop offset="1" stop-color="#ff526a" stop-opacity="0"/></linearGradient>
+              <radialGradient id="eye-red"><stop stop-color="#fff"/><stop offset=".18" stop-color="#ffdfdf"/><stop offset=".45" stop-color="#ff2844" stop-opacity=".65"/><stop offset="1" stop-color="#ff2844" stop-opacity="0"/></radialGradient>
+            </defs>
+            <g transform="translate(525 532)"><g id="beam-left" transform="rotate(34)"><path d="M0 0 L-165 500 Q0 570 165 500 Z" fill="url(#scan-red)"/></g><circle r="104" fill="url(#eye-red)"/><circle r="25" fill="#fff"/></g>
+            <g transform="translate(854 532)"><g id="beam-right" transform="rotate(-34)"><path d="M0 0 L-165 500 Q0 570 165 500 Z" fill="url(#scan-red)"/></g><circle r="104" fill="url(#eye-red)"/><circle r="25" fill="#fff"/></g>
+          </svg>
         </div>
       </div>
-
-      <div class="dashboard" aria-label="Illustrative SecuRA dashboard">
-        <div class="dashboard-head"><span>Findings — this week</span><small>Illustrative example</small></div>
-        <div class="kpis"><div class="kpi"><strong>7</strong><span>Critical open</span></div><div class="kpi"><strong>34</strong><span>Total open</span></div><div class="kpi"><strong>3</strong><span>Past SLA</span></div></div>
-        <div class="finding"><div>Exposed admin panel<br><small>Infrastructure team</small></div><span class="severity">Critical</span></div>
-        <div class="finding"><div>Outdated TLS cipher<br><small>Network team</small></div><span class="severity" style="color:#ff7043;background:rgba(255,112,67,.15)">High</span></div>
-        <div class="finding"><div>Missing rate limit<br><small>Application team</small></div><span class="severity" style="color:#ffd54f;background:rgba(255,213,79,.13)">Medium</span></div>
+      <div class="hero-copy"><p class="eyebrow">VEDI IL RISCHIO. GUIDA LA RISOLUZIONE.</p><h1 id="hero-title" class="secura-wordmark">Secu<span>RA</span></h1><p class="hero-payoff">Il rischio, sotto controllo.</p><a href="#overview" class="hero-scroll" aria-label="Scopri SecuRA"><span aria-hidden="true">↓</span></a></div>
+      <div class="hero-bottom"><span class="interaction-hint"><i></i> <span id="scan-status">Muovi il mouse. Inizia la scansione.</span></span><span class="hero-note">SELF-HOSTED. TEAM-DRIVEN.</span></div>
+    </section>
+    <section class="intro section-shell scan-reveal" id="overview">
+      <p class="eyebrow"><span class="red-dot"></span> 01 — IL SEGNALE, OLTRE IL RUMORE</p>
+      <h2>Ogni vulnerabilità.<br>Una direzione <em>chiara.</em></h2>
+      <div class="intro-bottom"><p>I finding si accumulano. Le priorità cambiano.<br>SecuRA connette evidenze, persone e scadenze in un unico flusso, dalla prima importazione alla chiusura.</p><a class="text-link" href="#platform">Entra nella visione operativa <span>↘</span></a></div>
+      <div class="principles"><span><b>01</b> Individua</span><span><b>02</b> Assegna</span><span><b>03</b> Risolvi</span><span><b>04</b> Traccia</span></div>
+    </section>
+    <section class="platform-section" id="platform" aria-labelledby="platform-title">
+      <div class="section-shell scan-reveal"><div class="section-heading"><div><p class="eyebrow">02 — LA VISIONE OPERATIVA</p><h2 id="platform-title">Tutto il contesto.<br><em>Un solo posto.</em></h2></div><p>Dal quadro generale al singolo finding.<br>Una dashboard per capire dove agire,<br>prima ancora di aprire un dettaglio.</p></div>
+        <div class="preview-toolbar"><div class="preview-tabs" role="tablist" aria-label="Esplora l'anteprima della piattaforma"><button type="button" role="tab" id="tab-dashboard" aria-selected="true" aria-controls="panel-dashboard" tabindex="0" data-view="dashboard">Dashboard</button><button type="button" role="tab" id="tab-findings" aria-selected="false" aria-controls="panel-findings" tabindex="-1" data-view="findings">Vulnerabilità</button><button type="button" role="tab" id="tab-campaigns" aria-selected="false" aria-controls="panel-campaigns" tabindex="-1" data-view="campaigns">Campagne</button></div><span class="demo-label"><i></i> ANTEPRIMA · DATI ILLUSTRATIVI</span></div>
+        <div class="app-preview">
+          <aside class="preview-sidebar" aria-label="Struttura della piattaforma, illustrativa"><div class="preview-brand"><span class="secura-mark"><img src="../assets/secura/secura-mark-scan.png" alt="" width="1379" height="1141" loading="lazy"></span><span class="secura-wordmark">Secu<span>RA</span></span></div><span class="preview-nav active" data-nav="dashboard"><b>▦</b> Dashboard</span><small>OPERATIVO</small><span class="preview-nav" data-nav="findings"><b>◇</b> Vulnerabilità <i>128</i></span><span class="preview-nav"><b>▤</b> Asset</span><span class="preview-nav" data-nav="campaigns"><b>◎</b> Campagne</span><span class="preview-nav"><b>⌁</b> Operations</span><span class="preview-nav"><b>↥</b> Import</span><small>STRUMENTI</small><span class="preview-nav"><b>⌘</b> Comandi</span><span class="preview-nav"><b>▧</b> Knowledge Base</span><span class="preview-nav"><b>↗</b> Remote Ops</span><span class="preview-nav"><b>⚙</b> Ansible</span><span class="preview-nav"><b>✧</b> AI Copilot</span><small>GESTIONE</small><span class="preview-nav"><b>♧</b> Team &amp; SLA</span><span class="preview-nav"><b>≡</b> Audit Log</span><div class="preview-user"><span>SR</span><div>Security team<small>Workspace illustrativo</small></div></div></aside>
+          <div class="preview-workspace"><div class="preview-topbar"><span>WORKSPACE / <b id="preview-location">DASHBOARD</b></span><span><i class="online-dot"></i> Ambiente self-hosted <b class="avatar">SR</b></span></div>
+            <div class="preview-panel" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard"><div class="preview-title"><h3>Dashboard</h3><span>64 asset · 3 campagne attive</span></div><div class="kpi-grid"><div><span>◇ <small>Attive</small></span><strong>128</strong><em>Finding aperti</em></div><div><span class="critical">! <small>Critical</small></span><strong>7</strong><em>24 High</em></div><div><span class="warning">◷ <small>Scadute</small></span><strong>3</strong><em>Richiedono attenzione</em></div><div><span class="success">✓ <small>Risolte (30gg)</small></span><strong>46</strong><em>Remediation completate</em></div><div><span>↻ <small>Rientrate</small></span><strong>4</strong><em>Riapparse nell'import</em></div><div><span>♧ <small>Da assegnare</small></span><strong>12</strong><em>In attesa di ownership</em></div><div><span>◎ <small>Campagne attive</small></span><strong>3</strong><em>Interventi coordinati</em></div><div><span>◷ <small>SLA medio (gg)</small></span><strong>8,2</strong><em>Tempo di risoluzione</em></div></div>
+              <div class="chart-grid"><div class="preview-card"><h4>Per severità <span>128 finding</span></h4><div class="severity-chart"><div class="donut"><div><strong>128</strong><span>ATTIVE</span></div></div><ul><li><i style="--swatch:#f43b54"></i>Critical <b>7</b></li><li><i style="--swatch:#f39853"></i>High <b>24</b></li><li><i style="--swatch:#e7c260"></i>Medium <b>62</b></li><li><i style="--swatch:#66bba5"></i>Low <b>35</b></li></ul></div></div><div class="preview-card"><h4>Per operatore <span>Distribuzione carico</span></h4><div class="bar-chart"><div><span>Operatore 01</span><i style="--bar:82%"></i><b>38</b></div><div><span>Operatore 02</span><i style="--bar:65%"></i><b>30</b></div><div><span>Operatore 03</span><i style="--bar:58%"></i><b>27</b></div><div><span>Operatore 04</span><i style="--bar:45%"></i><b>21</b></div><div><span>Da assegnare</span><i style="--bar:26%"></i><b>12</b></div></div></div></div>
+              <div class="chart-grid"><div class="preview-card deadline-list"><h4>Scadenze urgenti <span class="critical">3 scadute</span></h4><div><i class="severity critical">C</i><span>Pannello amministrativo esposto<small>edge-gateway · Infrastructure</small></span><b class="critical">Scaduta</b></div><div><i class="severity high">H</i><span>Libreria applicativa da aggiornare<small>app-server-02 · Application</small></span><b>Oggi</b></div><div><i class="severity medium">M</i><span>Configurazione TLS obsoleta<small>proxy-01 · Network</small></span><b>Tra 2 giorni</b></div></div><div class="preview-card cve-list"><h4>Top CVE <span>Per ricorrenza</span></h4><div><span>CVE · Libreria applicativa</span><b>18 finding</b></div><div><span>CVE · Servizio di rete</span><b>12 finding</b></div><div><span>CVE · Componente sistema</span><b>9 finding</b></div></div></div><div class="preview-card activity"><h4>Attività recente</h4><p><i></i><time>09:42</time> Campagna aggiornamento componenti: finding assegnati al team Infrastructure.</p><p><i></i><time>09:38</time> Import completato. Evidenze aggiornate e vulnerabilità rientrate rilevate.</p></div>
+            </div>
+            <div class="preview-panel" id="panel-findings" role="tabpanel" aria-labelledby="tab-findings" hidden><div class="preview-title"><h3>Vulnerabilità</h3><span>128 finding attivi</span></div><div class="mock-filter">⌕ &nbsp; Ricerca per titolo, hostname o CVE <span>Severità: tutte &nbsp; · &nbsp; Stato: tutti</span></div><div class="finding-table"><table><thead><tr><th>Finding / Asset</th><th>Severità</th><th>Stato</th><th>Assegnazione</th></tr></thead><tbody><tr><td>Pannello amministrativo esposto<small>edge-gateway · 10.0.0.12</small></td><td><span class="pill critical">Critical</span></td><td>In lavorazione</td><td>Infrastructure</td></tr><tr><td>Libreria applicativa da aggiornare<small>app-server-02 · 10.0.1.24</small></td><td><span class="pill high">High</span></td><td>In carico</td><td>Application</td></tr><tr><td>Configurazione TLS obsoleta<small>proxy-01 · 10.0.0.18</small></td><td><span class="pill medium">Medium</span></td><td>In attesa</td><td>Network</td></tr><tr><td>Componente di sistema obsoleto<small>worker-03 · 10.0.2.31</small></td><td><span class="pill high">High</span></td><td>Da assegnare</td><td>—</td></tr></tbody></table></div><div class="preview-callout"><span>↳</span><div><h4>Ogni finding ha una storia.</h4><p>Stato, asset, responsabile, note ed evidenze rimangono collegati durante tutto il ciclo di remediation.</p></div></div></div>
+            <div class="preview-panel" id="panel-campaigns" role="tabpanel" aria-labelledby="tab-campaigns" hidden><div class="preview-title"><h3>Campagne</h3><span>3 interventi coordinati</span></div><div class="campaign-list"><article><span class="pill critical">Alta priorità</span><h4>Aggiornamento componenti esposti</h4><p>Infrastructure · 24 finding</p><progress value="16" max="24" aria-label="16 finding risolti su 24"></progress><span>16 / 24 risolti</span></article><article><span class="pill medium">In corso</span><h4>Hardening configurazioni TLS</h4><p>Network · 18 finding</p><progress value="11" max="18" aria-label="11 finding risolti su 18"></progress><span>11 / 18 risolti</span></article><article><span class="pill success">In corso</span><h4>Remediation applicativa</h4><p>Application · 32 finding</p><progress value="19" max="32" aria-label="19 finding risolti su 32"></progress><span>19 / 32 risolti</span></article></div><div class="preview-callout"><span>◎</span><div><h4>Dalla singola evidenza all'intervento di squadra.</h4><p>Raggruppa le vulnerabilità in campagne e segui l'avanzamento della remediation.</p></div></div></div>
+          </div>
+        </div><p class="preview-caption"><span>INTERFACCIA RICOSTRUITA A SCOPO ILLUSTRATIVO</span><span>Le informazioni sensibili restano nel tuo ambiente. Qui, solo una preview.</span></p>
       </div>
     </section>
-
-    <section class="section" aria-labelledby="vuln-workflow">
-      <p class="kicker">The remediation workflow</p>
-      <h2 id="vuln-workflow">From an Excel export to a closed finding.</h2>
-      <div class="feature-grid">
-        <article class="feature-card"><span class="index">01</span><h3>Import</h3><p>Bring scanner exports and weekly Excel findings into one controlled workspace.</p></article>
-        <article class="feature-card"><span class="index">02</span><h3>Ownership</h3><p>Assign every finding to the team responsible for remediation and keep status visible.</p></article>
-        <article class="feature-card"><span class="index">03</span><h3>SLA</h3><p>Track severity-based deadlines and make overdue or returned vulnerabilities hard to miss.</p></article>
-        <article class="feature-card"><span class="index">04</span><h3>Audit</h3><p>Record imports, reassignments, state changes, notes and resolution history.</p></article>
-      </div>
+    <section class="workflow section-shell" id="workflow"><div class="section-heading scan-reveal"><div><p class="eyebrow">03 — DAL FINDING ALLA CHIUSURA</p><h2>Meno passaggi a vuoto.<br><em>Più avanzamento.</em></h2></div><p>Un flusso continuo per trasformare<br>un report in lavoro assegnato,<br>e il lavoro in evidenza tracciabile.</p></div>
+      <div class="workflow-row scan-reveal"><span class="step-number">01</span><div><span class="step-tag">IMPORT &amp; CONTESTO</span><h3>Parti dalle evidenze.</h3><p>Importa i report Excel, collega i finding agli asset e riconosci le vulnerabilità già risolte che ricompaiono nei nuovi report.</p></div><div class="step-visual"><span class="file-chip">XLSX</span><span class="flow-line"></span><span class="flow-target">Finding<br><small>normalizzati e collegati</small></span></div></div>
+      <div class="workflow-row scan-reveal"><span class="step-number">02</span><div><span class="step-tag">OWNERSHIP &amp; SLA</span><h3>Rendi chiaro il prossimo passo.</h3><p>Assegna i responsabili, organizza le campagne e segui le scadenze. Le criticità e gli SLA scaduti restano visibili al team.</p></div><div class="step-visual ownership"><span class="avatar">IT</span><span class="avatar">SEC</span><span class="avatar">OPS</span><span class="ownership-label">Una responsabilità, condivisa.</span></div></div>
+      <div class="workflow-row scan-reveal"><span class="step-number">03</span><div><span class="step-tag">REMEDIATION &amp; AUDIT</span><h3>Chiudi il cerchio.</h3><p>Accompagna la risoluzione con note, evidenze e strumenti operativi. Mantieni la cronologia di assegnazioni, attività e cambi di stato.</p></div><div class="step-visual audit-visual"><span><i></i> Finding assegnato</span><span><i></i> Evidenza aggiunta</span><span><i></i> Remediation completata <b>✓</b></span></div></div>
     </section>
-
-    <section class="section" aria-labelledby="vuln-security">
-      <p class="kicker">Controlled by the team running it</p>
-      <h2 id="vuln-security">The findings stay inside your infrastructure.</h2>
-      <div class="security-grid">
-        <article class="security-item"><strong>Self-hosted</strong><span>Runs on infrastructure controlled by the organisation, not an external SaaS.</span></article>
-        <article class="security-item"><strong>Containerised</strong><span>Deploys and updates alongside the rest of the local application stack.</span></article>
-        <article class="security-item"><strong>PIN + 2FA</strong><span>Requires a team PIN and TOTP second factor, with session timeout.</span></article>
-        <article class="security-item"><strong>Local storage</strong><span>Findings, ownership, comments and audit records stay in a local volume.</span></article>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="cta-panel">
-        <div><h2>Built for sensitive remediation workflows.</h2><p>SecuRA is distributed as a self-hosted application rather than a public demo, so this informational page intentionally does not expose an application login.</p></div>
-        <span class="status-label">Self-hosted build</span>
-      </div>
-    </section>
+    <section class="control-section" id="control"><div class="section-shell control-grid scan-reveal"><div><p class="eyebrow">04 — IL TUO PERIMETRO</p><h2>Il controllo<br>rimane <em>tuo.</em></h2><p>SecuRA è self-hosted. L'applicazione e i dati operativi risiedono nell'infrastruttura gestita dalla tua organizzazione.</p><a href="https://official.doppiaelletech.workers.dev/" class="button button-light">Parliamo del tuo ambiente <span>↗</span></a></div><div class="perimeter"><span class="perimeter-caption">LA TUA INFRASTRUTTURA</span><div class="perimeter-core"><span class="secura-mark"><img src="../assets/secura/secura-mark-scan.png" alt="" width="1379" height="1141" loading="lazy"></span><span class="secura-wordmark">Secu<span>RA</span></span></div><div class="perimeter-nodes"><span>Finding &amp; asset</span><span>Team &amp; SLA</span><span>Evidenze &amp; audit</span></div><span class="perimeter-footer"><i class="online-dot"></i> Un workspace sotto il tuo controllo</span></div></div></section>
+    <section class="details-section section-shell scan-reveal" id="details"><div class="section-heading"><div><p class="eyebrow">05 — DENTRO LA PIATTAFORMA</p><h2>La profondità<br><em>che serve al team.</em></h2></div><p>Una base operativa comune.<br>Gli strumenti per andare a fondo.</p></div><div class="capability-grid"><article><span>01 / VISIBILITÀ</span><h3>Priorità leggibili.</h3><p>KPI, severità, scadenze urgenti, distribuzione del carico e attività recente. Una vista condivisa per leggere l'avanzamento.</p></article><article><span>02 / OPERATIVITÀ</span><h3>Dal contesto all'azione.</h3><p>Asset, campagne, comandi, knowledge base, Remote Ops e Ansible affiancano il flusso di gestione delle vulnerabilità.</p></article><article><span>03 / RESPONSABILITÀ</span><h3>Una storia verificabile.</h3><p>Assegnazioni, note, evidenze e audit log rendono il percorso di remediation consultabile e seguibile nel tempo.</p></article></div><div class="faq"><details><summary>SecuRA esegue scansioni di vulnerabilità?<span>+</span></summary><p>SecuRA gestisce i finding e il processo di remediation a partire dalle evidenze importate. Il robot e la scansione visiva raccontano questa visibilità operativa: non sostituiscono gli scanner già utilizzati dal team.</p></details><details><summary>Posso provare la dashboard di questa pagina?<span>+</span></summary><p>Puoi esplorare le tre viste illustrative qui sopra. I dati sono dimostrativi: questa vetrina statica non si collega a un ambiente reale, non esegue operazioni e non espone un accesso applicativo.</p></details><details><summary>Dove viene eseguita l'applicazione?<span>+</span></summary><p>SecuRA viene distribuito come applicazione self-hosted e può essere eseguito in container nell'infrastruttura dell'organizzazione. Installazione, accessi e configurazione vengono gestiti nel proprio ambiente.</p></details></div></section>
+    <section class="closing section-shell scan-reveal"><p class="eyebrow"><span class="red-dot"></span> DALLA VISIBILITÀ ALL'AZIONE</p><h2>Vedi chiaro.<br><em>Agisci con SecuRA.</em></h2><a class="button" href="https://official.doppiaelletech.workers.dev/">Parliamo della tua remediation <span>↗</span></a></section>
   </main>
-
-  <footer class="site-shell site-footer">
-    <div class="footer-by"><span>SecuRA by</span><a href="https://official.doppiaelletech.workers.dev/" aria-label="Official DoubleL website"><img src="../assets/doublel-logo.png" alt="DoubleL"></a></div>
-    <a href="../">All products →</a>
+  <footer class="site-footer section-shell">
+    <a class="brand footer-brand" href="#top" aria-label="SecuRA, torna all’inizio"><span class="secura-mark"><img src="../assets/secura/secura-mark-scan.png" alt="" width="1377" height="1142" loading="lazy"></span><span class="secura-wordmark">Secu<span>RA</span></span></a>
+    <div class="footer-links"><a class="by-doublel" href="https://official.doppiaelletech.workers.dev/">by <strong>DoubleL</strong></a><a href="../">Tutti i prodotti ↗</a></div>
   </footer>
 </body>
 </html>

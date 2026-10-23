@@ -1,0 +1,74 @@
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(manrope-400.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(manrope-500.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(manrope-600.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(manrope-700.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(manrope-800.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(oxanium-400.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(oxanium-500.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(oxanium-600.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(oxanium-700.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(oxanium-800.ttf) format('truetype');
+}
+.secura-mark { display:inline-flex; align-items:center; justify-content:center; position:relative; flex-shrink:0; border-radius:0; background:transparent; vertical-align:middle; box-shadow:none; overflow:visible; }
+.secura-mark img { display:block; width:130%; height:130%; max-width:none; object-fit:contain; flex-shrink:0; }
+.secura-wordmark { font-family:'Oxanium',sans-serif; font-weight:700; letter-spacing:-.055em; }
+.secura-wordmark > span { color:#f43b54; }
