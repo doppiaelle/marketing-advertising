@@ -40,6 +40,10 @@ jobs:
           test -f public/assets/feeddy.js
           test -f public/assets/feeddy/motion.js
           test -f public/assets/feeddy/feeddy-logo.png
+          test -f public/assets/kritoma.css
+          test -f public/assets/kritoma.js
+          test -f public/assets/kritoma/extra-art.webp
+          node --check public/assets/kritoma.js
           ! grep -RniE '<video|intro\.mp4|Access Studio|Sign in with GitHub|Local access' public/ll-platform
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

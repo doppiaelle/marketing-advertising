@@ -97,3 +97,13 @@ L’intro HTML fornita si riproduce automaticamente, senza cornice o controlli d
 demo, e approda al logo originale con il titolo centrato sotto. Rispetta le
 preferenze di movimento ridotto e sospende il rendering fuori vista.
 Vedi [identità, intro e collegamenti](docs/feeddy-showcase.md).
+
+## Vetrina Kritoma
+
+Kritoma usa una direzione dedicata ciano/magenta/giallo su blu notte: terreno
+in CSS 3D, sequenza Mano/Luogo/Azione/Extra, particelle canvas e carte HTML.
+Fronti illustrativi con concept generici e retro semplice con logo originale
+sostituiscono le grafiche demo. La pagina include approfondimenti sulle
+interazioni e un selettore illustrativo dei dodici Ambiti, con formati 40/60
+carte e soglie 15/20 PV. Rispetta reduced-motion e sospende la scena fuori vista.
+Vedi [fonti, animazioni e prompt delle illustrazioni](docs/kritoma-showcase.md).
