@@ -34,16 +34,38 @@ public/
   assets/ll-mascot-secure.webp
   assets/ll-mascot-ai.webp
   assets/ll-frog-mark.png
+  assets/catalog.css
+  assets/navigation-lockup.svg
+  assets/doublel-frog.png
   assets/product-pages.css
   assets/product-pages.js
   assets/ll-platform.css
 ```
 
-Tutte le pagine condividono una base CSS mobile-first e la stessa navigazione:
-nome del prodotto in testata, accesso all'indice e firma «by DoubleL» nel footer.
-Le pagine sono documenti HTML statici, senza controlli applicativi. Un piccolo
-script condiviso gestisce soltanto le animazioni progressive e riattivabili allo
-scroll, rispettando la preferenza di sistema per la riduzione del movimento.
+L'indice è un catalogo compatto in inglese, con palette, tipografia e righe
+editoriali riprese da `DOUBLEL-SITE`. Le categorie sono **Digital workspaces**
+(Feeddy, Focus), **Software & infrastructure** (LL Platform, SecuRA, ACN) e
+**Games & interactive experiences** (Kritoma). Ogni riga collega la vetrina del
+prodotto, usa il logo disponibile e ne descrive brevemente l'ambito. Il footer
+mantiene la firma «by DoubleL» e il collegamento al sito ufficiale, come le
+vetrine già rivisitate.
+
+Il catalogo usa soltanto `assets/catalog.css`, senza JavaScript o dipendenze
+esterne. Classi e variabili hanno il prefisso `catalog-` per facilitarne un
+futuro riuso nel sito ufficiale. I collegamenti ai prodotti e agli asset sono
+relativi alla cartella `public/`; in caso di importazione in un percorso diverso
+vanno mantenuti o adattati. Il logo esteso in testata è lo stesso SVG statico
+generato da `DOUBLEL-SITE/scripts/prepare-navigation-brand.mjs`, con il PNG
+originale incorporato e la sua correzione colore. Anche ingombri e scale
+responsive seguono `DOUBLEL-SITE/src/styles/navigation-brand.css`, senza
+importare l'animazione di passaggio al simbolo singolo.
+La navbar mantiene l'altezza del sito ufficiale (86 px desktop, 76 px mobile),
+gli stessi margini responsive e il limite di larghezza di 1280 px anche su
+schermi ultra-wide. Lo stesso limite vale per il contenuto del catalogo.
+Anche la favicon usa il file originale `DOUBLEL-SITE/public/brand/doublel-frog.png`.
+Le vetrine conservano CSS e comportamenti dedicati.
+Le pagine sono documenti HTML statici. Il piccolo script condiviso delle vetrine
+gestisce le animazioni progressive allo scroll e rispetta reduced-motion.
 
 La vetrina LL Platform include un'illustrazione animata e supporto reduced-motion.
 La vetrina ACN ha uno stile autonomo e minimale, con i loghi trasparenti scuro e
