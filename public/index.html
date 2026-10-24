@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#090d0a">
   <title>Products &amp; ventures — DoubleL</title>
   <link rel="icon" type="image/png" href="assets/doublel-frog.png">
-  <link rel="stylesheet" href="assets/catalog.css?v=20261024-mobile-header-4">
+  <link rel="stylesheet" href="assets/catalog.css?v=20261024-hidden-products">
   <link rel="stylesheet" href="assets/ui-icons.css?v=20261024">
 </head>
 <body class="catalog-page" id="top">
@@ -27,7 +27,7 @@
 
     <nav class="catalog-index" aria-label="Product categories">
       <span class="catalog-index-label">Explore by category</span>
-      <div><a href="#digital-workspaces">Digital workspaces <span>03</span></a><a href="#software-infrastructure">Software &amp; infrastructure <span>03</span></a><a href="#games-experiences">Games &amp; experiences <span>01</span></a></div>
+      <div><a href="#digital-workspaces">Digital workspaces <span>02</span></a><a href="#software-infrastructure">Software &amp; infrastructure <span>02</span></a><a href="#games-experiences">Games &amp; experiences <span>01</span></a></div>
     </nav>
 
     <div class="catalog-products" id="products">
@@ -40,7 +40,8 @@
             <p id="feeddy-description">Create content, plan your calendar and manage your projects’ social channels in one workspace.</p>
             <span class="catalog-product-action" id="feeddy-action"><span>Explore</span><span aria-hidden="true"><svg class="ui-arrow" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></span></span>
           </a></li>
-          <li><a class="catalog-product" href="focus/" aria-labelledby="focus-title focus-action" aria-describedby="focus-description">
+          <!-- Temporarily hidden: remove hidden from this li to restore Focus. -->
+          <li hidden data-product="focus"><a class="catalog-product" href="focus/" aria-labelledby="focus-title focus-action" aria-describedby="focus-description">
             <span class="catalog-product-icon catalog-icon-focus" aria-hidden="true">F</span>
             <div class="catalog-product-name"><h3 id="focus-title" class="catalog-name-focus">Focus</h3><span class="catalog-product-type">Everyday organisation &amp; AI</span></div>
             <p id="focus-description">Notes, shopping, personal finances and appointments, brought together with an everyday AI assistant.</p>
@@ -58,7 +59,8 @@
       <section class="catalog-category" id="software-infrastructure" aria-labelledby="software-title">
         <div class="catalog-category-heading"><span class="catalog-category-number" aria-hidden="true">02 /</span><h2 id="software-title">Software &amp;<br class="catalog-desktop-break"> infrastructure</h2><p>Build, connect and operate.<br> Keep the context in view.</p></div>
         <ul class="catalog-list">
-          <li><a class="catalog-product" href="ll-platform/" aria-labelledby="ll-title ll-action" aria-describedby="ll-description">
+          <!-- Temporarily hidden: remove hidden from this li to restore LL Platform. -->
+          <li hidden data-product="ll"><a class="catalog-product" href="ll-platform/" aria-labelledby="ll-title ll-action" aria-describedby="ll-description">
             <span class="catalog-product-icon catalog-icon-ll"><img src="assets/ll-frog-mark.png" alt="" width="256" height="256" loading="lazy"></span>
             <div class="catalog-product-name"><h3 id="ll-title">LL <span class="catalog-name-platform">Platform</span></h3><span class="catalog-product-type">Infrastructure &amp; automation</span></div>
             <p id="ll-description">Connect repository analysis, provisioning and recovery context in one AI-assisted operational platform.</p>

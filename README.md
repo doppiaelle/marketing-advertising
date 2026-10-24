@@ -147,3 +147,7 @@ rapidi nello scroll non attraversano i capitoli saltati.
 Sono disponibili navigazione da tastiera, versione con movimento ridotto e
 contenuto alternativo senza JavaScript o in caso di mancato caricamento.
 Vedi [sequenza, ritmo e verifiche](docs/taskhub-showcase.md).
+
+## Prodotti temporaneamente nascosti dal catalogo
+
+Focus e LL Platform restano nell’HTML di `public/index.html`, ma i rispettivi `li` hanno `hidden` e `data-product`. Le pagine `public/focus/index.html` e `public/ll-platform/index.html` sono conservate. Il catalogo mostra 2 prodotti Digital workspaces e 2 Software & infrastructure. Per riattivare una voce rimuovere soltanto `hidden` dal relativo `li` e aggiornare il conteggio della categoria. In DOUBLEL-SITE la visibilità corrispondente si controlla con `hidden` in `src/productCatalog.ts`.
