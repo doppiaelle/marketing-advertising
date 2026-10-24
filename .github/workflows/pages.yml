@@ -26,7 +26,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for page in index ll-platform acn focus secura kritoma feeddy; do
+          for page in index ll-platform acn focus secura kritoma feeddy taskhub; do
             if [ "$page" = "index" ]; then
               test -f public/index.html
             else
@@ -44,6 +44,15 @@ jobs:
           test -f public/assets/kritoma.js
           test -f public/assets/kritoma/extra-art.webp
           node --check public/assets/kritoma.js
+          test -f public/assets/taskhub/taskhub-mark.svg
+          test -f public/assets/taskhub/frame.html
+          test -f public/assets/taskhub/motion.css
+          test -f public/assets/taskhub/showcase.css
+          test -f public/assets/taskhub/screens.css
+          test -f public/assets/taskhub/inter.woff2
+          test -f public/assets/taskhub/plus-jakarta-sans.woff2
+          node --check public/assets/taskhub/motion.js
+          node --check public/assets/taskhub/screens.js
           ! grep -RniE '<video|intro\.mp4|Access Studio|Sign in with GitHub|Local access' public/ll-platform
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

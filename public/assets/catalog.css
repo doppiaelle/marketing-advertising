@@ -60,9 +60,10 @@
 .catalog-product:hover { background: #bded8108; }
 .catalog-product-icon { display: grid; width: 52px; height: 52px; place-items: center; }
 .catalog-product-icon img { width: 100%; height: 100%; object-fit: contain; }
-.catalog-icon-feeddy img { width: 62px; height: 62px; max-width: none; }
+.catalog-icon-feeddy img { width: 59px; height: 59px; max-width: none; }
+.catalog-icon-taskhub img { width: 72%; height: 72%; }
 .catalog-icon-ll img { width: 48px; height: 48px; }
-.catalog-icon-focus { font: italic 43px/1 Georgia, 'Times New Roman', serif; color: #b9b0ff; }
+.catalog-icon-focus { font: italic 41px/1 Georgia, 'Times New Roman', serif; color: #b9b0ff; }
 .catalog-icon-kritoma img { width: 48px; height: 48px; }
 .catalog-product-name { min-width: 0; }
 .catalog-product-name h3 { font-size: 21px; font-weight: 600; line-height: 1.2; letter-spacing: -.04em; }

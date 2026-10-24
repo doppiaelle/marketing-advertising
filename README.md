@@ -1,6 +1,6 @@
 # DoubleL product pages
 
-Pagine informative dei prodotti DoubleL: Feeddy, LL Platform, Focus, ACN, Kritoma e SecuRA.
+Pagine informative dei prodotti DoubleL: Feeddy, LL Platform, Focus, ACN, Kritoma, SecuRA e taskhub.
 Il sito è statico e viene pubblicato dalla CI GitHub Pages all'indirizzo:
 
 `https://doppiaelle.github.io/marketing-advertising/`
@@ -20,6 +20,7 @@ public/
   acn/index.html
   kritoma/index.html
   secura/index.html
+  taskhub/index.html
   assets/doublel-logo.png
   assets/acn-logo-dark.png
   assets/acn-logo-light.png
@@ -44,7 +45,7 @@ public/
 
 L'indice è un catalogo compatto in inglese, con palette, tipografia e righe
 editoriali riprese da `DOUBLEL-SITE`. Le categorie sono **Digital workspaces**
-(Feeddy, Focus), **Software & infrastructure** (LL Platform, SecuRA, ACN) e
+(Feeddy, Focus, taskhub), **Software & infrastructure** (LL Platform, SecuRA, ACN) e
 **Games & interactive experiences** (Kritoma). Ogni riga collega la vetrina del
 prodotto, usa il logo disponibile e ne descrive brevemente l'ambito. Il footer
 mantiene la firma «by DoubleL» e il collegamento al sito ufficiale, come le
@@ -129,3 +130,13 @@ sostituiscono le grafiche demo. La pagina include approfondimenti sulle
 interazioni e un selettore illustrativo dei dodici Ambiti, con formati 40/60
 carte e soglie 15/20 PV. Rispetta reduced-motion e sospende la scena fuori vista.
 Vedi [fonti, animazioni e prompt delle illustrazioni](docs/kritoma-showcase.md).
+
+## Vetrina taskhub
+
+taskhub entra nel catalogo Digital workspaces con una vetrina a tutto schermo:
+otto scene dell'HTML fornito, scroll nativo con durate ponderate e un finale verde
+in cui una card scura sale al centro. Il pulsante apre l'installazione pubblica.
+I font e le schermate illustrative sono risorse locali, senza dipendenze di build.
+Sono disponibili navigazione da tastiera, versione con movimento ridotto e
+contenuto alternativo senza JavaScript o in caso di mancato caricamento.
+Vedi [sequenza, ritmo e verifiche](docs/taskhub-showcase.md).
