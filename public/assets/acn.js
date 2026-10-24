@@ -71,7 +71,7 @@ function selectStage(index) {
   stages.forEach((button, i) => button.setAttribute('aria-pressed', String(i === index)));
   panels.forEach((panel, i) => { panel.hidden = i !== index; });
   document.querySelector('.trace-progress').textContent = `${String(index + 1).padStart(2, '0')} — 05`;
-  next.textContent = index === stages.length - 1 ? 'Replay lifecycle ↺' : 'Next transition →';
+  next.innerHTML = index === stages.length - 1 ? "Replay lifecycle <svg class=\"ui-arrow\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M3 10a9 9 0 1 1 2 9M3 4v6h6\"/></svg>" : "Next transition <svg class=\"ui-arrow\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg>";
 }
 if (stages.length && panels.length && next) {
   stages.forEach((button, i) => button.addEventListener('click', () => selectStage(i)));

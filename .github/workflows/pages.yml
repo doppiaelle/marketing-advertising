@@ -46,6 +46,8 @@ jobs:
           node --check public/assets/kritoma.js
           test -f public/assets/taskhub/taskhub-mark.svg
           test -f public/assets/taskhub/frame.html
+          test -f public/assets/taskhub/frame.css
+          test -f public/assets/ui-icons.css
           test -f public/assets/taskhub/motion.css
           test -f public/assets/taskhub/showcase.css
           test -f public/assets/taskhub/screens.css

@@ -13,7 +13,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acid); outline-
 .motion-enabled:not(.motion-failed) .experience { display: block; }
 .motion-enabled:not(.motion-failed) .fallback { display: none; }
 .experience.is-scroll { height: var(--story-height, 1200svh); }
-.shell, .screen-wrap { height: 100svh; }
+.shell, .screen-wrap { height: 100dvh; }
 .screen-wrap { position: relative; }
 .canvas { overflow: visible; }
 .headline-mask { top: 92px; }
@@ -21,9 +21,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acid); outline-
 .scene[data-index="0"].active .headline { animation: none; }
 .scene { transition: none; }
 .fragment { transition: none; }
-.end-panel { transition: none; }
+.scene .headline, .scene .intertitle { will-change: auto; }
+.scene.active .headline, .scene.active .intertitle { will-change: transform, opacity; }
+.composition { opacity: 0; }
+.fragment { contain: layout paint; }
+.end-panel { transition: none; will-change: auto; }
+.is-closing .end-panel { will-change: transform, opacity; }
+.is-closing .composition, .is-closing .fragment { will-change: auto; }
 #closing-slot { display: grid; place-items: center; padding: 82px 24px; }
-.closing-card { width: min(100%, 480px); text-align: center; background: #08281f; color: #f4f6ec; border: 1px solid #ddffd329; border-radius: 28px; padding: clamp(26px, 4vh, 42px) 30px 24px; box-shadow: 0 35px 100px -20px #002a2ab3; will-change: transform, opacity; }
+.closing-card { width: min(100%, 480px); text-align: center; background: #08281f; color: #f4f6ec; border: 1px solid #ddffd329; border-radius: 28px; padding: clamp(26px, 4vh, 42px) 30px 24px; box-shadow: 0 35px 100px -20px #002a2ab3; }
+.is-closing .closing-card { will-change: transform, opacity; }
 .closing-eyebrow { margin: 0 0 22px; text-transform: uppercase; font-size: 9px; letter-spacing: .2em; color: #b7cfb8; }
 .closing-mark { display: block; margin: 0 auto 8px; width: 64px; height: 64px; border-radius: 18px; box-shadow: 0 8px 28px #0002; }
 .closing-card h2 { margin: 0; font-size: clamp(44px, 6vw, 60px); font-weight: 750; letter-spacing: -3.5px; line-height: 1.2; }
@@ -64,6 +71,11 @@ body:has(.is-closing) .story-footer a:hover { color: #061b15; }
   #closing-slot { padding: 70px 20px 74px; }
   .closing-card { max-width: 390px; border-radius: 24px; padding: 26px 22px 16px; }
   .closing-eyebrow { margin-bottom: 18px; font-size: 8px; }
+  .halo { filter: none; opacity: .35; }
+  .composition { perspective: none; }
+  .fragment { box-shadow: 0 16px 38px -14px #0009; }
+  .secondary { filter: none; }
+  .intertitle { filter: none !important; }
 }
 @media (max-height: 720px) {
   .closing-card { padding-block: 20px 12px; }
@@ -94,5 +106,6 @@ body:has(.is-closing) .story-footer a:hover { color: #061b15; }
   .closing-card .launch-button { grid-column: 3; grid-row: 1 / 3; width: 100%; font-size: 12px; padding: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .closing-card { will-change: auto; }
+  .is-closing .closing-card, .is-closing .end-panel,
+  .scene.active .headline, .scene.active .intertitle { will-change: auto; }
 }

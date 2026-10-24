@@ -18,22 +18,39 @@ const shots=[
 const total=shots.reduce((n,s)=>n+s.duration,0),starts=shots.map((s,i)=>shots.slice(0,i).reduce((a,b)=>a+b.duration,0));
 const contentSources=new Set(shots.filter(s=>!s.closing).map(s=>s.source));
 let elapsed=0,index=-1,local=0,last=0,destroyed=false,ready=false,mobile=false,scale=1,frameHandle,lastSent=-Infinity,visible=true,targetElapsed=0,lastRendered=-1;
-const cleanup=[],frames=[],bounds=new Map(),nodes=[];
+const cleanup=[],frames=[],bounds=new Map(),nodes=[],frameScenes=new Map();
+let requestedSource=0,lastAction=-1;
+// Exactly two documents are reused for every chapter; hidden chapters have no apps.
+const composition=document.createElement('div');composition.className='composition';
+composition.innerHTML='<div class="fragment secondary" aria-hidden="true"></div><div class="fragment primary" aria-hidden="true"></div>';
+$('#canvas').insertBefore(composition,$('.cursor'));
+for(const role of ['primary','secondary']){
+ const f=document.createElement('iframe');f.title='Taskhub illustrative '+role+' screen';f.tabIndex=-1;f.setAttribute('aria-hidden','true');
+ f.src='../assets/taskhub/frame.html?scene=0&v=20261024-mobile-2';
+ f.addEventListener('load',()=>{f.contentWindow?.postMessage({type:'taskhub:scene',scene:requestedSource},location.origin);f.contentWindow?.postMessage({type:'taskhub:visibility',visible:!shots[index]?.closing},location.origin);});
+ composition.querySelector('.'+role).appendChild(f);frames.push(f);
+}
+function screensReady(){return !shots[index]?.closing&&frames.every(f=>frameScenes.get(f.contentWindow)===shots[index]?.source);}
+function switchScreens(source){requestedSource=source;frameScenes.clear();lastAction=-1;lastSent=-Infinity;for(const f of frames)f.contentWindow?.postMessage({type:'taskhub:scene',scene:source},location.origin);}
+
 shots.forEach((shot,i)=>{
  if(shot.closing){nodes.push({el:null,pair:[]});return;}
  const el=document.createElement('section');el.className='scene';el.dataset.index=i;el.dataset.titleMode=shot.titleMode;el.setAttribute('aria-hidden','true');
- el.innerHTML='<div class="headline-mask"><'+(i===0?'h1':'h2')+' class="headline">'+shot.title+'</'+(i===0?'h1':'h2')+'></div><div class="intertitle" aria-hidden="true"><div>'+shot.title+'</div></div><div class="composition"><div class="fragment secondary" aria-hidden="true"></div><div class="fragment primary" aria-hidden="true"></div></div>';
- $('#scenes').appendChild(el);const pair=[];
- for(const role of ['primary','secondary']){const f=document.createElement('iframe');f.title='Taskhub '+shot.label+' — '+role+' UI excerpt';f.tabIndex=-1;f.setAttribute('aria-hidden','true');f.src='../assets/taskhub/frame.html?scene='+shot.source;el.querySelector('.'+role).appendChild(f);frames.push(f);pair.push(f);}
- nodes.push({el,primary:el.querySelector('.primary'),secondary:el.querySelector('.secondary'),headline:el.querySelector('.headline'),intertitle:el.querySelector('.intertitle'),composition:el.querySelector('.composition'),pair});
+ el.innerHTML='<div class="headline-mask"><'+(i===0?'h1':'h2')+' class="headline">'+shot.title+'</'+(i===0?'h1':'h2')+'></div><div class="intertitle" aria-hidden="true"><div>'+shot.title+'</div></div>';
+ $('#scenes').appendChild(el);
+ nodes.push({el,primary:composition.querySelector('.primary'),secondary:composition.querySelector('.secondary'),headline:el.querySelector('.headline'),intertitle:el.querySelector('.intertitle'),composition,pair:frames});
 });
 function listen(el,event,fn,options){el.addEventListener(event,fn,options);cleanup.push(()=>el.removeEventListener(event,fn,options));}
 function fromFrame(e){return frames.some(f=>f.contentWindow===e.source);}
 listen(window,'message',e=>{
  if(e.data?.type==='taskhub:ready'&&fromFrame(e)){
-  if(!contentSources.has(e.data.scene)||!e.data.primary)return;bounds.set(e.data.scene,e.data);
-  if(!ready&&bounds.size>=contentSources.size){ready=true;$('#loading').classList.add('hidden');$('#loading').setAttribute('aria-hidden','true');last=performance.now();document.body.classList.remove('motion-failed');onScroll();render();}
-  if(index>=0&&shots[index].source===e.data.scene){compose(index,local);paintTitle(nodes[index],local,shots[index].titleMode);}return;
+  if(!contentSources.has(e.data.scene)||!e.data.primary)return;
+  bounds.set(e.data.scene,e.data);frameScenes.set(e.source,e.data.scene);
+  if(!ready&&frames.every(f=>frameScenes.has(f.contentWindow))){ready=true;$('#loading').classList.add('hidden');$('#loading').setAttribute('aria-hidden','true');document.body.classList.remove('motion-failed');}
+  if(screensReady()){
+   compose(index,local);paintTitle(nodes[index],local,shots[index].titleMode);sendProgress();
+  }
+  return;
  }
  if(window.parent!==window&&e.source===window.parent){
   if(e.data?.type==='taskhub:set-progress')setProgress(e.data.progress);
@@ -53,7 +70,7 @@ function paintTitle(n,t,titleMode){
  n.headline.style.transform='translateY('+((1-rise)*195)+'px)';n.headline.style.opacity=String(rise*outgoing*(titleMode==='center'&&!reduced.matches?ease((t-.29)/.12):1));
  const pop=titleMode==='center'&&!reduced.matches?incoming*(1-ease((t-.19)/.14)):0;
  n.intertitle.style.opacity=String(pop);n.intertitle.style.transform='scale('+(.82+.18*incoming)+')';n.intertitle.style.filter='blur('+((1-incoming)*8)+'px)';
- n.composition.style.opacity=String(titleMode==='center'&&!reduced.matches?ease((t-.19)/.18):incoming);
+ n.composition.style.opacity=String(screensReady()?(titleMode==='center'&&!reduced.matches?ease((t-.19)/.18):incoming):0);
 }
 function crop(el,box){if(!box)return false;const b={...box};b.w=Math.min(1440,b.w);b.h=Math.min(1000,b.h);el.style.width=b.w+'px';el.style.height=b.h+'px';const f=el.querySelector('iframe');f.style.left=-b.x+'px';f.style.top=-b.y+'px';return true;}
 function pose(el,x,y,s,r,extra=0){el.style.transform=`translate3d(${x}px,${y}px,0) rotate(${reduced.matches?0:r}deg) scale(${s})`;el.style.opacity=String(extra?0:1);}
@@ -96,11 +113,21 @@ function compose(i,t){if(i===0)t=Math.max(.25,t);const n=nodes[i],data=bounds.ge
  const clickAt=source===1?.72:source===2?.73:.58,action=actionProgress(shots[i],t);c.classList.toggle('click',action>clickAt&&action<clickAt+.11);
 }
 function actionProgress(shot,t){if(reduced.matches)return .9;const beats=shot.beats;for(let j=1;j<beats.length;j++){const [x,y]=beats[j], [px,py]=beats[j-1];if(t<=x)return py+(y-py)*clamp((t-px)/(x-px));}return 1;}
-function sendProgress(){if(!ready||index<0||shots[index].closing)return;for(const f of nodes[index].pair)f.contentWindow?.postMessage({type:'taskhub:frame',progress:actionProgress(shots[index],local)},'*');lastSent=performance.now();}
+function sendProgress(){
+ if(!screensReady())return;
+ const now=performance.now(),action=actionProgress(shots[index],local);
+ if(now-lastSent<50||Math.abs(action-lastAction)<.001)return;
+ for(const f of frames)f.contentWindow?.postMessage({type:'taskhub:frame',progress:action},location.origin);
+ lastSent=now;lastAction=action;
+}
 function render(){const e=clamp(elapsed,0,total-.00001);let next=0;for(let i=0;i<shots.length;i++)if(e>=starts[i])next=i;local=elapsed>=total?1:clamp((e-starts[next])/shots[next].duration);
  if(index!==next){
   if(index>=0&&nodes[index].el){nodes[index].el.classList.remove('active');nodes[index].el.setAttribute('aria-hidden','true');}
   index=next;const closing=!!shots[index].closing;
+  if(!closing)switchScreens(shots[index].source);
+  for(const f of frames)f.contentWindow?.postMessage({type:'taskhub:visibility',visible:!closing},location.origin);
+  if(closing){$('#loading').classList.add('hidden');$('#loading').setAttribute('aria-hidden','true');}
+
   if(nodes[index].el){nodes[index].el.classList.add('active');nodes[index].el.setAttribute('aria-hidden','false');}
   $('#experience').classList.toggle('is-closing',closing);$('#closing').setAttribute('aria-hidden',String(!closing));$('#closing').inert=!closing;$('#announcement').textContent=closing?'Your next connection. Open taskhub.':shots[index].label;
   $('.slip').classList.remove('on');if(!closing&&!reduced.matches)requestAnimationFrame(()=>$('.slip').classList.add('on'));
@@ -115,11 +142,12 @@ function render(){const e=clamp(elapsed,0,total-.00001);let next=0;for(let i=0;i
 // Native wheel/touch/keyboard scrolling stays in charge. A short visual catch-up
 // removes wheel stepping without intercepting input or adding a second scroll container.
 function tick(now){if(destroyed)return;const dt=last?Math.min((now-last)/1000,.1):0;last=now;
- if(ready&&!document.hidden&&visible){
+ if(!document.hidden&&visible){
   const delta=targetElapsed-elapsed;
-  elapsed=reduced.matches||Math.abs(delta)<.001?targetElapsed:elapsed+delta*(1-Math.exp(-dt/0.075));
+  // Fast flings jump directly to their destination, without rendering every skipped app state.
+  elapsed=reduced.matches||Math.abs(delta)>2||Math.abs(delta)<.001?targetElapsed:elapsed+delta*(1-Math.exp(-dt/0.075));
   if(Math.abs(elapsed-lastRendered)>.0001){render();lastRendered=elapsed;}
-  else if(now-lastSent>150)sendProgress();
+  else sendProgress();
  }
  frameHandle=requestAnimationFrame(tick);
 }
@@ -127,7 +155,8 @@ function setProgress(progress){targetElapsed=clamp(Number(progress)||0)*total;el
 function storyRange(){const el=$('#experience');return{top:el.getBoundingClientRect().top+scrollY,range:Math.max(1,el.offsetHeight-$('.shell').clientHeight)};}
 function goTo(i){i=clamp(Math.floor(Number(i)||0),0,shots.length-1);const target=starts[i]+shots[i].duration*(shots[i].closing?.72:.2),r=storyRange();window.scrollTo({top:r.top+r.range*target/total,behavior:'instant'});onScroll();}
 function onScroll(){const r=storyRange();targetElapsed=clamp((scrollY-r.top)/r.range)*total;}
-function sizeRunway(){const h=$('.shell').clientHeight;const pxPerBeat=reduced.matches?h/3.5:Math.max(160,Math.min(280,h*.32));$('#experience').style.setProperty('--story-height',(h+total*pxPerBeat)+'px');onScroll();}
+let runwayWidth=0;
+function sizeRunway(){const width=document.documentElement.clientWidth;if(runwayWidth===width)return;runwayWidth=width;const h=$('.shell').clientHeight;const pxPerBeat=reduced.matches?h/3.5:Math.max(160,Math.min(280,h*.32));$('#experience').style.setProperty('--story-height',(h+total*pxPerBeat)+'px');onScroll();}
 listen(window,'resize',()=>{resize();sizeRunway();});listen(window,'scroll',onScroll,{passive:true});
 listen(reduced,'change',()=>{sizeRunway();onScroll();elapsed=targetElapsed;render();});
 for(const link of document.querySelectorAll('a[href="#closing"]'))listen(link,'click',e=>{if(document.body.classList.contains('motion-failed')){e.preventDefault();$('.fallback .launch-button').focus();return;}e.preventDefault();goTo(shots.length-1);elapsed=targetElapsed;render();$('.launch-button').focus({preventScroll:true});});

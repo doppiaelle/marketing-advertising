@@ -51,7 +51,7 @@ prodotto, usa il logo disponibile e ne descrive brevemente l'ambito. Il footer
 mantiene la firma «by DoubleL» e il collegamento al sito ufficiale, come le
 vetrine già rivisitate.
 
-Il catalogo usa soltanto `assets/catalog.css`, senza JavaScript o dipendenze
+Il catalogo usa `assets/catalog.css` e `assets/ui-icons.css`, senza JavaScript o dipendenze
 esterne. Classi e variabili hanno il prefisso `catalog-` per facilitarne un
 futuro riuso nel sito ufficiale. I collegamenti ai prodotti e agli asset sono
 relativi alla cartella `public/`; in caso di importazione in un percorso diverso
@@ -64,6 +64,10 @@ La navbar mantiene l'altezza del sito ufficiale (86 px desktop, 76 px mobile),
 gli stessi margini responsive e il limite di larghezza di 1280 px anche su
 schermi ultra-wide. Lo stesso limite vale per il contenuto del catalogo.
 Anche la favicon usa il file originale `DOUBLEL-SITE/public/brand/doublel-frog.png`.
+La testata contiene solo Products a destra; il contenitore usa la spaziatura
+della navbar senza sommare i margini della griglia dei contenuti, anche su mobile.
+Le frecce del catalogo e delle vetrine sono SVG monocromatici condivisi, così
+mantengono lo stesso disegno anche sui dispositivi che usano emoji per i glifi.
 Le vetrine conservano CSS e comportamenti dedicati.
 Le pagine sono documenti HTML statici. Il piccolo script condiviso delle vetrine
 gestisce le animazioni progressive allo scroll e rispetta reduced-motion.
@@ -137,6 +141,9 @@ taskhub entra nel catalogo Digital workspaces con una vetrina a tutto schermo:
 otto scene dell'HTML fornito, scroll nativo con durate ponderate e un finale verde
 in cui una card scura sale al centro. Il pulsante apre l'installazione pubblica.
 I font e le schermate illustrative sono risorse locali, senza dipendenze di build.
+Due sole interfacce persistenti servono tutte le scene, senza creare un'app per
+ogni estratto. Le interfacce sospendono gli aggiornamenti nel finale; i salti
+rapidi nello scroll non attraversano i capitoli saltati.
 Sono disponibili navigazione da tastiera, versione con movimento ridotto e
 contenuto alternativo senza JavaScript o in caso di mancato caricamento.
 Vedi [sequenza, ritmo e verifiche](docs/taskhub-showcase.md).

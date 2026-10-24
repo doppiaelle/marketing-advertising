@@ -1,0 +1,8 @@
+/* These non-interactive excerpts are animated by the parent scroll timeline.
+   Avoid a separate blur surface for every glass panel inside each document. */
+*, *::before, *::after {
+  animation: none !important;
+  transition: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}

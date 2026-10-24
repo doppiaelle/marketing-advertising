@@ -28,6 +28,8 @@
 
 .catalog-header { height: 86px; background: var(--catalog-ink); border-bottom: 1px solid #ffffff18; }
 .catalog-header-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; height: 100%; padding: env(safe-area-inset-top, 0px) max(40px, calc((100vw - 1280px) / 2)) 0; }
+/* The header uses viewport padding, not the content shell's additional margins. */
+.catalog-header .catalog-header-inner { width: 100%; margin-inline: 0; }
 /* Same extended artwork footprint and responsive scaling as DOUBLEL-SITE. */
 .catalog-brand { position: relative; display: block; width: 210px; height: 62px; flex: none; }
 .catalog-brand img { position: absolute; left: 0; top: 50%; width: 210px; height: 70px; max-width: none; transform: translateY(-50%); transform-origin: left center; }
