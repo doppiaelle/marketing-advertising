@@ -9,6 +9,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acid); outline-
 .story-header a:hover { color: var(--acid); }
 .story-brand { font-size: 23px; font-weight: 750; letter-spacing: -1px; color: #f4f6ec; }
 .story-brand img { width: 29px; height: 29px; }
+.story-portal { width: 44px; justify-content: center; margin-left: 12px; border: 1px solid currentColor; border-radius: 50%; font-size: 20px; opacity: .85; }
+.story-portal:hover { opacity: 1; }
 .experience { display: none; }
 .motion-enabled:not(.motion-failed) .experience { display: block; }
 .motion-enabled:not(.motion-failed) .fallback { display: none; }

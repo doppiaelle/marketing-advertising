@@ -62,7 +62,8 @@ only when viewport width changes; height-only browser-bar events leave its
 length intact. The final
 card is independent of the scaled canvas and has compact variants for short
 and landscape viewports. The fixed header contains only the right-aligned
-Taskhub mark and name. All products is available only in the footer. Progress
+Taskhub mark and name, followed by an SVG portal icon linking directly to the
+public app with a 44px touch target. All products is available only in the footer. Progress
 information, scroll hints and replay controls are omitted as requested.
 A keyboard skip link reaches the final call to action. Arrow Left/Right change
 scenes when focus is outside interactive controls;
