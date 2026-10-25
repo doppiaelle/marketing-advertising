@@ -9,6 +9,12 @@ Il repository resta separato da `DOUBLEL-SITE`, che collega ciascuna scheda
 prodotto alla relativa pagina informativa. Gli eventuali link alle applicazioni
 reali compaiono qui, non nella landing principale.
 
+Le sette vetrine collegano il modulo del sito ufficiale a `#contatti`, passando
+`product`, `intent` e `lang=en` per preparare il messaggio. SecuRA distingue anche
+integrazione nell'infrastruttura e remediation. I link funzionano senza JavaScript;
+il selettore EN/IT del sito ufficiale traduce il messaggio iniziale conservando le
+modifiche del visitatore. Verifica: `node scripts/check-contact-links.mjs`.
+
 ## Struttura
 
 ```text
