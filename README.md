@@ -15,6 +15,14 @@ integrazione nell'infrastruttura e remediation. I link funzionano senza JavaScri
 il selettore EN/IT del sito ufficiale traduce il messaggio iniziale conservando le
 modifiche del visitatore. Verifica: `node scripts/check-contact-links.mjs`.
 
+Tutte le vetrine, incluse Focus e LL Platform temporaneamente nascoste dal catalogo,
+usano un solo footer condiviso: logo prodotto a sinistra, «by DoubleL» al centro,
+Support / Contact / All Products a destra. `assets/product-footer.css` gestisce
+struttura responsive e palette specifiche. I colori di testo e hover hanno un
+contrasto di almeno 4,5:1 con lo sfondo del relativo footer. Il precedente blocco
+contatti separato è rimosso. In taskhub il footer segue l'intera sequenza di scroll
+ed è nel flusso del documento: non è fisso e non si sovrappone alla scena finale.
+
 ## Struttura
 
 ```text
