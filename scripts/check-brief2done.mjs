@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
+import { runInNewContext } from 'node:vm';
 
 const root = new URL('../public/', import.meta.url);
 for (const relative of ['brief2done/index.html', 'assets/brief2done/frame.html']) {
@@ -38,21 +39,70 @@ assert.match(motion, /Math\.round\(p\)/, 'Nearest chapter must track manual scru
 assert.match(motion, /window\.scrollTo\(\{top:from\+\(target-from\)\*smoother\(frac\)/, 'Native scroll must advance with the animation');
 assert.match(motion, /if\(!finalUnlocked&&stageH\)/, 'Footer must be gated before the closing reveal');
 assert.match(motion, /story-unlocked/, 'The footer must unlock after the final scene');
-assert.match(motion, /queuedFirstGesture/, 'A first gesture during loading must not be lost');
-// Both slow devices and fast bursts must use native scroll as the control.
-assert.match(motion, /function cubicPoint\(/, 'One cubic per chapter must replace multi-waypoint spline');
-assert.match(motion, /flightPaths\.push\(\{/, 'A single cubic segment is created for each chapter');
-assert.doesNotMatch(motion, /function catmull\(/, 'Old high-speed multi-curve implementation must be removed');
-assert.doesNotMatch(motion, /const fast=clamp\(part\/\.68\)/, 'Remove artificially accelerated rocket timeline');
-assert.match(motion, /const camera=worldCamera\(progress\)/);
-assert.match(motion, /const position=sampleFlight\(progress\)/, 'Rocket must follow true scroll position');
-assert.match(motion, /x:a\.x,y:a\.y\+vertical\*\.32/, 'Cubic must leave the boundary vertically down');
-assert.match(motion, /x:d\.x,y:d\.y-vertical\*\.32/, 'Cubic must arrive vertically down');
-assert.match(motion, /window\.scrollTo\(\{top:target,behavior:'instant'\}\)/, 'Slow gesture should move scroll directly');
-assert.match(motion, /touchPoint\.at\+dy\*1\.12/, 'Touchmove must track finger distance');
-assert.match(motion, /velocity>\.85/, 'Quick mobile fling can finish its chapter');
-assert.match(motion, /wheelGesture\.delta\+=delta\*sensitivity/, 'Wheel distance must accumulate continuously');
-assert.match(motion, /progress-\.19/, 'Tail must fade as it travels');
+// Native scrolling must not be intercepted or rate-limited. It drives both
+// forward motion and rewind regardless of pointer velocity or device.
+assert.doesNotMatch(motion, /function onWheel\(/);
+assert.doesNotMatch(motion, /function onTouchMove\(/);
+assert.doesNotMatch(motion, /wheelGesture|queuedFirstGesture|wheelLast/);
+assert.doesNotMatch(motion, /touchstart.*onTouchStart/);
+assert.doesNotMatch(motion, /worldCamera\(|const fast=clamp\(part\/\.68\)/);
+assert.match(motion, /listen\(window,'scroll',onManualScroll,\{passive:true\}\)/);
+assert.match(motion, /const p=scrollProgress\(\)/);
+assert.match(motion, /const position=sampleFlight\(progress\)/);
+assert.match(motion, /tip\.style\.opacity=String\(depart/);
+assert.match(motion, /flightDirection<0\?-yaw:180-yaw/, 'Reverse points the nose upward');
+assert.match(motion, /mirrorMix\+=\(reverse-mirrorMix\)/, 'Return path mirrors smoothly');
+assert.match(motion, /flightDirection<0\?Math\.min\(chapterCount,progress\+\.17\)/,
+  'Reverse trail should follow the rocket, not lead it');
+assert.match(motion, /paintTitle\(nodes\[index\],1,shot\.titleMode\)/, 'Simplified static titles');
+assert.match(motion, /compose\(index,\.68\)/, 'No aggressive screen whip on chapter changes');
+assert.match(motion, /const enter=reduced\.matches\?1:ease\(\(p-\(chapterCount-\.49\)\)\/\.46\)/,
+  'Closing reveal must follow scroll, not a multi-second timer');
+
+// Test the *actual* pure geometry functions extracted from the browser source,
+// including both lanes and their shared anchors, rather than a copy of the math.
+const geomStart = motion.indexOf('function cubicPoint(');
+const geomEnd = motion.indexOf('// There is no camera subtraction.', geomStart);
+assert.ok(geomStart > 0 && geomEnd > geomStart, 'Cannot locate flight geometry');
+const geometry = runInNewContext(
+  motion.slice(geomStart, geomEnd) + '\n({cubicPoint,cubicTangent})',
+  {Math}
+);
+const start = {x: 880, y: 92};
+const end = {x: 490, y: 645};
+const anchors = [start];
+for (let i = 1; i < 6; i++) {
+  anchors.push({x:i%2===0?780:220,y:start.y+(end.y-start.y)*i/6});
+}
+anchors.push(end);
+const segments = [];
+for (let i = 0; i < 6; i++) {
+  const a=anchors[i],d=anchors[i+1],dy=d.y-a.y;
+  segments.push({a,d,bow:i%2===0?-200:200,b:{y:a.y+dy/3},c:{y:d.y-dy/3}});
+}
+for (const mirror of [0,1]) {
+  for (let i=0; i<segments.length;i++) {
+    let previousY=-Infinity;
+    for (let k=0;k<=100;k++) {
+      const p=geometry.cubicPoint(segments[i],k/100,mirror);
+      assert.ok(p.y>=previousY-1e-6, 'Forward flight must descend without ascending');
+      previousY=p.y;
+    }
+    if (i>0) {
+      const a=geometry.cubicPoint(segments[i-1],1,mirror);
+      const b=geometry.cubicPoint(segments[i],0,mirror);
+      assert.ok(Math.hypot(a.x-b.x,a.y-b.y)<1e-8,'No discontinuity at a chapter join');
+      const da=geometry.cubicTangent(segments[i-1],1,mirror);
+      const db=geometry.cubicTangent(segments[i],0,mirror);
+      assert.ok(Math.hypot(da.x-db.x,da.y-db.y)<1e-7,'No velocity stop at chapter join');
+      assert.ok(Math.hypot(db.x,db.y)>100,'The rocket must not stall at a chapter start');
+    }
+  }
+}
+assert.match(showcase, /\.rocket-guide\s*\{\s*opacity: 0;/,
+  'The rocket must be invisible before the first scroll');
+assert.match(showcase, /\.rocket-guide img\s*\{[^}]*transition: transform/s,
+  'Reverse heading must rotate smoothly');
 const rocket = await readFile(new URL('assets/brief2done/rocket-flight.svg', root), 'utf8');
 assert.match(rocket, /viewBox="0 0 120 220"/);
 assert.match(rocket, /Entire cone flame: an unbroken silhouette ending at a single tip/);
@@ -81,4 +131,4 @@ assert.match(html, /Create your account/);
 const legacy = await readFile(new URL('taskhub/index.html', root), 'utf8');
 assert.ok(legacy.includes('../brief2done/'));
 assert.ok(legacy.includes('location.search+location.hash'));
-console.log('PASS: Brief2Done scroll-coupled six-cubic rocket, responsive touch/wheel control, intact vector flame, fading trail, accessible navigation and footer lock.');
+console.log('PASS: Brief2Done native scroll and immediate response, seamless six-stage descent, mirrored reverse flight, header launch fade, calm scene transitions, assets and footer lock.');

@@ -1,97 +1,97 @@
-# Brief2Done showcase — continuous rocket journey
+# Brief2Done showcase — native scroll, forward descent and mirrored rewind
 
-## What changed after the first release
+## Overview
 
-The first guided release fixed the number of steps but incorrectly collapsed
-the whole storyboard to **one viewport**. The footer could scroll under the
-pinned-looking illustration, and the browser's scrollbar no longer matched
-the active chapter. Its single Bézier per chapter also left the brand rocket
-visibly detached from the intended swooping route and from the original flame.
-
-This revision restores a **real native document scroll**: the experience is
-seven viewport heights (six demo chapters plus the final call-to-action);
-`.shell` stays `position: sticky` while the scroll position advances from
-chapter zero through chapter six. The scrollbar and the illustration read
-from **the same native scroll coordinate**. A user dragging the scrollbar
-scrubs the journey instead of moving the footer behind a static animation.
-The footer is not exposed until the rocket reaches the closing chapter and
-the final card has settled. A direct thumb jump ahead is clamped back to the
-closing position while its reveal finishes; keyboard/touch/wheel navigation
-remain available.
-
-The existing six chapter sources and mock data are unchanged:
-opportunities, people and collaborators, applying, agreeing, delivering and
-confirmation. The source React bundle and its CSS are left intact; the same
-two persistent iframes receive the original `brief2done:scene`,
-`brief2done:frame`, `brief2done:visibility`, and
-`brief2done:ready` messages. When crossing a chapter boundary, the old
-frame fades out and the next fades in while the rocket flies independently.
-The informational title, description and simulated actions keep their
-readable pace without being scrubbable into oblivion.
-
-## Rocket motion design — revision 26 October 2026
-
-The speed of the flying rocket is now coupled **1:1 to the real scroll
-coordinate**. The old `part / .68` acceleration was removed: a slow drag
-tracks the finger and a slow trackpad movement advances the rocket slowly,
-without snapping forward after the gesture. Wheel input is accumulated from
-actual delta values, with larger sensitivity only for fast bursts; those
-bursts are capped to one chapter. Quick mobile flicks may finish the
-neighbouring chapter with a short navigation scroll, while slow swipes
-remain at the exact position released. Button/keyboard navigation still
-provides a concise animated jump.
-
-The former five waypoint S-curves per chapter are gone. There is now
-**one cubic Bézier per chapter**, with its control handles positioned
-vertically below/above the anchors. This makes entry/exit tangents point
-downward and keeps the joins continuous as the virtual world moves down.
-The viewport follows the virtual journey at 95% of the document's motion:
-the rocket slowly descends on-screen across the six chapters rather than
-being teleported back to the top at each join. The trail is a fading
-19%-of-a-chapter window behind the current scroll position.
-
-A new, standalone `public/assets/brief2done/rocket-flight.svg` replaces
-the two cropped slices of the product PNG. It retains the teal, white and
-green language of the mark, with **one solid pointed flame silhouette**
-and a separate yellow inner cone. The tip cannot be cut off by the old
-body/fire clip paths. The original product lockups elsewhere on the page
-remain unchanged.
-
-## UI and conversion
-
-The large bottom-centred progress/Next bar has been removed. The remaining
-controls are small, translucent up/down arrows at the bottom-right corner,
-still with accessible button labels, keyboard focus and disabled states.
-The persistent **Get started** link and final **Create your account**
-link continue opening the actual Brief2Done portal:
+The public showcase is a six-chapter static demonstration followed by a
+registration CTA. It uses the existing two persistent demo iframes and
+`brief2done:scene`/`brief2done:ready`/`brief2done:frame`/`brief2done:visibility`
+protocol. The demo does not represent real available work or guaranteed
+earnings. The live destination is
 `https://brief2done.doppiaelletech.workers.dev/`.
-There are no implied guarantees of income; the project and budget samples
-inside the mocked screens are illustrations only.
 
-## QA
+## Scroll physics — October 2026 follow-up
 
-The dedicated PR workflow checks JS syntax and the updated
-`scripts/check-brief2done.mjs` integration assertions.
+The earlier implementation separately handled wheel bursts and touch swipes.
+It clamped each burst to a chapter boundary for 290 ms, so subsequent wheel
+events could be consumed without moving the rocket. This caused the observed
+one- or two-scroll pauses.
 
-Manual browser checks recommended before merge:
-- Desktop wheel/trackpad: one completed multi-curve rocket flight per gesture,
-  no chapter skipping under momentum.
-- Scrollbar thumb from beginning to middle to end: the correct screens,
-  no permanent black gap and no footer underneath the ongoing animation.
-- Mobile touch and browser UI resizing: correct sticky bounds, no jump when
-  height changes, smaller rocket and unobtrusive up/down controls.
-- Reverse scroll and navigation buttons: rocket follows the connected path
-  in both directions with no reset flash.
-- Closing scene: flight ends inside the actual brand mark with flame visible,
-  final button remains legible, replay and back navigation work.
-- Keyboard, skip link, reduced motion, static fallback and screen adapter.
+**The new version no longer prevents or handles native wheel/touch events.**
+All scroll input — including slow touch drags, trackpad inertia, scrollbar
+thumb dragging and fast wheel motion — modifies the browser document scroll
+directly. The scroll event and animation frame sample exactly the same
+`scrollProgress()` value. There is no gesture cap, input deadline, auto-snap,
+separate scroll position or first-scroll delay. The small chapter up/down
+buttons and ArrowLeft/Right are the only programmatic navigation gestures.
 
-The GitHub Pages deploy workflow still runs only on `main`.
+The story remains six screen-height chapters plus a closing chapter, with a
+sticky full-viewport stage. The footer remains gated until the final CTA is
+visible. Chapter changes no longer trigger dramatic title lifts or panel
+whips: titles and compositions settle immediately, while chapter transitions
+use a scroll-dependent dissolve. Demo action animations may still take time,
+but they never hold or block the rocket.
 
-### Follow-up review checklist
+## Rocket path
 
-- Slowly drag upward on a mobile screen and hold mid-gesture: rocket must stop at the corresponding path point without autonomous catch-up.
-- Fast swipe / fast mouse wheel: advance at most one chapter per burst, without a fixed one-second flight.
-- All six chapter endpoints: the rocket must point down, with no abrupt upward turn.
-- Verify the new rocket SVG's **single pointed orange flame** on mobile and desktop (no old clipping artifacts).
-- Drag the browser scrollbar directly: rocket position must match chapter progress exactly.
+The rocket sprite is `public/assets/brief2done/rocket-flight.svg`, a small
+standalone vector with an unbroken orange flame.
+
+The rocket's original world/camera formula nearly cancelled vertical travel:
+the route descended one viewport per chapter, while the camera moved down by
+95% of that distance. The rocket therefore hovered at almost the same
+height and barely moved at the section boundaries.
+
+The replacement builds **one large cubic per chapter in real viewport
+coordinates**, with progressively lower joins ending at the closing
+Brief2Done mark. The final lockup is displayed below the primary CTA on
+taller screens so the visual path can genuinely descend farther down the
+page. Control points alternate around the left/right chapter endpoints,
+keeping x/y positions continuous and derivatives matched at joins.
+The geometry has no camera subtraction and therefore never stalls due to
+cancellation. The rocket moves precisely with the user's actual scroll
+position and naturally stops only when the user stops scrolling.
+
+At the initial position the header logo is the *only* visible rocket. The
+flying version starts just outside that icon and fades in over the first
+small portion of scroll. On rewind it fades away again into that exact
+header area, avoiding a second rocket overlapping the brand before scrolling.
+
+**Reverse scroll** preserves the real chapter order and demonstration states.
+It also changes the nose to face up and makes the trailing line follow the
+actual backward direction. An alternate mirrored cubic lane is blended in
+gradually on direction changes, so it shares all chapter endpoints with
+the forward track and cannot teleport at a join. The line remains a short,
+progressively fading segment behind the moving rocket.
+
+Under `prefers-reduced-motion`, the decorative rocket and trail are hidden;
+native scrolling, the chapter content and CTAs remain available. The static
+fallback still works if the demo frame fails.
+
+## Navigation and conversion
+
+The small translucent arrows at bottom right remain available with accessible
+labels. The always-visible Get started link and the final Create your account
+CTA go to the Brief2Done app. No new account/payments logic is implemented in
+this marketing repository.
+
+## Verification
+
+`scripts/check-brief2done.mjs` verifies integration and uses the actual
+pure cubic geometry functions from `motion.js` to check both forward and
+mirrored lanes at 101 positions per chapter, continuity, matched tangents,
+positive downward motion and non-zero velocity at all chapter joins.
+
+Manual browser review before merge is still important:
+- Initial load: no floating duplicate near the brand logo.
+- Slow mobile swipe, small wheel deltas and scrollbar dragging: immediate
+  proportional rocket motion without input-consuming pauses.
+- Fast scroll through all six steps, then rewind: correctly ordered chapters,
+  continuous flight, nose up while returning and trail behind the rocket.
+- Tall desktop/mobile: the rocket traverses from the header toward the
+  lower final brand lockup; short viewports keep the compact closing layout.
+- Final CTA and normal footer accessible, including reduced motion and
+  keyboard navigation.
+- Visual test on iPhone Safari and a real Android phone for sticky scroll,
+  SVG rotation and partial-scroll resumes.
+
+The GitHub Pages deploy workflow only publishes changes merged into `main`.
