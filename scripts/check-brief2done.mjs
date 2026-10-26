@@ -39,105 +39,90 @@ assert.match(motion, /Math\.round\(p\)/, 'Nearest chapter must track manual scru
 assert.match(motion, /window\.scrollTo\(\{top:from\+\(target-from\)\*smoother\(frac\)/, 'Native scroll must advance with the animation');
 assert.match(motion, /if\(!finalUnlocked&&stageH\)/, 'Footer must be gated before the closing reveal');
 assert.match(motion, /story-unlocked/, 'The footer must unlock after the final scene');
-// Native scrolling must not be intercepted or rate-limited. It drives both
-// forward motion and rewind regardless of pointer velocity or device.
-assert.doesNotMatch(motion, /function onWheel\(/);
-assert.doesNotMatch(motion, /function onTouchMove\(/);
-assert.doesNotMatch(motion, /wheelGesture|queuedFirstGesture|wheelLast/);
-assert.doesNotMatch(motion, /touchstart.*onTouchStart/);
-assert.doesNotMatch(motion, /worldCamera\(|const fast=clamp\(part\/\.68\)/);
-assert.match(motion, /listen\(window,'scroll',onManualScroll,\{passive:true\}\)/);
-assert.match(motion, /const p=scrollProgress\(\)/);
-assert.match(motion, /const position=screenFlight\(progress\)/);
-assert.match(motion, /tip\.style\.opacity=String\(depart/);
-assert.match(motion, /flightDirection<0\?-yaw:180-yaw/, 'Reverse points the nose upward');
-assert.match(motion, /mirrorMix\+=\(reverse-mirrorMix\)/, 'Return path mirrors smoothly');
-assert.match(motion, /flightDirection<0\?Math\.min\(chapterCount,progress\+\.17\)/,
-  'Reverse trail should follow the rocket, not lead it');
-assert.match(motion, /paintTitle\(nodes\[index\],1,shot\.titleMode\)/, 'Simplified static titles');
-assert.match(motion, /compose\(index,\.68\)/, 'No aggressive screen whip on chapter changes');
-assert.match(motion, /const enter=reduced\.matches\?1:ease\(\(p-\(chapterCount-\.49\)\)\/\.46\)/,
-  'Closing reveal must follow scroll, not a multi-second timer');
+// A physical vertical rail scrolls UP under a small, continuously descending
+// serpentine rocket. The rocket is NOT attached to a resettable camera.
+assert.doesNotMatch(motion,/function onWheel\(/);
+assert.doesNotMatch(motion,/function onTouchMove\(/);
+assert.doesNotMatch(motion,/wheelGesture|queuedFirstGesture|wheelLast/);
+assert.doesNotMatch(motion,/infinityPoint|infinityTangent|flightCamera|worldCamera/);
+assert.match(motion,/listen\(window,'scroll',onManualScroll,\{passive:true\}\)/);
+assert.match(motion,/sceneRail\.style\.transform='translate3d\(0,'\+railOffset\(p,h\)/);
+assert.match(motion,/n\.el\.style\.top=railPanelTop\(i,h\)/);
+assert.match(motion,/nodes\.forEach\(\(n,i\)=>/);
+assert.match(motion,/const closingShift=Math\.max\(0,chapterCount-p\)\*screen\.clientHeight/);
+assert.match(motion,/endPanel\.style\.transform='translate3d\(0,'\+closingShift/);
+assert.match(motion,/const point=descentPoint\(p,w,h,mirror\)/);
+assert.match(motion,/const tangent=descentTangent\(progress,w,h,mirrorMix\)/);
+assert.match(motion,/const angle=\(flightDirection<0\?0:180\)/);
+assert.match(motion,/flightDirection<0\?Math\.min\(chapterCount,progress\+\.16\)/);
+assert.match(motion,/mirrorMix\+=\(reverse-mirrorMix\)/);
+assert.match(motion,/tip\.style\.opacity=String\(depart/);
+assert.match(showcase,/\.experience\.is-scroll #scenes\s*\{[^}]*will-change: transform/s);
+assert.match(showcase,/\.experience\.is-scroll #closing\s*\{[^}]*visibility: visible/s);
 
-// Execute the actual geometry and flight builder used on the page, instead
-// of duplicating the control points in the test. This prevents a return to the
-// previous failure where each of six stages travelled only 1/6 screen height.
-const geomStart=motion.indexOf('function cubicPoint(');
-const geomEnd=motion.indexOf('function flightSegment(',geomStart);
-assert.ok(geomStart>0&&geomEnd>geomStart,'Cannot locate real flight geometry');
-function fixture(w,h,begin,finish){
- const prelude=[
-  'const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));',
-  'const ease=t=>1-Math.pow(1-clamp(t),3);',
-  'const chapterCount=6;',
-  'const screen={clientWidth:'+w+',clientHeight:'+h+'};',
-  'const flightPaths=[];let pathSize="";',
-  'const rocketStart=()=>({x:'+begin.x+',y:'+begin.y+'});',
-  'const rocketEnd=()=>({x:'+finish.x+',y:'+finish.y+'});',
-  'const trailSvg={setAttribute(){}};',
-  'const mirrorMix=0;'
- ].join('\n');
- return runInNewContext(
-  prelude+'\n'+motion.slice(geomStart,geomEnd)+
-  '\nbuildFlight();({flightPaths,flightSweep,flightCamera,cubicPoint,cubicTangent})',
-  {Math}
- );
-}
-for(const {w,h,start,end} of [
- {w:1280,h:800,start:{x:1080,y:82},end:{x:420,y:690}},
- {w:390,h:844,start:{x:300,y:74},end:{x:170,y:700}}
-]){
- const {flightPaths,flightSweep,flightCamera,cubicPoint,cubicTangent}=fixture(w,h,start,end);
- assert.equal(flightPaths.length,6);
- assert.ok(flightSweep>=h*.78,'Chapter sweep should occupy most of the viewport');
- const projected=p=>{
-  const index=Math.min(5,Math.floor(p));
-  const point=cubicPoint(flightPaths[index],p>=6?1:p-index,0);
-  return{x:point.x,y:point.y-flightCamera(p)};
- };
- for(const lane of [0,1]){
+// Execute the ACTUAL rail functions to catch a return to resetting every
+// panel at the top rather than physically lifting one column of content.
+const railStart=motion.indexOf('const railPanelTop=');
+const railEnd=motion.indexOf('function layoutRail(){',railStart);
+assert.ok(railStart>0&&railEnd>railStart);
+const rail=runInNewContext(motion.slice(railStart,railEnd)+
+  '\n({railPanelTop,railOffset})', {});
+for(const h of [760,940]){
   for(let i=0;i<6;i++){
-   const segment=flightPaths[i];
-   let prevWorldY=-Infinity;
-   for(let j=0;j<=100;j++){
-    const p=cubicPoint(segment,j/100,lane);
-    assert.ok(p.y>=prevWorldY-1e-6,'World trajectory must always descend');
-    prevWorldY=p.y;
-   }
-   if(i>0){
-    const left=cubicPoint(flightPaths[i-1],1,lane),right=cubicPoint(segment,0,lane);
-    assert.ok(Math.hypot(left.x-right.x,left.y-right.y)<1e-8,'Join cannot teleport');
-    const tangent=cubicTangent(segment,0,lane);
-    assert.ok(Math.hypot(tangent.x,tangent.y)>100,'Start of chapter cannot stall');
-   }
+    const top=rail.railPanelTop(i,h);
+    assert.equal(top,i*h);
+    assert.equal(top+rail.railOffset(i-1,h),h, 'Next panel waits below');
+    assert.equal(top+rail.railOffset(i,h),0, 'Panel arrives at top under native scroll');
+    assert.equal(top+rail.railOffset(i+1,h),-h, 'Previous panel rises off screen');
   }
- }
- for(let i=0;i<6;i++){
-  const top=projected(i).y;
-  const bottom=projected(i+.76).y;
-  assert.ok(bottom-top>=h*.46,
-    'Each chapter must visibly sweep down at least 46% of the viewport; chapter '+i+
-    ' moved '+Math.round(bottom-top)+'px of '+h+'px');
-  if(i<5){
-   const before=projected(i+1-0.000001),after=projected(i+1);
-   assert.ok(Math.hypot(before.x-after.x,before.y-after.y)<.01,
-    'Viewport/camera must remain continuous at chapter '+(i+1));
+  for(let p=0;p<6;p+=.02){
+    assert.ok(rail.railOffset(p+.02,h)<rail.railOffset(p,h),
+      'Rail must always rise with forward scrolling');
   }
- }
- assert.ok(Math.abs(projected(6).y-end.y)<1e-6,'Final landing must meet brand icon');
 }
-assert.match(motion,/function flightCamera\(progress\)/);
-assert.match(motion,/flightSweep\*\(i\+ease\(\(u-\.78\)\/\.22\)\)/,
- 'Camera should hand off between chapters only after the full-height sweep');
-assert.match(motion,/position=screenFlight\(progress\)/,'Rocket must use projected position');
-assert.match(motion,/points\.push\(screenFlight\(q\)\)/,
- 'Trail must be drawn in the same projected space as the rocket');
-assert.match(motion,/opacity\*=1-\.9\*ease\(\(fraction-\.78\)\/\.22\)/,
- 'Panel should dissolve during camera handoff');
-assert.match(showcase, /\.rocket-guide\s*\{\s*opacity: 0;/,
-  'The rocket must be invisible before the first scroll');
-assert.match(showcase, /\.rocket-guide img\s*\{[^}]*transition: transform/s,
-  'Reverse heading must rotate smoothly');
+
+// Execute the source geometry rather than a hand-written approximation.
+// Each chapter is one alternating horizontal swing. Its Y coordinate NEVER
+// goes upward on the forward journey (and ascends on rewind).
+const geoStart=motion.indexOf('function descentPoint(');
+const geoEnd=motion.indexOf('function rocketStart(){',geoStart);
+assert.ok(geoStart>0&&geoEnd>geoStart);
+const flight=runInNewContext(
+  'const chapterCount=6;const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));\n'+
+  motion.slice(geoStart,geoEnd)+'\n({descentPoint,descentTangent})',{Math}
+);
+for(const {w,h} of [{w:1280,h:800},{w:390,h:844}]){
+  let previous=-Infinity;
+  for(let j=0;j<=1200;j++){
+    const p=6*j/1200;
+    const point=flight.descentPoint(p,w,h,0);
+    assert.ok(point.y>previous-1e-8,'Rocket must never rise in the viewport');
+    previous=point.y;
+    assert.ok(point.x>=w*.26&&point.x<=w*.74,'Stay clear of screen edges');
+    const reversed=flight.descentPoint(p,w,h,1);
+    assert.ok(Math.abs(reversed.y-point.y)<1e-8,'Return lane preserves vertical travel');
+    assert.ok(Math.abs(reversed.x+point.x-w)<1e-7,'Return path mirrors x coordinates');
+    const tangent=flight.descentTangent(p,w,h);
+    assert.ok(tangent.y>0,'Always a downward tangent, never a vertical stall');
+  }
+  for(let i=0;i<6;i++){
+    const middle=flight.descentPoint(i+.5,w,h);
+    assert.ok((middle.x-w*.5)*(i%2===0?1:-1)>w*.08,
+      'Chapter '+i+' must alternate right and left');
+    const join=flight.descentPoint(i+1,w,h);
+    assert.ok(Math.abs(join.x-w*.5)<1e-7,'No x teleport at chapter joins');
+    const before=flight.descentPoint(i+1-1e-6,w,h);
+    assert.ok(Math.hypot(join.x-before.x,join.y-before.y)<.005,
+      'Continuous path at chapter boundary');
+  }
+  assert.ok(flight.descentPoint(6,w,h).y-flight.descentPoint(0,w,h).y>=h*.44,
+    'The nose slowly descends while the page rises behind it');
+}
+assert.match(motion,/paintTitle\(nodes\[index\],1,shots\[index\]\.titleMode\)/);
+assert.match(motion,/const previewFade=clamp\(\(\.48-distance\)\/\.22\)/,
+  'Shared iframe handoff must be hidden while switching panels');
+assert.match(motion,/if\(e\.key!=='ArrowLeft'&&e\.key!=='ArrowRight'\)return/,
+  'Vertical keyboard scrolling must remain native');
 const rocket = await readFile(new URL('assets/brief2done/rocket-flight.svg', root), 'utf8');
 assert.match(rocket, /viewBox="0 0 120 220"/);
 assert.match(rocket, /Entire cone flame: an unbroken silhouette ending at a single tip/);
@@ -166,4 +151,4 @@ assert.match(html, /Create your account/);
 const legacy = await readFile(new URL('taskhub/index.html', root), 'utf8');
 assert.ok(legacy.includes('../brief2done/'));
 assert.ok(legacy.includes('location.search+location.hash'));
-console.log('PASS: Brief2Done six full-height sweeps (desktop/mobile), scroll-led camera handoffs, no jumps, reverse paths, native scroll, asset and footer checks.');
+console.log('PASS: Brief2Done physical upward story rail, monotonic serpentine rocket, mirrored return, native scroll, staged CTA, and assets.');

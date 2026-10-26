@@ -457,3 +457,57 @@ body { overscroll-behavior-y: none; }
   .closing-card .closing-replay { order: 4; }
   .closing-card .closing-brand { order: 5; margin: 18px auto 0; }
 }
+
+
+/*
+ * Infinity flight / physical storyboard rail (v6).
+ * Every section is an actual logical viewport below the previous one.
+ * One native scroll coordinate raises all of them through the stage.
+ * The rocket is a separate, fixed overlay following an infinity-shaped orbit.
+ */
+.experience.is-scroll .canvas { opacity: 1 !important; visibility: visible !important; overflow: hidden; }
+.experience.is-scroll #scenes {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  will-change: transform;
+  pointer-events: none;
+}
+.experience.is-scroll #scenes .scene,
+.experience.is-scroll #scenes .scene.active {
+  position: absolute;
+  left: 0;
+  right: 0;
+  inset: auto 0 auto 0;
+  width: 100%;
+  visibility: visible;
+  pointer-events: none;
+  transition: none;
+}
+.experience.is-scroll .composition {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.experience.is-scroll .cursor, .experience.is-scroll .slip {
+  display: none !important;
+}
+.experience.is-scroll #closing {
+  visibility: visible !important;
+  opacity: 1;
+  pointer-events: none;
+  transition: none;
+  will-change: transform;
+}
+.experience.is-scroll.is-closing #closing { pointer-events: auto; }
+.experience.is-scroll .flight-trace, .experience.is-scroll .rocket-guide {
+  z-index: 61;
+}
+.experience.is-scroll .rocket-guide { z-index: 62; }
+.experience.is-scroll .story-nav { z-index: 63; }
+@media (prefers-reduced-motion: reduce) {
+  .experience.is-scroll #scenes,
+  .experience.is-scroll .composition,
+  .experience.is-scroll #closing { will-change: auto; }
+}
