@@ -102,3 +102,13 @@ body:has(.is-closing) .story-brand { color: #073f2a; }
   .is-closing .closing-card, .is-closing .end-panel,
   .scene.active .headline, .scene.active .intertitle { will-change: auto; }
 }
+
+/* Supplied lockup: independently animated icon and the exact original wordmark. */
+.story-header .story-brand { gap: 3px !important; padding: 3px 14px 3px 6px; border: 1px solid #d8e6df; border-radius: 18px; background: #fff; box-shadow: 0 5px 24px #0002; }
+.story-header .story-brand-icon { width: 52px; height: 52px; object-fit: contain; transition: transform .3s; }
+.story-brand:hover .story-brand-icon, .story-brand:focus-visible .story-brand-icon { transform: rotate(-8deg) scale(1.08); }
+.story-wordmark { width: 154px; height: 38px; }
+.story-header .story-portal { width: auto; min-height: 46px; margin-left: 10px; gap: 8px; padding: 0 14px; border: 1px solid #caff9b55; border-radius: 14px; background: #092c23; color: #e0ffb4; font-size: 12px; font-weight: 650; opacity: 1; box-shadow: 0 5px 24px #0002; }
+.story-header .story-portal:hover { background: #164537; color: #fff; }
+@media (max-width: 480px) { .story-header { padding-inline: 12px; } .story-header .story-brand-icon { width: 42px; height: 42px; } .story-wordmark { width: 128px; height: 32px; } .story-header .story-portal { padding-inline: 10px; } .story-portal span { display: none; } }
+@media (prefers-reduced-motion: reduce) { .story-brand-icon { transition: none !important; } .story-brand:hover .story-brand-icon { transform: none; } }

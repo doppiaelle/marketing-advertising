@@ -25,13 +25,13 @@ const composition=document.createElement('div');composition.className='compositi
 composition.innerHTML='<div class="fragment secondary" aria-hidden="true"></div><div class="fragment primary" aria-hidden="true"></div>';
 $('#canvas').insertBefore(composition,$('.cursor'));
 for(const role of ['primary','secondary']){
- const f=document.createElement('iframe');f.title='Taskhub illustrative '+role+' screen';f.tabIndex=-1;f.setAttribute('aria-hidden','true');
- f.src='../assets/taskhub/frame.html?scene=0&v=20261024-mobile-2';
- f.addEventListener('load',()=>{f.contentWindow?.postMessage({type:'taskhub:scene',scene:requestedSource},location.origin);f.contentWindow?.postMessage({type:'taskhub:visibility',visible:!shots[index]?.closing},location.origin);});
+ const f=document.createElement('iframe');f.title='Brief2Done illustrative '+role+' screen';f.tabIndex=-1;f.setAttribute('aria-hidden','true');
+ f.src='../assets/brief2done/frame.html?scene=0&v=20261024-mobile-2';
+ f.addEventListener('load',()=>{f.contentWindow?.postMessage({type:'brief2done:scene',scene:requestedSource},location.origin);f.contentWindow?.postMessage({type:'brief2done:visibility',visible:!shots[index]?.closing},location.origin);});
  composition.querySelector('.'+role).appendChild(f);frames.push(f);
 }
 function screensReady(){return !shots[index]?.closing&&frames.every(f=>frameScenes.get(f.contentWindow)===shots[index]?.source);}
-function switchScreens(source){requestedSource=source;frameScenes.clear();lastAction=-1;lastSent=-Infinity;for(const f of frames)f.contentWindow?.postMessage({type:'taskhub:scene',scene:source},location.origin);}
+function switchScreens(source){requestedSource=source;frameScenes.clear();lastAction=-1;lastSent=-Infinity;for(const f of frames)f.contentWindow?.postMessage({type:'brief2done:scene',scene:source},location.origin);}
 
 shots.forEach((shot,i)=>{
  if(shot.closing){nodes.push({el:null,pair:[]});return;}
@@ -43,7 +43,7 @@ shots.forEach((shot,i)=>{
 function listen(el,event,fn,options){el.addEventListener(event,fn,options);cleanup.push(()=>el.removeEventListener(event,fn,options));}
 function fromFrame(e){return frames.some(f=>f.contentWindow===e.source);}
 listen(window,'message',e=>{
- if(e.data?.type==='taskhub:ready'&&fromFrame(e)){
+ if(e.data?.type==='brief2done:ready'&&fromFrame(e)){
   if(!contentSources.has(e.data.scene)||!e.data.primary)return;
   bounds.set(e.data.scene,e.data);frameScenes.set(e.source,e.data.scene);
   if(!ready&&frames.every(f=>frameScenes.has(f.contentWindow))){ready=true;$('#loading').classList.add('hidden');$('#loading').setAttribute('aria-hidden','true');document.body.classList.remove('motion-failed');}
@@ -53,10 +53,10 @@ listen(window,'message',e=>{
   return;
  }
  if(window.parent!==window&&e.source===window.parent){
-  if(e.data?.type==='taskhub:set-progress')setProgress(e.data.progress);
+  if(e.data?.type==='brief2done:set-progress')setProgress(e.data.progress);
   
   
-  if(e.data?.type==='taskhub:go-to')goTo(e.data.scene);
+  if(e.data?.type==='brief2done:go-to')goTo(e.data.scene);
  }
 });
 const timeout=setTimeout(()=>{if(!ready){document.body.classList.add('motion-failed');$('#loading').classList.add('hidden');}},20000);cleanup.push(()=>clearTimeout(timeout));
@@ -117,7 +117,7 @@ function sendProgress(){
  if(!screensReady())return;
  const now=performance.now(),action=actionProgress(shots[index],local);
  if(now-lastSent<50||Math.abs(action-lastAction)<.001)return;
- for(const f of frames)f.contentWindow?.postMessage({type:'taskhub:frame',progress:action},location.origin);
+ for(const f of frames)f.contentWindow?.postMessage({type:'brief2done:frame',progress:action},location.origin);
  lastSent=now;lastAction=action;
 }
 function render(){const e=clamp(elapsed,0,total-.00001);let next=0;for(let i=0;i<shots.length;i++)if(e>=starts[i])next=i;local=elapsed>=total?1:clamp((e-starts[next])/shots[next].duration);
@@ -125,14 +125,14 @@ function render(){const e=clamp(elapsed,0,total-.00001);let next=0;for(let i=0;i
   if(index>=0&&nodes[index].el){nodes[index].el.classList.remove('active');nodes[index].el.setAttribute('aria-hidden','true');}
   index=next;const closing=!!shots[index].closing;
   if(!closing)switchScreens(shots[index].source);
-  for(const f of frames)f.contentWindow?.postMessage({type:'taskhub:visibility',visible:!closing},location.origin);
+  for(const f of frames)f.contentWindow?.postMessage({type:'brief2done:visibility',visible:!closing},location.origin);
   if(closing){$('#loading').classList.add('hidden');$('#loading').setAttribute('aria-hidden','true');}
 
   if(nodes[index].el){nodes[index].el.classList.add('active');nodes[index].el.setAttribute('aria-hidden','false');}
-  $('#experience').classList.toggle('is-closing',closing);$('#closing').setAttribute('aria-hidden',String(!closing));$('#closing').inert=!closing;$('#announcement').textContent=closing?'Your next connection. Open taskhub.':shots[index].label;
+  $('#experience').classList.toggle('is-closing',closing);$('#closing').setAttribute('aria-hidden',String(!closing));$('#closing').inert=!closing;$('#announcement').textContent=closing?'Your next connection. Open Brief2Done.':shots[index].label;
   $('.slip').classList.remove('on');if(!closing&&!reduced.matches)requestAnimationFrame(()=>$('.slip').classList.add('on'));
-  const detail={scene:index,closing};window.dispatchEvent(new CustomEvent('taskhub:scene-change',{detail}));
-  if(window.parent!==window)window.parent.postMessage({type:'taskhub:scene-change',...detail},'*');
+  const detail={scene:index,closing};window.dispatchEvent(new CustomEvent('brief2done:scene-change',{detail}));
+  if(window.parent!==window)window.parent.postMessage({type:'brief2done:scene-change',...detail},'*');
  }
  if(shots[index].closing){const enter=reduced.matches?1:ease(local/.26);$('#closing').style.opacity=String(enter);$('#closing').style.transform='scale('+(1.04-.04*enter)+')';$('.cursor').classList.remove('visible');
   const arrival=reduced.matches?1:ease((local-.07)/.46);const card=$('.closing-card');card.style.opacity=String(arrival);card.style.transform='translate3d(0,'+((1-arrival)*Math.min(innerHeight*.62,520))+'px,0) scale('+(.94+.06*arrival)+')';$('#closing').inert=arrival<.85;
@@ -162,6 +162,6 @@ listen(reduced,'change',()=>{sizeRunway();onScroll();elapsed=targetElapsed;rende
 for(const link of document.querySelectorAll('a[href="#closing"]'))listen(link,'click',e=>{if(document.body.classList.contains('motion-failed')){e.preventDefault();$('.fallback .launch-button').focus();return;}e.preventDefault();goTo(shots.length-1);elapsed=targetElapsed;render();$('.launch-button').focus({preventScroll:true});});
 listen(document,'keydown',e=>{if(e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.target.closest('a,button,input,textarea,select,[contenteditable]'))return;if(e.key==='ArrowRight'){e.preventDefault();goTo(index+1);}if(e.key==='ArrowLeft'){e.preventDefault();goTo(index-1);}});
 const observer=new IntersectionObserver(([e])=>{visible=e.isIntersecting;if(!visible)last=0;},{threshold:.02});observer.observe($('.screen-wrap'));
-window.TaskhubMotion=Object.freeze({setProgress,goTo,getState:()=>({mode:'scroll',progress:elapsed/total,scene:index,closing:!!shots[index]?.closing,ready,duration:total}),destroy(){destroyed=true;cancelAnimationFrame(frameHandle);cleanup.forEach(fn=>fn());ro.disconnect();observer.disconnect();frames.forEach(f=>f.remove());}});
+window.Brief2DoneMotion=Object.freeze({setProgress,goTo,getState:()=>({mode:'scroll',progress:elapsed/total,scene:index,closing:!!shots[index]?.closing,ready,duration:total}),destroy(){destroyed=true;cancelAnimationFrame(frameHandle);cleanup.forEach(fn=>fn());ro.disconnect();observer.disconnect();frames.forEach(f=>f.remove());}});
 $('#experience').classList.add('is-scroll');sizeRunway();onScroll();elapsed=targetElapsed;render();frameHandle=requestAnimationFrame(tick);
 })();

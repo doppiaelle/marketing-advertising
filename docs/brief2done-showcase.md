@@ -1,25 +1,25 @@
-# taskhub showcase
+# brief2done showcase
 
 ## Source and integration
 
-`public/taskhub/index.html` is the dedicated product page, linked from the
+`public/brief2done/index.html` is the dedicated product page, linked from the
 Digital workspaces category in `public/index.html`. It follows the catalogue's
 English language and retains the existing static GitHub Pages deployment.
-The app destination is `https://taskhub.doppiaelletech.workers.dev/`.
+The app destination is `https://brief2done.doppiaelletech.workers.dev/`.
 
-The supplied `taskhub-motion-sprint.html` is the visual and motion source.
+The supplied `brief2done-motion-sprint.html` is the visual and motion source.
 Its eight selected scenes remain in the same order, with the same illustrative
 product screens, copy and green palette. The final previously empty panel now
 contains a dark card, the original app mark, product name and call to action.
 The footer carries the All products link and DoubleL attribution. The mark
-comes from `taskhub/apps/web/public/favicon.svg`.
+comes from `brief2done/apps/web/public/favicon.svg`.
 The app README was used to verify the product description. Screen names,
 budgets and projects are demo data; the walkthrough is labelled accordingly.
 
 Fonts and bundled demo React code/CSS were extracted from the supplied file
-to `public/assets/taskhub/`. Exactly two persistent iframes load `frame.html`
+to `public/assets/brief2done/`. Exactly two persistent iframes load `frame.html`
 once and share cached resources. Their router changes scenes through the
-`taskhub:scene` message; they are never duplicated for hidden chapters or
+`brief2done:scene` message; they are never duplicated for hidden chapters or
 reloaded/reparented during scrolling. The `screens.js` adapter resets demo
 mutations and invalidates the relevant cached queries on each route change.
 The demo's fetch mock remains in place: screens do not operate on real app data.
@@ -62,7 +62,7 @@ only when viewport width changes; height-only browser-bar events leave its
 length intact. The final
 card is independent of the scaled canvas and has compact variants for short
 and landscape viewports. The fixed header contains only the right-aligned
-Taskhub mark and name, followed by an SVG portal icon linking directly to the
+Brief2Done mark and name, followed by an SVG portal icon linking directly to the
 public app with a 44px touch target. All products is available only in the footer. Progress
 information, scroll hints and replay controls are omitted as requested.
 A keyboard skip link reaches the final call to action. Arrow Left/Right change
@@ -106,4 +106,4 @@ arrows. Main assets and the iframe adapter have versioned URLs for old caches.
   been directly tested.
 
 No build or additional package installation is required. The GitHub Pages
-workflow checks the Taskhub page and its required assets before publication.
+workflow checks the Brief2Done page and its required assets before publication.

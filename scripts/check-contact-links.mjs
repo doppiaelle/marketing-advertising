@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
 
-for (const product of ['feeddy', 'focus', 'taskhub', 'll-platform', 'acn', 'kritoma', 'secura']) {
+for (const product of ['feeddy', 'focus', 'brief2done', 'll-platform', 'acn', 'kritoma', 'secura']) {
   const html = await readFile(new URL(`../public/${product}/index.html`, import.meta.url), 'utf8');
   const links = [...html.matchAll(/href="([^"]*#contatti)"/g)].map(match => new URL(match[1].replaceAll('&amp;', '&')));
   assert.ok(links.length >= 2, `Information and support links required for ${product}`);
