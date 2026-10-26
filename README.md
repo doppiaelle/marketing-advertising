@@ -1,6 +1,6 @@
 # DoubleL product pages
 
-Pagine informative dei prodotti DoubleL: Feeddy, LL Platform, Focus, ACN, Kritoma, SecuRA e brief2done.
+Pagine informative dei prodotti DoubleL: Feeddy, LL Platform, Focus, ACN, Kritoma, SecuRA e Brief2Done.
 Il sito è statico e viene pubblicato dalla CI GitHub Pages all'indirizzo:
 
 `https://doppiaelle.github.io/marketing-advertising/`
@@ -20,7 +20,7 @@ usano un solo footer condiviso: logo prodotto a sinistra, «by DoubleL» al cent
 Support / Contact / All Products a destra. `assets/product-footer.css` gestisce
 struttura responsive e palette specifiche. I colori di testo e hover hanno un
 contrasto di almeno 4,5:1 con lo sfondo del relativo footer. Il precedente blocco
-contatti separato è rimosso. In brief2done il footer segue l'intera sequenza di scroll
+contatti separato è rimosso. In Brief2Done il footer segue l'intera sequenza di scroll
 ed è nel flusso del documento: non è fisso e non si sovrappone alla scena finale.
 
 ## Struttura
@@ -149,9 +149,9 @@ interazioni e un selettore illustrativo dei dodici Ambiti, con formati 40/60
 carte e soglie 15/20 PV. Rispetta reduced-motion e sospende la scena fuori vista.
 Vedi [fonti, animazioni e prompt delle illustrazioni](docs/kritoma-showcase.md).
 
-## Vetrina brief2done
+## Vetrina Brief2Done
 
-brief2done entra nel catalogo Digital workspaces con una vetrina a tutto schermo:
+Brief2Done entra nel catalogo Digital workspaces con una vetrina a tutto schermo:
 otto scene dell'HTML fornito, scroll nativo con durate ponderate e un finale verde
 in cui una card scura sale al centro. Il pulsante apre l'installazione pubblica.
 I font e le schermate illustrative sono risorse locali, senza dipendenze di build.

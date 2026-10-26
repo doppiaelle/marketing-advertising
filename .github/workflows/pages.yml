@@ -55,6 +55,8 @@ jobs:
           test -f public/assets/brief2done/plus-jakarta-sans.woff2
           node --check public/assets/brief2done/motion.js
           node --check public/assets/brief2done/screens.js
+          node scripts/check-brief2done.mjs
+          node scripts/check-contact-links.mjs
           ! grep -RniE '<video|intro\.mp4|Access Studio|Sign in with GitHub|Local access' public/ll-platform
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

@@ -103,12 +103,37 @@ body:has(.is-closing) .story-brand { color: #073f2a; }
   .scene.active .headline, .scene.active .intertitle { will-change: auto; }
 }
 
-/* Supplied lockup: independently animated icon and the exact original wordmark. */
-.story-header .story-brand { gap: 3px !important; padding: 3px 14px 3px 6px; border: 1px solid #d8e6df; border-radius: 18px; background: #fff; box-shadow: 0 5px 24px #0002; }
-.story-header .story-brand-icon { width: 52px; height: 52px; object-fit: contain; transition: transform .3s; }
+/* Transparent split lockup. Only the supplied icon rotates; the wordmark stays on its optical baseline. */
+.story-header { height: 72px; background: transparent; }
+.story-header .story-brand { gap: 2px !important; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.story-header .story-brand-icon { width: 40px; height: 40px; object-fit: contain; transition: transform .3s; }
 .story-brand:hover .story-brand-icon, .story-brand:focus-visible .story-brand-icon { transform: rotate(-8deg) scale(1.08); }
-.story-wordmark { width: 154px; height: 38px; }
-.story-header .story-portal { width: auto; min-height: 46px; margin-left: 10px; gap: 8px; padding: 0 14px; border: 1px solid #caff9b55; border-radius: 14px; background: #092c23; color: #e0ffb4; font-size: 12px; font-weight: 650; opacity: 1; box-shadow: 0 5px 24px #0002; }
-.story-header .story-portal:hover { background: #164537; color: #fff; }
-@media (max-width: 480px) { .story-header { padding-inline: 12px; } .story-header .story-brand-icon { width: 42px; height: 42px; } .story-wordmark { width: 128px; height: 32px; } .story-header .story-portal { padding-inline: 10px; } .story-portal span { display: none; } }
-@media (prefers-reduced-motion: reduce) { .story-brand-icon { transition: none !important; } .story-brand:hover .story-brand-icon { transform: none; } }
+.story-header .story-wordmark { width: 128px; height: auto; transform: translateY(3px); }
+.story-header .story-portal { width: 44px; min-height: 44px; margin-left: 6px; padding: 0; border: 0; border-radius: 0; background: transparent; color: #cbf58b; font-size: 24px; opacity: 1; box-shadow: none; transition: color .18s, transform .18s; }
+.story-header .story-portal:hover { color: #f4f6ec; transform: translate(2px,-2px); }
+body:has(.is-closing) .story-header .story-portal { color: #08281f; }
+.closing-card { padding-bottom: 36px; }
+.closing-card .closing-brand { display: flex; align-items: center; justify-content: center; gap: 4px; margin: 0 auto; line-height: 1; }
+.closing-brand-icon { width: 96px; height: 96px; object-fit: contain; }
+.closing-wordmark { width: 224px; height: auto; transform: translateY(5px); }
+.product-footer-brand .footer-wordmark { width: 132px; height: auto; border-radius: 0; transform: translateY(3px); }
+@media (max-width: 729px) {
+  .story-header { height: 64px; }
+  .story-header .story-brand-icon { width: 38px; height: 38px; }
+  .story-header .story-wordmark { width: 124px; }
+  .closing-card { padding-bottom: 32px; }
+  .closing-brand-icon { width: 80px; height: 80px; }
+  .closing-wordmark { width: 188px; }
+}
+@media (max-width: 380px) { .story-header { padding-inline: 14px; } .closing-brand-icon { width: 68px; height: 68px; } .closing-wordmark { width: 172px; } }
+@media (max-height: 720px) { .closing-card { padding-bottom: 28px; } .closing-brand-icon { width: 76px; height: 76px; } .closing-wordmark { width: 190px; } }
+@media (max-width: 729px) and (max-height: 620px) { .closing-card { padding-bottom: 24px; } .closing-brand-icon { width: 64px; height: 64px; } .closing-wordmark { width: 166px; } }
+@media (min-width: 730px) and (max-height: 520px) {
+  .closing-card { grid-template-columns: minmax(0,1fr) 190px; padding: 22px 22px 28px; }
+  .closing-card .closing-brand { grid-column: 1; grid-row: 1; justify-content: flex-start; }
+  .closing-brand-icon { width: 64px; height: 64px; }
+  .closing-wordmark { width: 174px; }
+  .closing-card .closing-line { grid-column: 1; grid-row: 2; }
+  .closing-card .launch-button { grid-column: 2; }
+}
+@media (prefers-reduced-motion: reduce) { .story-brand-icon, .story-header .story-portal { transition: none !important; } .story-brand:hover .story-brand-icon, .story-header .story-portal:hover { transform: none; } }

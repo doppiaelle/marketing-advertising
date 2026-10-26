@@ -1,4 +1,4 @@
-# brief2done showcase
+# Brief2Done showcase
 
 ## Source and integration
 
@@ -12,7 +12,7 @@ Its eight selected scenes remain in the same order, with the same illustrative
 product screens, copy and green palette. The final previously empty panel now
 contains a dark card, the original app mark, product name and call to action.
 The footer carries the All products link and DoubleL attribution. The mark
-comes from `brief2done/apps/web/public/favicon.svg`.
+comes from `brief2done/apps/web/public/brand/brief2done-icon.png`.
 The app README was used to verify the product description. Screen names,
 budgets and projects are demo data; the walkthrough is labelled accordingly.
 
@@ -107,3 +107,13 @@ arrows. Main assets and the iframe adapter have versioned URLs for old caches.
 
 No build or additional package installation is required. The GitHub Pages
 workflow checks the Brief2Done page and its required assets before publication.
+
+## Branding and entry links (26 October 2026)
+
+The public route and asset directory are `brief2done/`. The previous route is kept only
+as an incoming-link redirect, preserving query strings and fragments. The supplied transparent mark stays unchanged. A transparent light wordmark variant
+is used on the dark showcase background; the original lockup remains available.
+The independent icon rotates on hover; the compact wordmark stays aligned beside it.
+The closing card and footer reuse the same split lockup. A persistent Open portal link is visible before scrolling,
+including a labelled icon on mobile. Support and Contact use `product=brief2done`; DoubleL
+accepts the former product key only for compatibility with already-shared links.
