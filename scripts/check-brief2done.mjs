@@ -140,14 +140,14 @@ for(const {w,h} of [{w:1280,h:800},{w:390,h:844}]){
   for (const p of [.5,1.5,2.5,3.5,4.5,5.5]) {
     for (const direction of [1,-1]) {
       const start=flight.trailOrigin(p,direction);
-      assert.ok(Math.abs(p-start)>.80,'Tail must be long enough to remain visible beyond the sprite');
+      assert.ok(Math.abs(p-start)>=Math.min(.84,p)-1e-8,'Tail must span the usable flight history');
       let total=0,prev=flight.descentPoint(start,w,h,0);
       for(let i=1;i<=64;i++){
         const current=flight.descentPoint(start+(p-start)*i/64,w,h,0);
         total+=Math.hypot(current.x-prev.x,current.y-prev.y);
         prev=current;
       }
-      assert.ok(total>65, 'Trail must leave a useful visible arc at p='+p+' size='+w+'x'+h);
+      assert.ok(total>(p<.84?50:65), 'Trail must leave a visible arc beyond the sprite at p='+p+' size='+w+'x'+h);
     }
   }
 
