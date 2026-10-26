@@ -14,6 +14,13 @@ const shots=[
  {source:null,label:'Create your account',duration:3.5,closing:true}
 ];
 const total=shots.reduce((n,s)=>n+s.duration,0),starts=shots.map((s,i)=>shots.slice(0,i).reduce((a,b)=>a+b.duration,0));
+// The six mobile previews are static markup created once, not heavy React
+// applications remounted or repainted during a Safari scroll.
+const staticPreviews=[["Open briefs","Recommended opportunities","Website for a creative studio","A responsive website for an independent creative studio.","Digital & IT · Studio Forma","€450","Brand identity for a new venture","Creative · €600"],["People and companies","Discover collaborators","Alex Morgan","Brand designer & illustrator","Verified results · Open to new work","View profile","People and companies","Find people and teams for your next project"],["Applications","Show your skills","Your application","Introduce yourself and explain why you are the right fit.","Website for a creative studio","Application sent","Open opportunity","Brief · Requirements · Milestones"],["Agreements","Clear terms, shared direction","Project terms","Scope and deliverables agreed before work begins.","Final delivery · Rights · Review rounds","Accept and start","Studio Forma → Collaborator","Terms, schedule and responsibilities"],["Delivery","Work ready for review","Complete website","Responsive layout · Home, Services and Contact pages.","Round 1 · In review","Work submitted","Project agreement","Client · €450 · 2 review rounds"],["Confirmation","Results and next steps","Work approved","The client has confirmed the completed deliverables.","Your work history, clearly recorded","Confirmed","Project complete","Approval · Payment recorded separately"]];
+function staticPreviewMarkup(d){
+ const esc=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ return '<div class="static-preview" aria-hidden="true"><div class="static-back-card"><span class="static-eyebrow">'+esc(d[0])+'</span><strong>'+esc(d[6])+'</strong><p>'+esc(d[7])+'</p><div class="static-mock-line"></div><div class="static-mock-line short"></div></div><div class="static-front-card"><span class="static-eyebrow">'+esc(d[1])+'</span><strong>'+esc(d[2])+'</strong><p>'+esc(d[3])+'</p><div class="static-meta">'+esc(d[4])+'</div><div class="static-card-bottom"><span class="static-check">✓</span>'+esc(d[5])+'</div></div></div>';
+}
 const contentSources=new Set(shots.filter(s=>!s.closing).map(s=>s.source));
 let elapsed=0,index=-1,local=0,last=0,destroyed=false,ready=false,mobile=false,scale=1,frameHandle,lastSent=-Infinity,visible=true,targetElapsed=0,lastRendered=-1;
 const cleanup=[],frames=[],bounds=new Map(),nodes=[],frameScenes=new Map();
@@ -22,23 +29,29 @@ let chapterStart=performance.now(),gestureUntil=0,pendingDirection=0,touchStart=
 let flightFrom={x:0,y:0},flightTo={x:0,y:0},flightCurve=null;
 const flyer=$('#rocket-guide'),trail=$('#flight-trace'),flightPath=$('#flight-path');
 const targets=[[.12,.75],[.84,.15],[.12,.2],[.88,.78],[.13,.78],[.85,.20]];
-// Exactly two documents are reused for every chapter; hidden chapters have no apps.
+// Desktop reuses two illustrative React frames. On mobile we avoid them
+// entirely; each chapter already owns a lightweight static demonstration.
+const staticMobileAtLoad=$('.screen-wrap').clientWidth<730;
 const composition=document.createElement('div');composition.className='composition';
 composition.innerHTML='<div class="fragment secondary" aria-hidden="true"></div><div class="fragment primary" aria-hidden="true"></div>';
 $('#canvas').insertBefore(composition,$('.cursor'));
-for(const role of ['primary','secondary']){
- const f=document.createElement('iframe');f.title='Brief2Done illustrative '+role+' screen';f.tabIndex=-1;f.setAttribute('aria-hidden','true');
- f.src='../assets/brief2done/frame.html?scene=0&v=20261026-guided';
- f.addEventListener('load',()=>{f.contentWindow?.postMessage({type:'brief2done:scene',scene:requestedSource},location.origin);f.contentWindow?.postMessage({type:'brief2done:visibility',visible:!shots[index]?.closing},location.origin);});
- composition.querySelector('.'+role).appendChild(f);frames.push(f);
+function mountDemoFrames(){
+ if(frames.length)return;
+ for(const role of ['primary','secondary']){
+  const f=document.createElement('iframe');f.title='Brief2Done illustrative '+role+' screen';f.tabIndex=-1;f.setAttribute('aria-hidden','true');
+  f.src='../assets/brief2done/frame.html?scene=0&v=20261026-guided';
+  f.addEventListener('load',()=>{f.contentWindow?.postMessage({type:'brief2done:scene',scene:requestedSource},location.origin);f.contentWindow?.postMessage({type:'brief2done:visibility',visible:!shots[index]?.closing},location.origin);});
+  composition.querySelector('.'+role).appendChild(f);frames.push(f);
+ }
 }
-function screensReady(){return !shots[index]?.closing&&frames.every(f=>frameScenes.get(f.contentWindow)===shots[index]?.source);}
-function switchScreens(source){requestedSource=source;frameScenes.clear();lastAction=-1;lastSent=-Infinity;for(const f of frames)f.contentWindow?.postMessage({type:'brief2done:scene',scene:source},location.origin);}
+if(!staticMobileAtLoad)mountDemoFrames();
+function screensReady(){return !mobile&&!shots[index]?.closing&&frames.length===2&&frames.every(f=>frameScenes.get(f.contentWindow)===shots[index]?.source);}
+function switchScreens(source){requestedSource=source;frameScenes.clear();lastAction=-1;lastSent=-Infinity;if(mobile)return;for(const f of frames)f.contentWindow?.postMessage({type:'brief2done:scene',scene:source},location.origin);}
 
 shots.forEach((shot,i)=>{
  if(shot.closing){nodes.push({el:null,pair:[]});return;}
  const el=document.createElement('section');el.className='scene';el.dataset.index=i;el.dataset.titleMode=shot.titleMode;el.setAttribute('aria-hidden','true');
- el.innerHTML='<div class="scene-eyebrow">STEP '+String(i+1).padStart(2,'0')+' / 06</div><div class="headline-mask"><'+(i===0?'h1':'h2')+' class="headline">'+shot.title+'</'+(i===0?'h1':'h2')+'></div><p class="scene-explainer">'+shot.description+'</p><div class="intertitle" aria-hidden="true"><div>'+shot.title+'</div></div>';
+ el.innerHTML='<div class="scene-eyebrow">STEP '+String(i+1).padStart(2,'0')+' / 06</div><div class="headline-mask"><'+(i===0?'h1':'h2')+' class="headline">'+shot.title+'</'+(i===0?'h1':'h2')+'></div><p class="scene-explainer">'+shot.description+'</p>'+staticPreviewMarkup(staticPreviews[i])+'<div class="intertitle" aria-hidden="true"><div>'+shot.title+'</div></div>';
  $('#scenes').appendChild(el);
  nodes.push({el,primary:composition.querySelector('.primary'),secondary:composition.querySelector('.secondary'),headline:el.querySelector('.headline'),explainer:el.querySelector('.scene-explainer'),intertitle:el.querySelector('.intertitle'),composition,pair:frames});
 });
@@ -63,7 +76,7 @@ listen(window,'message',e=>{
  }
 });
 const timeout=setTimeout(()=>{if(!ready){document.body.classList.add('motion-failed');$('#loading').classList.add('hidden');}},20000);cleanup.push(()=>clearTimeout(timeout));
-function resize(){mobile=$('.screen-wrap').clientWidth<730;const w=mobile?640:1280,h=mobile?940:760,area=$('.screen-wrap');scale=Math.min(area.clientWidth/w,(area.clientHeight||innerHeight)/h);$('#canvas').classList.toggle('mobile',mobile);$('#canvas').style.transform='scale('+scale+')';$('#canvas').style.left=((area.clientWidth-w*scale)/2)+'px';$('#canvas').style.top=(((area.clientHeight||innerHeight)-h*scale)/2)+'px';if(index>=0&&!shots[index].closing)compose(index,local);}
+function resize(){const area=$('.screen-wrap');mobile=area.clientWidth<730;if(!mobile&&frames.length===0)mountDemoFrames();const w=mobile?640:1280,h=mobile?940:760;scale=Math.min(area.clientWidth/w,(area.clientHeight||innerHeight)/h);$('#canvas').classList.toggle('mobile',mobile);$('#canvas').style.transform='scale('+scale+')';$('#canvas').style.left=((area.clientWidth-w*scale)/2)+'px';$('#canvas').style.top=(((area.clientHeight||innerHeight)-h*scale)/2)+'px';if(index>=0&&!mobile&&!shots[index].closing)compose(index,local);}
 const ro=new ResizeObserver(resize);ro.observe($('.screen-wrap'));resize();
 // A real vertical visual rail contains all six already-laid-out story scenes.
 // The rail (rather than a simulated camera) moves UP behind a center-flight rocket.
@@ -457,6 +470,7 @@ if(!window.location.hash&&navigation?.type!=='back_forward'){
  window.scrollTo({top:0,left:0,behavior:'instant'});
 }
 $('#experience').classList.add('is-scroll');
+if(mobile){ready=true;$('#loading').classList.add('hidden');$('#loading').setAttribute('aria-hidden','true');}
 sizeRunway();
 layoutRail();
 activate(chapterFor(scrollProgress()));
