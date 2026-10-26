@@ -11,9 +11,9 @@
   <title>Brief2Done — Connections into collaboration.</title>
   <link rel="icon" type="image/png" href="../assets/brief2done/brief2done-icon.png">
   <link rel="preload" href="../assets/brief2done/inter.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../assets/brief2done/motion.css?v=20261026-journey">
-  <link rel="stylesheet" href="../assets/brief2done/showcase.css?v=20261026-journey">
-  <script defer src="../assets/brief2done/motion.js?v=20261026-journey"></script>
+  <link rel="stylesheet" href="../assets/brief2done/motion.css?v=20261026-flight-v3">
+  <link rel="stylesheet" href="../assets/brief2done/showcase.css?v=20261026-flight-v3">
+  <script defer src="../assets/brief2done/motion.js?v=20261026-flight-v3"></script>
   <link rel="stylesheet" href="../assets/ui-icons.css?v=20261024">
   <link rel="stylesheet" href="../assets/product-footer.css">
 </head>
@@ -33,14 +33,29 @@
             <div class="cursor" aria-hidden="true"><svg viewBox="0 0 32 36"><path d="M3 2L27 20L16.5 21L11.5 31Z"/></svg></div>
             <div class="slip" aria-hidden="true"></div>
           </div>
-          <svg id="flight-trace" class="flight-trace" aria-hidden="true"><path id="flight-path"></path></svg>
-          <div id="rocket-guide" class="rocket-guide" aria-hidden="true"><span class="rocket-exhaust"></span><svg viewBox="312 45 190 220" role="presentation" focusable="false"><defs><clipPath id="rocket-cut"><polygon points="320,171 328,147 357,124 390,107 420,84 450,65 480,52 499,45 502,64 488,98 469,135 455,169 454,195 430,234 415,250 393,227 374,214 355,207 336,190"/></clipPath></defs><image href="../assets/brief2done/brief2done-icon.png" width="500" height="500" clip-path="url(#rocket-cut)"/></svg></div>
-          <nav class="story-nav" aria-label="Walkthrough navigation">
-            <button id="story-prev" class="story-nav-button" type="button" aria-label="Previous step" disabled><span aria-hidden="true">←</span></button>
-            <div class="story-step-info"><span id="story-step-counter">01 / 06</span><strong id="story-step-name">Explore opportunities</strong><div class="story-step-track" aria-hidden="true"><span id="story-step-progress"></span></div></div>
-            <button id="story-next" class="story-nav-button story-nav-next" type="button" aria-label="Next step"><span id="story-next-label">Next</span><span aria-hidden="true">→</span></button>
+          <svg id="flight-trace" class="flight-trace" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="rocket-trail-gradient" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#cbf58b" stop-opacity="0"/><stop offset="48%" stop-color="#b8ff86" stop-opacity=".32"/><stop offset="100%" stop-color="#d8ffa0" stop-opacity=".88"/></linearGradient></defs>
+            <path id="flight-path" stroke="url(#rocket-trail-gradient)"></path>
+          </svg>
+          <div id="rocket-guide" class="rocket-guide" aria-hidden="true">
+            <svg viewBox="242 43 263 350" focusable="false" role="presentation" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <clipPath id="rocket-fire-cut"><path d="M373 187 Q405 180 414 207 Q402 231 378 257 L342 295 Q345 267 355 237 Z"/></clipPath>
+                <clipPath id="rocket-body-cut"><path d="M500 43 Q507 77 485 123 Q471 160 451 194 L442 220 Q418 242 394 251 L372 225 Q349 228 330 220 Q311 195 325 166 Q345 135 390 112 Q447 59 500 43 Z"/></clipPath>
+              </defs>
+              <image href="../assets/brief2done/brief2done-icon.png" width="500" height="500" clip-path="url(#rocket-fire-cut)"/>
+              <image href="../assets/brief2done/brief2done-icon.png" width="500" height="500" clip-path="url(#rocket-body-cut)"/>
+            </svg>
+          </div>
+          <nav class="story-nav" aria-label="Walkthrough chapters">
+            <button id="story-prev" class="story-nav-button" type="button" aria-label="Previous chapter" disabled><svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>
+            <span class="sr-only" id="story-step-counter">01 / 06</span>
+            <span class="sr-only" id="story-step-name">Explore opportunities</span>
+            <span class="sr-only" id="story-step-progress"></span>
+            <span class="sr-only" id="story-next-label">Next</span>
+            <button id="story-next" class="story-nav-button" type="button" aria-label="Next chapter"><svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
           </nav>
-          <p id="story-hint" class="story-hint">Scroll to explore · One step at a time</p>
+          <p id="story-hint" class="sr-only">Scroll to explore, one chapter at a time.</p>
           <section id="closing" class="end-panel" aria-hidden="true" inert aria-labelledby="closing-title">
             <div id="closing-slot">
               <div class="closing-card">
