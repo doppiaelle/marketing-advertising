@@ -257,3 +257,17 @@ body:has(.is-closing) .story-header .story-portal:hover { background: #0e3b2b; c
   .scene-explainer { transform: none !important; }
   .story-step-progress { transition: none !important; }
 }
+
+
+.closing-replay {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; margin: 12px auto 0; padding: 8px 12px;
+  border: 0; border-radius: 10px; background: transparent;
+  color: #cbe3c9; font-size: 12px; text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.closing-replay:hover { color: var(--acid); }
+.is-closing.rocket-docked .closing-brand-icon { filter: drop-shadow(0 0 13px #b7ff7a80); }
+@media (max-width: 729px) and (max-height: 620px) {
+  .closing-replay { min-height: 32px; margin-top: 4px; font-size: 10px; }
+}
