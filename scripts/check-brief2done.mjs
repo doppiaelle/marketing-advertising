@@ -48,7 +48,7 @@ assert.doesNotMatch(motion, /touchstart.*onTouchStart/);
 assert.doesNotMatch(motion, /worldCamera\(|const fast=clamp\(part\/\.68\)/);
 assert.match(motion, /listen\(window,'scroll',onManualScroll,\{passive:true\}\)/);
 assert.match(motion, /const p=scrollProgress\(\)/);
-assert.match(motion, /const position=sampleFlight\(progress\)/);
+assert.match(motion, /const position=screenFlight\(progress\)/);
 assert.match(motion, /tip\.style\.opacity=String\(depart/);
 assert.match(motion, /flightDirection<0\?-yaw:180-yaw/, 'Reverse points the nose upward');
 assert.match(motion, /mirrorMix\+=\(reverse-mirrorMix\)/, 'Return path mirrors smoothly');
@@ -71,7 +71,7 @@ function fixture(w,h,begin,finish){
   'const ease=t=>1-Math.pow(1-clamp(t),3);',
   'const chapterCount=6;',
   'const screen={clientWidth:'+w+',clientHeight:'+h+'};',
-  'const flightPaths=[];let flightSweep=0,pathSize="";',
+  'const flightPaths=[];let pathSize="";',
   'const rocketStart=()=>({x:'+begin.x+',y:'+begin.y+'});',
   'const rocketEnd=()=>({x:'+finish.x+',y:'+finish.y+'});',
   'const trailSvg={setAttribute(){}};',
