@@ -226,22 +226,46 @@ function cubicTangent(segment,t,mirror=0){
  return{x:3*u*u*(b.x-a.x)+6*u*t*(c.x-b.x)+3*t*t*(d.x-c.x),
         y:3*u*u*(b.y-a.y)+6*u*t*(c.y-b.y)+3*t*t*(d.y-c.y)};
 }
-// There is no camera subtraction. Rocket positions are calculated directly in
-// viewport space across the whole experience, with progressively lower anchors.
+// One scroll chapter = one near-full-screen DOWNWARD sweep. The old path
+// spread the total header-to-footer difference across *all* six chapters,
+// leaving only ~1/6 of the viewport in each; it looked almost horizontal.
+//
+// Geometry is stored in continuous world coordinates. In the last 22% of
+// chapters 1–5 a deterministic camera handoff catches up with the rocket,
+// scrolling the visual window to the top of the next chapter. This creates a
+// film-like page descent without teleporting the flight or changing wheel/
+// touch physics. The sixth sweep lands directly on the final brand mark.
+let flightSweep=0;
+function flightCamera(progress){
+ const p=clamp(progress,0,chapterCount);
+ const i=Math.min(chapterCount-1,Math.floor(p));
+ if(i===chapterCount-1)return (chapterCount-1)*flightSweep;
+ const u=p-i;
+ return flightSweep*(i+ease((u-.78)/.22));
+}
+function screenFlight(progress,mirror=mirrorMix){
+ const point=sampleFlight(progress,mirror);
+ return{x:point.x,y:point.y-flightCamera(progress)};
+}
 function buildFlight(){
  const w=screen.clientWidth,h=screen.clientHeight;
  if(!w||!h)return;
- const start=rocketStart(),end=rocketEnd(),anchors=[start];
+ const start=rocketStart(),end=rocketEnd();
+ // Aim near the bottom of the visible stage before its camera handoff.
+ // The value is recalculated with the viewport on every resize.
+ flightSweep=Math.max(h*.78,h*.96-start.y);
+ const anchors=[start];
  for(let i=1;i<chapterCount;i++){
-  anchors.push({x:w*(i%2===0?.76:.22),y:start.y+(end.y-start.y)*i/chapterCount});
+  anchors.push({x:w*(i%2===0?.76:.22),y:start.y+i*flightSweep});
  }
- anchors.push(end);
+ // The last stage has no rollover; the brand icon is its true landing spot.
+ anchors.push({x:end.x,y:end.y+(chapterCount-1)*flightSweep});
  flightPaths.length=0;
  const bow=Math.min(w*.20,260);
  for(let i=0;i<chapterCount;i++){
   const a=anchors[i],d=anchors[i+1],dy=d.y-a.y;
-  // One wide cubic per chapter. Adjacent offsets have opposite signs:
-  // previous incoming dx matches the next outgoing dx, even on reverse.
+  // Single sweeping cubic in each section. Both y control points are
+  // monotonic, so the rocket goes down the page without backing up.
   flightPaths.push({a,d,bow:i%2===0?-bow:bow,
    b:{y:a.y+dy/3},c:{y:d.y-dy/3}});
  }
@@ -270,38 +294,33 @@ function drawFlight(progress){
  const delta=progress-previousFlightProgress;
  if(Math.abs(delta)>.00015)flightDirection=delta>0?1:-1;
  previousFlightProgress=progress;
- // Smoothly morph to the mirrored return lane. Endpoints are shared so the
- // mirrored path always rejoins the same header/closing logo.
+ // Return lane mirrors the cubic around its anchors, transitioning smoothly.
  const reverse=flightDirection<0?1:0;
  mirrorMix+=(reverse-mirrorMix)*(1-Math.exp(-dt/180));
- const position=sampleFlight(progress),tangent=flightTangent(progress);
+ const position=screenFlight(progress),tangent=flightTangent(progress);
  const docking=ease((progress-(chapterCount-.23))/.23);
- // Keep the landing locked to the live logo despite card entrance/resizes.
+ // Re-align to the real logo after responsive layout or card motion.
  if(progress>chapterCount-.32){
-  const end=rocketEnd(),reference=sampleFlight(chapterCount);
+  const end=rocketEnd(),reference=screenFlight(chapterCount);
   const approach=ease((progress-(chapterCount-.32))/.32);
   position.x+=(end.x-reference.x)*approach;
   position.y+=(end.y-reference.y)*approach;
  }
- // The rocket's SVG points UP by default. Forward travel points down;
- // reversing scroll turns its nose UP. Limit sideways banking to 55°.
  const yaw=clamp(Math.atan2(tangent.x,Math.max(18,tangent.y))*180/Math.PI,-55,55);
  const angle=flightDirection<0?-yaw:180-yaw;
  const launch=.54+.46*ease(progress/.20);
  const size=launch*(1-.48*docking);
  tip.style.transform='translate3d('+(position.x-tip.offsetWidth/2)+'px,'+(position.y-tip.offsetHeight/2)+'px,0) scale('+size+')';
  tip.querySelector('img').style.transform='rotate('+(angle*(1-docking))+'deg)';
- // At zero progress there is ONLY the brand icon; the sprite fades in once
- // it has left the logo, and fades away again when rewound to the beginning.
  const depart=ease((progress-.025)/.11);
  tip.style.opacity=String(depart*(1-ease((progress-(chapterCount-.055))/.055)));
- // Reverse trail follows the mirrored return lane, behind the rocket in
- // the actual direction of travel. Older trail fades away progressively.
+ // Tail is always BEHIND the rocket (forward and mirrored return), in the
+ // same projected coordinate system as the rocket, fading to transparent.
  const from=flightDirection<0?Math.min(chapterCount,progress+.17):Math.max(0,progress-.17);
  const n=30,points=[];
  for(let j=0;j<=n;j++){
-  const q=from+(progress-from)*j/n,p=sampleFlight(q);
-  points.push(p);
+  const q=from+(progress-from)*j/n;
+  points.push(screenFlight(q));
  }
  const tail=points[0],head=points[n];
  trailPath.setAttribute('d',points.map((p,j)=>(j?'L ':'M ')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(''));
