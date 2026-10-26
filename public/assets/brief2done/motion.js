@@ -82,7 +82,6 @@ function layoutRail(){
   n.intertitle.style.opacity='0';
  });
 }
-layoutRail();
 function paintTitle(n,t,titleMode){
  const arrival=reduced.matches?1:ease(t/.19);
  const center=titleMode==='center'&&!reduced.matches;
@@ -305,40 +304,42 @@ function drawFlight(progress){
 }
 function render(){
  if(index<0)return;
- const p=scrollProgress();
- const nearest=chapterFor(p);
- if(nearest!==index)activate(nearest);
- const shot=shots[index];
- local=ready?clamp((performance.now()-chapterStartedAt)/(shot.duration*1000)):0;
- // An unbroken pinned stage: screenshots fade during the travelling portion;
- // the rocket keeps moving on its independent, faster trajectory.
- const fraction=p-Math.floor(p),travelling=Math.abs(p-Math.round(p))>.015;
- let opacity=1;
- if(travelling){
-  // Content remains legible during the main downward arc. During the final
-  // camera handoff, the scene dissolves instead of appearing to slide up
-  // beneath the rocket. The next chapter emerges as the camera settles.
-  opacity=1-.34*Math.sin(Math.PI*fraction);
-  if(Math.floor(p)<chapterCount-1)opacity*=1-.9*ease((fraction-.78)/.22);
- }
- $('#canvas').style.opacity=String(clamp(opacity));
- if(shot.closing){
-  const enter=reduced.matches?1:ease((p-(chapterCount-.49))/.46);
-  $('#closing').style.opacity=String(enter*clamp(opacity));
-  $('#closing').style.transform='scale('+(1.025-.025*enter)+')';
-  $('.cursor').classList.remove('visible');
-  const card=$('.closing-card');
-  if(enter>.92&&!finalUnlocked){finalUnlocked=true;document.body.classList.add('story-unlocked');}
-  card.style.opacity=String(enter);
-  card.style.transform='translate3d(0,'+((1-enter)*Math.min(innerHeight*.27,180))+'px,0)';
-  $('#closing').inert=enter<.8;
-  logo.style.opacity=String(reduced.matches?1:.5+.5*ease((p-(chapterCount-.18))/.17));
- }else{
-  // Calm scroll-led dissolves; title and screen are settled on arrival.
-  paintTitle(nodes[index],1,shot.titleMode);
+ const p=scrollProgress(),next=chapterFor(p);
+ if(next!==index)activate(next);
+ const h=sceneDesignHeight();
+ // Consecutive panels are already laid out BELOW each other. Native scroll
+ // lifts the entire rail upward pixel-for-pixel; there is NO camera reset.
+ sceneRail.style.transform='translate3d(0,'+(-p*h)+'px,0)';
+ nodes.forEach((n,i)=>{
+  if(!n.el)return;
+  const distance=Math.abs(p-i);
+  const fade=clamp((1.12-distance)/.15);
+  n.el.style.visibility=distance<1.12?'visible':'hidden';
+  n.el.style.opacity=String(fade);
+ });
+ const closingShift=Math.max(0,chapterCount-p)*screen.clientHeight;
+ const endPanel=$('#closing');
+ endPanel.style.transform='translate3d(0,'+closingShift+'px,0)';
+ endPanel.style.opacity='1';
+ // The two shared demo frames ride the current panel and crossfade while
+ // ownership changes between adjacent, physically present chapters.
+ const distance=Math.abs(p-index);
+ composition.style.transform='translate3d(0,'+((index-p)*h)+'px,0)';
+ const previewFade=clamp((.53-distance)/.17);
+ $('.cursor').classList.remove('visible');
+ if(!shots[index].closing){
+  paintTitle(nodes[index],1,shots[index].titleMode);
   sendProgress();
   compose(index,.68);
+  composition.style.opacity=String((screensReady()?1:0)*previewFade);
+ }else composition.style.opacity='0';
+ // The closing item rides up from below just like the six preceding panels.
+ const entered=clamp((p-(chapterCount-.86))/.86);
+ endPanel.inert=entered<.83;
+ if(entered>.98&&!finalUnlocked){
+  finalUnlocked=true;document.body.classList.add('story-unlocked');
  }
+ logo.style.opacity=String(reduced.matches?1:.55+.45*ease((p-(chapterCount-.20))/.19));
  drawFlight(p);
 }
 function scrollToStep(to,focus=false){
@@ -432,7 +433,7 @@ render();
 frameHandle=requestAnimationFrame(tick);
 window.Brief2DoneMotion=Object.freeze({
  setProgress,goTo,
- getState:()=>({mode:'continuous-scroll',progress:scrollProgress()/chapterCount,scene:index,closing:!!shots[index]?.closing,ready,duration:total}),
+ getState:()=>({mode:'infinity-rail',progress:scrollProgress()/chapterCount,scene:index,closing:!!shots[index]?.closing,ready,duration:total}),
  destroy(){
   destroyed=true;
   cancelAnimationFrame(frameHandle);
