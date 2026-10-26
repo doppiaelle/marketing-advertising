@@ -69,12 +69,14 @@ const ro=new ResizeObserver(resize);ro.observe($('.screen-wrap'));resize();
 // The rail (rather than a simulated camera) moves UP behind a center-flight rocket.
 const sceneRail=$('#scenes');
 const sceneDesignHeight=()=>mobile?940:760;
+const railPanelTop=(i,h)=>i*h;
+const railOffset=(progress,h)=>-progress*h;
 function layoutRail(){
  const h=sceneDesignHeight();
  sceneRail.style.height=(chapterCount*h)+'px';
  nodes.forEach((n,i)=>{
   if(!n.el)return;
-  n.el.style.top=(i*h)+'px';
+  n.el.style.top=railPanelTop(i,h)+'px';
   n.el.style.bottom='auto';
   n.el.style.height=h+'px';
   n.headline.style.opacity='1';n.headline.style.transform='translateY(0)';
@@ -313,7 +315,7 @@ function render(){
  const h=sceneDesignHeight();
  // Consecutive panels are already laid out BELOW each other. Native scroll
  // lifts the entire rail upward pixel-for-pixel; there is NO camera reset.
- sceneRail.style.transform='translate3d(0,'+(-p*h)+'px,0)';
+ sceneRail.style.transform='translate3d(0,'+railOffset(p,h)+'px,0)';
  nodes.forEach((n,i)=>{
   if(!n.el)return;
   const distance=Math.abs(p-i);
@@ -329,7 +331,7 @@ function render(){
  // ownership changes between adjacent, physically present chapters.
  const distance=Math.abs(p-index);
  composition.style.transform='translate3d(0,'+((index-p)*h)+'px,0)';
- const previewFade=clamp((.53-distance)/.17);
+ const previewFade=clamp((.48-distance)/.22);
  $('.cursor').classList.remove('visible');
  if(!shots[index].closing){
   paintTitle(nodes[index],1,shots[index].titleMode);
