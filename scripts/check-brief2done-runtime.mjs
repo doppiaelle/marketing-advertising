@@ -15,7 +15,7 @@ function boot({initialScroll=0,navigationType='navigate',width=1280,height=800}=
  class MockElement {
   constructor(key='element'){
    this.key=key;this.children=[];this.nodes=new Map();this.dataset={};
-   this.attributes={};this.clientWidth=width;this.clientHeight=height;
+   this.attributes={};this.clientWidth=width;this.clientHeight=height;this.offsetWidth=48;this.offsetHeight=88;
    this.classList={values:new Set(),add(...x){x.forEach(z=>this.values.add(z));},
     remove(...x){x.forEach(z=>this.values.delete(z));},
     contains(x){return this.values.has(x);},
@@ -187,7 +187,7 @@ phone.window.Brief2DoneMotion.setProgress(2.6/6);
 assert.notEqual(sprite.style.transform,frozenHeading,'Banking resumes once toolbar settles');
 assert.equal(phone.get('#experience').style['--journey-height'],beforeRunway);
 assert.equal(phone.get('#canvas').style.transform,beforeCanvas);
-assert.equal(phone.scroll(),2.6*760,'Toolbar must not introduce chapter snapping');
+assert.ok(Math.abs(phone.scroll()-2.6*760)<.01,'Toolbar must not introduce chapter snapping');
 phone.window.Brief2DoneMotion.setProgress(5.5/6);
 assert.ok(phone.get('#scenes').style.transform.includes('translate3d'),
  'The preloaded mobile rail must move with native scroll');
