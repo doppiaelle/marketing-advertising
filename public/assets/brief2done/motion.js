@@ -220,22 +220,26 @@ function activate(next){
  window.dispatchEvent(new CustomEvent('brief2done:scene-change',{detail}));
  if(window.parent!==window)window.parent.postMessage({type:'brief2done:scene-change',...detail},'*');
 }
-// One uninterrupted infinity-sign route, centered over a normal vertical
-// content rail. Rocket movement never has to reset between chapters: each
-// integer progress marks a loop junction with continuous velocity.
-function infinityPoint(progress,w,h,mirror=0){
- const theta=2*Math.PI*progress;
+// A continuous, vertical serpentine flight: one broad half-wave to the right,
+// then one to the left, repeated across the six chapters. The page's actual
+// section rail rises behind the ship. There are NO jumps, viewport resets,
+// independent looping y-motion or time-based movement.
+function descentPoint(progress,w,h,mirror=0){
+ const p=clamp(progress,0,chapterCount);
  const side=1-2*mirror;
+ const swing=Math.min(w*(w<730?.115:.17),215);
  return {
-  x:w*.5+side*Math.min(w*.29,350)*Math.sin(theta),
-  y:h*.49+Math.min(h*.15,128)*Math.sin(2*theta)
+  x:w*.5+side*swing*Math.sin(Math.PI*p),
+  y:h*(.28+.45*p/chapterCount)
  };
 }
-function infinityTangent(progress,w,h,mirror=0){
- const theta=2*Math.PI*progress;
+function descentTangent(progress,w,h,mirror=0){
+ const p=clamp(progress,0,chapterCount);
+ const side=1-2*mirror;
+ const swing=Math.min(w*(w<730?.115:.17),215);
  return {
-  x:(1-2*mirror)*Math.min(w*.29,350)*2*Math.PI*Math.cos(theta),
-  y:Math.min(h*.15,128)*4*Math.PI*Math.cos(2*theta)
+  x:side*swing*Math.PI*Math.cos(Math.PI*p),
+  y:h*.45/chapterCount
  };
 }
 function rocketStart(){
@@ -251,7 +255,7 @@ function rocketEnd(progress){
 }
 function flightPoint(progress,mirror=mirrorMix){
  const w=screen.clientWidth,h=screen.clientHeight,p=clamp(progress,0,chapterCount);
- const point=infinityPoint(p,w,h,mirror);
+ const point=descentPoint(p,w,h,mirror);
  if(p<.24){
   const start=rocketStart(),blend=ease(p/.24);
   point.x=start.x+(point.x-start.x)*blend;
@@ -276,9 +280,9 @@ function drawFlight(progress){
  const reverse=flightDirection<0?1:0;
  mirrorMix+=(reverse-mirrorMix)*(1-Math.exp(-dt/160));
  const point=flightPoint(progress);
- const tangent=infinityTangent(progress,w,h,mirrorMix);
- // In forward flight the rocket faces downward even when the local
- // infinity curve rises. On rewind, it faces upward, with gentle banking.
+ const tangent=descentTangent(progress,w,h,mirrorMix);
+ // The rocket always descends on forward scroll, and ascends on reverse.
+ // The serpentine arcs bank gently without fighting the travel direction.
  const bank=clamp(Math.atan2(tangent.x,Math.max(40,Math.abs(tangent.y)))*180/Math.PI,-40,40);
  const angle=(flightDirection<0?0:180)+bank*(flightDirection<0?-1:1);
  const docking=ease((progress-(chapterCount-.25))/.25);
@@ -287,7 +291,7 @@ function drawFlight(progress){
  tip.querySelector('img').style.transform='rotate('+(angle*(1-docking))+'deg)';
  const depart=ease((progress-.025)/.12);
  tip.style.opacity=String(depart*(1-ease((progress-(chapterCount-.065))/.065)));
- // The trail is a short, fading slice of the SAME infinity path; reverse
+ // The trail is a short, fading slice of the SAME serpentine path; reverse
  // direction samples AHEAD of progress so the old line stays behind the ship.
  const from=flightDirection<0?Math.min(chapterCount,progress+.16):Math.max(0,progress-.16);
  const n=32,points=[];
@@ -433,7 +437,7 @@ render();
 frameHandle=requestAnimationFrame(tick);
 window.Brief2DoneMotion=Object.freeze({
  setProgress,goTo,
- getState:()=>({mode:'infinity-rail',progress:scrollProgress()/chapterCount,scene:index,closing:!!shots[index]?.closing,ready,duration:total}),
+ getState:()=>({mode:'serpentine-rail',progress:scrollProgress()/chapterCount,scene:index,closing:!!shots[index]?.closing,ready,duration:total}),
  destroy(){
   destroyed=true;
   cancelAnimationFrame(frameHandle);
