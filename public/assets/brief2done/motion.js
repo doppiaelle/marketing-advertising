@@ -343,8 +343,11 @@ function render(){
  const fraction=p-Math.floor(p),travelling=Math.abs(p-Math.round(p))>.015;
  let opacity=1;
  if(travelling){
-  // Preserve legibility even when the visitor drags very slowly between stages.
-  opacity=1-.58*Math.sin(Math.PI*fraction);
+  // Content remains legible during the main downward arc. During the final
+  // camera handoff, the scene dissolves instead of appearing to slide up
+  // beneath the rocket. The next chapter emerges as the camera settles.
+  opacity=1-.34*Math.sin(Math.PI*fraction);
+  if(Math.floor(p)<chapterCount-1)opacity*=1-.9*ease((fraction-.78)/.22);
  }
  $('#canvas').style.opacity=String(clamp(opacity));
  if(shot.closing){
