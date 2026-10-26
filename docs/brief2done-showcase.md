@@ -140,3 +140,45 @@ physical iPhone or a physical Safari installation. CI runs the real
 JavaScript in a simulated DOM for desktop and mobile viewport sizes, including
 a synthetic Safari toolbar height-change event. Actual Safari device testing
 remains a release review requirement, not a claimed result.
+
+
+## Wider flight, clearer payment and Safari edge fades — October 2026
+
+The centre-to-side swing of the serpentine route is now calculated as
+`min(width * 0.29, 390px)` on desktop and
+`min(width * 0.225, 125px)` on mobile. These are **real screen coordinates**:
+the rocket travels farther horizontally without clipping the viewport.
+Forward and reverse share the same geometry and orientation rules.
+
+Chapter 06's **static mobile card** depicts the actual distinction between
+an approved delivery and payment confirmation. It displays a **€450 illustrative
+payment**, the status **Reported by client**, an explanatory note that payment
+is made outside the service, and **Confirm receipt** as the next step only
+after the collaborator has actually received it. No payment is promised or
+claimed to have been collected automatically.
+
+A pair of *fixed* gradients along the clipped top/bottom edges of the
+story viewport now supplies a subtle fade as each preloaded panel enters from
+below and leaves above. Unlike per-section opacity animations, the gradients
+do not trigger chapter repaints; the panel rail remains a static stack moving
+with `transform: translate3d`. The closing screen is not obscured.
+
+When `visualViewport.height` changes at constant width and at a constant
+`100svh` stage height — typical when Safari reveals/hides the URL toolbar —
+the animation suspends optional banking/mirror interpolation for roughly
+220 milliseconds. **Position, trail and page scroll remain continuously
+coupled to actual scroll input.** The mobile rendering loop avoids idle
+60-FPS DOM/SVG rewrites except when a reverse-path morph still needs to
+settle. We do not and cannot hide the browser's own address bar.
+
+Automated checks cover the increased path amplitude at 390px and 1280px,
+the payment information present in the sixth static panel, the fixed edge
+fade styles, and a simulated visualViewport-height change where banking
+pauses while the rocket position keeps responding to scroll.
+
+Before merge, check the larger lateral movement on desktop/mobile, the
+readability of the sixth payment mock on iPhone Safari and Android Chrome,
+the fade at both scene edges, and the first down/up scroll that changes
+browser chrome. Real physical-device visual QA is not available in this
+connector environment, so the tests above are *not* a claim of a live Safari
+pass.
