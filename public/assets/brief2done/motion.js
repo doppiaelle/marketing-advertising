@@ -180,7 +180,7 @@ function sizeRunway(){
   $('#experience').style.setProperty('--journey-height',storyHeight+'px');
   // A resize must preserve the chapter even when mobile browser chrome changes.
   if(ratio>0&&inStage())window.scrollTo({top:storyTop()+ratio*chapterCount*stageH,behavior:'instant'});
-  pathSize='';
+  // No old flight-path cache exists: serpentine geometry reads viewport size directly.
  }
 }
 function chapterFor(p){return clamp(Math.round(p),0,chapterCount);}
@@ -433,6 +433,14 @@ listen(document,'keydown',e=>{
 });
 const observer=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;},{threshold:.01});
 observer.observe(screen);
+// A fresh visit/reload always starts at the beginning. Browser restoration
+// otherwise leaves visitors at the closing CTA before the walkthrough starts.
+// Preserve navigation back/forward restoration and deliberate hash anchors.
+const navigation=performance.getEntriesByType?.('navigation')?.[0];
+if(!window.location.hash&&navigation?.type!=='back_forward'){
+ window.history.scrollRestoration='manual';
+ window.scrollTo({top:0,left:0,behavior:'instant'});
+}
 $('#experience').classList.add('is-scroll');
 sizeRunway();
 layoutRail();
