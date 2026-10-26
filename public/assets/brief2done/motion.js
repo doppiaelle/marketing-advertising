@@ -285,9 +285,19 @@ function drawFlight(progress){
  const position=sampleFlight(flown);
  const ahead=sampleFlight(Math.min(chapterCount,flown+.009));
  const behind=sampleFlight(Math.max(0,flown-.009));
- const angle=Math.atan2(ahead.y-behind.y,ahead.x-behind.x)*180/Math.PI+45;
+ const travelAngle=Math.atan2(ahead.y-behind.y,ahead.x-behind.x)*180/Math.PI+45;
  const docking=ease((progress-(chapterCount-.25))/.25);
- const size=1-.52*docking;
+ // Match the final mark's live rectangle after its entrance transform settles.
+ // The correction starts at zero: all intermediate route joins remain exact.
+ if(flown>=chapterCount-1){
+  const stored=flightPaths[chapterCount-1].samples.at(-1),live=rocketEnd();
+  const adjust=smoother(flown-(chapterCount-1));
+  position.x+=(live.x-stored.x)*adjust;
+  position.y+=(live.y-stored.y)*adjust;
+ }
+ const angle=travelAngle*(1-docking);
+ const launch=.42+.58*ease(progress/.18);
+ const size=launch*(1-.52*docking);
  tip.style.transform='translate3d('+(position.x-tip.offsetWidth/2)+'px,'+(position.y-tip.offsetHeight/2)+'px,0) rotate('+angle+'deg) scale('+size+')';
  tip.style.opacity=String(1-ease((progress-(chapterCount-.055))/.055));
  const start=Math.max(0,flown-.17);
