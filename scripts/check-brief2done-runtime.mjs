@@ -9,13 +9,13 @@ import { runInNewContext } from 'node:vm';
 
 const source=await readFile(new URL('../public/assets/brief2done/motion.js',import.meta.url),'utf8');
 
-function boot({initialScroll=0,navigationType='navigate'}={}){
+function boot({initialScroll=0,navigationType='navigate',width=1280,height=800}={}){
  const events=new Map(),elements=new Map(),iframes=[],rafs=[],timers=[];
  let scrollY=initialScroll,seq=1;
  class MockElement {
   constructor(key='element'){
    this.key=key;this.children=[];this.nodes=new Map();this.dataset={};
-   this.attributes={};this.clientWidth=1280;this.clientHeight=800;
+   this.attributes={};this.clientWidth=width;this.clientHeight=height;
    this.classList={values:new Set(),add(...x){x.forEach(z=>this.values.add(z));},
     remove(...x){x.forEach(z=>this.values.delete(z));},
     contains(x){return this.values.has(x);},
@@ -37,10 +37,10 @@ function boot({initialScroll=0,navigationType='navigate'}={}){
   }
   childFor(s){if(!this.nodes.has(s))this.nodes.set(s,new MockElement(s));return this.nodes.get(s);}
   getBoundingClientRect(){
-   if(this.key==='#experience')return {top:-scrollY,bottom:5600-scrollY,left:0,right:1280,width:1280,height:5600};
+   if(this.key==='#experience')return {top:-scrollY,bottom:height*7-scrollY,left:0,right:width,width,height:height*7};
    if(this.key==='.story-brand-icon')return {top:20,left:1100,right:1140,bottom:60,width:40,height:40};
    if(this.key==='.closing-brand-icon')return {top:580,left:610,right:706,bottom:676,width:96,height:96};
-   return {top:0,left:0,bottom:800,right:1280,width:1280,height:800};
+   return {top:0,left:0,bottom:height,right:width,width,height};
   }
   focus(){}
  }
@@ -60,7 +60,7 @@ function boot({initialScroll=0,navigationType='navigate'}={}){
  };
  const window={
   parent:null,location:{hash:'',origin:'https://doppiaelle.github.io'},
-  history:{scrollRestoration:'auto'},innerHeight:800,
+  history:{scrollRestoration:'auto'},innerHeight:height,
   addEventListener(name,fn){if(!events.has(name))events.set(name,[]);events.get(name).push(fn);},
   removeEventListener(name,fn){events.set(name,(events.get(name)||[]).filter(x=>x!==fn));},
   dispatchEvent(e){(events.get(e.type)||[]).forEach(fn=>fn(e));return true;},
@@ -73,7 +73,7 @@ function boot({initialScroll=0,navigationType='navigate'}={}){
  const reduced={matches:false,addEventListener(){},removeEventListener(){}};
  const context={
   document,window,location:window.location,history:window.history,
-  matchMedia(){return reduced;},innerHeight:800,Math,Set,Map,Date,Number,
+  matchMedia(){return reduced;},innerHeight:height,Math,Set,Map,Date,Number,
   performance:{now(){return 1000;},getEntriesByType(){return [{type:navigationType}];}},
   ResizeObserver:class{observe(){}disconnect(){}},
   IntersectionObserver:class{observe(){}disconnect(){}},
@@ -86,6 +86,7 @@ function boot({initialScroll=0,navigationType='navigate'}={}){
  };
  runInNewContext(source,context,{filename:'motion.js',timeout:3000});
  return {window,body,get,iframes,events,scroll:()=>scrollY,
+   changeBrowserToolbar(nextHeight){window.innerHeight=nextHeight;context.innerHeight=nextHeight;for(const fn of events.get('resize')||[])fn();},
    sendReady(scene){
     for(const iframe of iframes)(events.get('message')||[]).forEach(fn=>
      fn({source:iframe.contentWindow,data:{
@@ -115,7 +116,7 @@ assert.ok(fresh.get('#loading').classList.contains('hidden'));
 // must tilt in the same left/right direction as its serpentine segment.
 function noseX(){
  const transform=fresh.get('#rocket-guide').querySelector('img').style.transform;
- const degrees=Number(transform.match(/rotate\\(([-\\d.]+)deg\\)/)?.[1]);
+ const degrees=Number(transform.match(/rotate\(([-\d.]+)deg\)/)?.[1]);
  assert.ok(Number.isFinite(degrees),'Rocket must have a computed rotation');
  return Math.sin(degrees*Math.PI/180);
 }
@@ -147,4 +148,28 @@ const restored=boot({initialScroll:2400,navigationType:'back_forward'});
 assert.equal(restored.scroll(),2400,'Back/forward history must retain its scroll position');
 assert.equal(restored.window.Brief2DoneMotion.getState().scene,3);
 
-console.log('PASS: Browser startup, heading on forward/reverse scroll, illuminated long trail, six scenes, CTA, reverse and browser history.');
+
+const phone=boot({initialScroll:0,navigationType:'navigate',width:390,height:760});
+assert.ok(phone.window.Brief2DoneMotion,'Mobile boot must initialize controller');
+assert.equal(phone.iframes.length,0,'Mobile Safari must not initialize heavyweight React preview iframes');
+assert.equal(phone.get('#scenes').children.length,6,'All six static mobile panels must be created before scrolling');
+for(const [i,panel] of phone.get('#scenes').children.entries()){
+ assert.ok(panel.innerHTML.includes('static-preview'),'Static panel '+i+' must already exist');
+}
+assert.ok(phone.get('#loading').classList.contains('hidden'),'Mobile static content must not wait for async frames');
+phone.window.Brief2DoneMotion.setProgress(2.25/6);
+assert.equal(phone.window.Brief2DoneMotion.getState().scene,2);
+const beforeRunway=phone.get('#experience').style['--journey-height'];
+const beforeCanvas=phone.get('#canvas').style.transform;
+const beforeScroll=phone.scroll();
+// Safari's address-bar collapse expands its visual viewport without changing
+// the small stable layout viewport: avoid the forced resize that caused jumps.
+phone.changeBrowserToolbar(830);
+assert.equal(phone.get('#experience').style['--journey-height'],beforeRunway);
+assert.equal(phone.get('#canvas').style.transform,beforeCanvas);
+assert.equal(phone.scroll(),beforeScroll);
+phone.window.Brief2DoneMotion.setProgress(5.5/6);
+assert.ok(phone.get('#scenes').style.transform.includes('translate3d'),
+ 'The preloaded mobile rail must move with native scroll');
+
+console.log('PASS: Browser startup, heading on forward/reverse scroll, illuminated long trail, mobile static panels, stable Safari toolbar, scenes, CTA and history.');
