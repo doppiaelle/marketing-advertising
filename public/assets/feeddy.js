@@ -42,9 +42,8 @@
 
   const tabs = [...document.querySelectorAll('[data-tab]')];
   const captions = {
-    editor: 'Compose photos, carousels and videos. The creative studio brings formats, cropping, text, audio and subtitles together. Review the result before using it.',
-    calendar: 'Switch between Month, Week and Agenda. Filter by channel, language, format and status; in the tool you can move drafts and review the plan before approval.',
-    results: 'Find profile and content metrics based on the data available from each channel. The inbox gathers comments and requests, keeping context close to your replies.'
+    calendar: 'Plan and review posts across connected profiles. Supported channels can publish automatically at the approved time.',
+    editor: 'Prepare your copy and visuals in one place. AI assistance is optional, and you decide what is approved for publishing.'
   };
   function selectTab(tab) {
     tabs.forEach(item => {

@@ -21,13 +21,14 @@
   const FIRST = {x:P[0].x, y:-.72};
   const SEGMENTS = [];
   const add=(kind,duration,from,to)=>SEGMENTS.push({kind,duration,from,to});
-  add('flight',1050,-1,0);
+  // Faster travelling, with a longer contact pause before each visible recoil.
+  add('flight',580,-1,0);
   for(let i=0;i<5;i++) {
-    add('impact',122,i,i);
-    add('flight',i===4?1120:1020,i,i+1);
+    add('impact',235,i,i);
+    add('flight',i===4?650:615,i,i+1);
   }
-  add('reveal',1200,5,5);
-  add('hold',1200,5,5);
+  add('reveal',720,5,5);
+  add('hold',250,5,5);
   let LENGTH=0;
   SEGMENTS.forEach(s=>{s.start=LENGTH; LENGTH+=s.duration;s.end=LENGTH;});
   const clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
@@ -86,11 +87,11 @@
     }
     currentFlight(from,to,t){
       const a=from<0?FIRST:P[from], b=P[to];
-      // Very fast flipper takeoff: a short UPWARD impulse followed by
-      // accelerated free fall. No gentle repeated hopping on a logo.
+      // Contact is held in the impact segment. Then the ball rebounds
+      // briefly upwards before the squared fall makes it speed up again.
       const u=smooth(t);
       const x=mix(a.x,b.x,u);
-      const launch=from<0?0:.34;
+      const launch=from<0?0:.32;
       const y=mix(a.y,b.y,t*t) - launch*Math.sin(Math.PI*t)*(1-.15*t);
       // Follow the path with a delayed virtual camera: the ball moves sideways
       // on screen, while OLD icons are pushed up and out of the viewport.

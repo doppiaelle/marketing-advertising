@@ -27,15 +27,34 @@ L’animazione è estratta da `feeddy-motion-v2-demo.html`, fornito il 23 ottobr
 la scia canvas e il logo originale. Il PNG incorporato diventa un asset locale.
 Shell della demo, bordi, label, stato e pulsanti esterni vengono rimossi.
 
-Riproduzione automatica unica di circa 9,3 secondi. Al reveal, il logo rimane
-visibile e il titolo e i contenuti della hero entrano progressivamente sotto.
-La durata segue il tempo effettivo anche su dispositivi con frame rate ridotto.
+Riproduzione automatica unica di circa 5,8 secondi (prima ~9,3 s).
+Tutte e cinque le collisioni rimangono in sequenza: impatto e compressione
+durano 235 ms, poi la sfera rimbalza in alto e accelera nella caduta
+successiva (580 ms iniziali, 615/650 ms tra i loghi). Reveal 720 ms e finale
+250 ms. La durata segue il tempo effettivo anche a frame rate ridotto.
+Al reveal il logo e la copy della hero compaiono progressivamente.
 Lo scroll rimane libero. I link interni consentono di saltare subito al prodotto.
 Sono disponibili comandi accessibili da tastiera per salto e pausa dell’intro.
 Fuori vista e a scheda nascosta il rendering si sospende, senza ripartire da capo.
 Con `prefers-reduced-motion` si mostra direttamente la composizione finale.
 Senza JavaScript, logo e informazioni restano leggibili, così come tutti i pannelli
 dimostrativi e le FAQ native.
+
+## Landing più sintetica
+
+La hero esplicita subito il beneficio: schedulare post per i profili connessi,
+con supporto AI facoltativo e approvazione umana. La pagina contiene soltanto:
+una sezione chiara con tre benefici (scheduling, AI, controllo), una demo
+interattiva di calendario e post editor e una CTA finale. Calendario predefinito.
+Rimossi i grandi collage illustrativi, le pagine lunghe su copilot/approvazione,
+il tab Risultati e la sezione FAQ; i concetti importanti sono riassunti nelle card.
+Restano le precisazioni sulla pubblicazione automatica: vale per i profili
+compatibili e le funzionalità supportate dalle API dei singoli social.
+La demo è illustrativa, non pubblica contenuti reali.
+
+Le ancore di navigazione sono `#scopri`, `#spazio` e `#inizia`.
+Le schede rimaste usano ruoli tab, frecce, Home/End e contenuti disponibili
+anche senza JavaScript. Logo e sequenza pinball rimangono invariati nell'ordine.
 
 ## Collegamenti
 
@@ -52,9 +71,8 @@ Pubblicare questa pagina prima di distribuire il frontend aggiornato del tool.
 
 ## Verifica locale
 
-Servire `public/` con un server HTTP statico e aprire `/feeddy/`. Le tab Editor,
-Calendario e Risultati supportano click, frecce sinistra/destra, Home/End e ARIA.
-Le FAQ usano `details/summary`. Verificare desktop e mobile, intro, link, font,
+Servire `public/` con un server HTTP statico e aprire `/feeddy/`. Le tab Calendario e Editor supportano click, frecce sinistra/destra,
+Home/End e ARIA. Verificare desktop e mobile, intro, link, font,
 assenza di scroll orizzontale e layout senza animazioni.
 
 Per il frontend del tool usare Node >=22.22.0 come indicato in `package.json`.
@@ -64,6 +82,6 @@ di questa macchina non è compatibile con Vite 8.
 Verifiche eseguite il 23 ottobre 2026: risposta HTTP 200 della pagina; sintassi dei
 due script; presenza di asset e destinazioni delle ancore; ID HTML unici; controllo
 visivo a 1280×720 e 390×844 senza sbordi orizzontali; arrivo automatico al logo;
-selezione delle tre tab via mouse e freccia destra. Accesso e registrazione del
+selezione delle tre tab via mouse e freccia destra (versione precedente). Accesso e registrazione del
 tool verificati su build locale con risposta dimostrativa di `/auth/status`, in
 italiano e inglese. Nessuna registrazione o autenticazione reale eseguita.

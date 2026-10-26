@@ -132,11 +132,13 @@ Vedi [asset, animazioni e verifiche](docs/secura-branding.md).
 
 ## Vetrina Feeddy
 
-Feeddy ha una pagina dedicata con Manrope locale, antracite e oro del tool,
-illustrazioni cartoon e anteprime interattive di editor, calendario e risultati.
-L’intro HTML fornita si riproduce automaticamente, senza cornice o controlli della
-demo, e approda al logo originale con il titolo centrato sotto. Rispetta le
-preferenze di movimento ridotto e sospende il rendering fuori vista.
+Feeddy ha una vetrina compatta con Manrope locale, antracite e oro:
+tre benefici chiari (scheduling, supporto AI opzionale e controllo), una demo
+interattiva focalizzata su calendario e post editor e una CTA. L'intro pinball
+mantiene i cinque loghi e i rimbalzi, ma dura ~5,8 s invece di ~9,3 s.
+La scena approda al logo originale, rispetta il movimento ridotto e sospende
+il rendering fuori vista. La pubblicazione automatica dipende dalle API
+dei social supportati e dai permessi dei profili connessi.
 Vedi [identità, intro e collegamenti](docs/feeddy-showcase.md).
 
 ## Vetrina Kritoma
