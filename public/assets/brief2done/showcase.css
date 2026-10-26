@@ -422,3 +422,25 @@ body { overscroll-behavior-y: none; }
 @media (max-width: 729px) {
   .rocket-guide { width: 38px; height: 70px; }
 }
+
+
+/* Fourth revision: the brand mark is the only rocket visible before scrolling. */
+.rocket-guide {
+  opacity: 0;
+  transition: opacity .16s ease-out;
+  backface-visibility: hidden;
+}
+.rocket-guide img {
+  transform-origin: 50% 50%;
+  transition: transform .23s cubic-bezier(.22,.7,.24,1);
+  will-change: transform;
+}
+/* The scroll runway is entirely native: touch, trackpad, wheel and scrollbar
+   all manipulate one continuous progress value with no input suppression. */
+.experience.is-scroll { touch-action: pan-y; }
+.screen-wrap { touch-action: pan-y; }
+.scene { transition: none; }
+.scene.active .headline, .scene.active .scene-explainer { will-change: opacity; }
+@media (prefers-reduced-motion: reduce) {
+  .rocket-guide, .rocket-guide img { transition: none !important; }
+}
