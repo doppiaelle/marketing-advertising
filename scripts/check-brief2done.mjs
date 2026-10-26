@@ -75,6 +75,8 @@ assert.match(showcase,/\.experience\.is-scroll \.scene-viewport\s*\{[^}]*positio
 assert.match(showcase,/\.experience\.is-scroll \.scene-viewport #scenes \.scene,[\s\S]*?opacity: 1;[\s\S]*?visibility: visible;/,
   'All inactive and active scenes must remain painted, preventing abrupt mobile phase changes');
 assert.match(showcase,/\.mobile \.scene-viewport::before/, 'Top fade must be anchored to the scaled story viewport');
+assert.match(showcase,/\.scene-viewport #scenes\s*\{ z-index: 1; \}/, 'Moving panels must paint BEHIND the two fixed gradient overlays');
+assert.match(showcase,/\.mobile \.scene-viewport::after[\s\S]*?z-index: 4;/, 'Static fades must paint above the moving rail');
 assert.match(showcase,/\.mobile \.scene-viewport::after/, 'Bottom fade must be anchored to the scaled story viewport');
 assert.match(showcase,/\.screen-wrap::before,[\s\S]*?\.screen-wrap::after\s*\{\s*display: none;/,
   'Old outer mobile gradients must not conflict with the new inner fade');
