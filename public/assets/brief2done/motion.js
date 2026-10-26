@@ -18,7 +18,7 @@ const contentSources=new Set(shots.filter(s=>!s.closing).map(s=>s.source));
 let elapsed=0,index=-1,local=0,last=0,destroyed=false,ready=false,mobile=false,scale=1,frameHandle,lastSent=-Infinity,visible=true,targetElapsed=0,lastRendered=-1;
 const cleanup=[],frames=[],bounds=new Map(),nodes=[],frameScenes=new Map();
 let requestedSource=0,lastAction=-1;
-let chapterStart=performance.now(),gestureUntil=0,pendingDirection=0,touchStart=null;
+let chapterStart=performance.now(),gestureUntil=0,pendingDirection=0,touchStart=null,lastWheelAt=0;
 let flightFrom={x:0,y:0},flightTo={x:0,y:0},flightCurve=null;
 const flyer=$('#rocket-guide'),trail=$('#flight-trace'),flightPath=$('#flight-path');
 const targets=[[.12,.75],[.84,.15],[.12,.2],[.88,.78],[.13,.78],[.85,.20]];
@@ -147,7 +147,8 @@ function changeScene(next){
  $('.slip').classList.remove('on');
  if(!closing&&!reduced.matches)requestAnimationFrame(()=>$('.slip').classList.add('on'));
  $('#story-prev').disabled=index===0;
- $('#story-next-label').textContent=index===shots.length-2?'Get started':'Next';
+ $('#story-next-label').textContent=index===shots.length-2?'Finish':'Next';
+ $('#story-next').setAttribute('aria-label',index===shots.length-2?'Finish walkthrough':'Next step');
  $('#story-step-counter').textContent=String(Math.min(index+1,6)).padStart(2,'0')+' / 06';
  $('#story-step-name').textContent=shots[index].label;
  $('#story-step-progress').style.transform='scaleX('+Math.min(1,(index+1)/6)+')';
@@ -254,7 +255,10 @@ function onWheel(e){
  const dir=e.deltaY>0?1:-1;
  if((index===0&&dir<0)||(index===shots.length-1&&dir>0))return;
  e.preventDefault();
- requestStep(dir);
+ // Inertial trackpad events belong to one gesture, even if they last > 620ms.
+ const now=performance.now(),newGesture=now-lastWheelAt>440;
+ lastWheelAt=now;
+ if(newGesture)requestStep(dir);
 }
 function onTouchStart(e){
  if(!inStage()||e.touches.length!==1||e.target.closest('a,button')){touchStart=null;return;}
@@ -303,6 +307,7 @@ listen(window,'resize',()=>{resize();updateFlight(local);});
 listen(reduced,'change',()=>{render();});
 listen($('#story-prev'),'click',()=>requestStep(-1,true));
 listen($('#story-next'),'click',()=>requestStep(1,true));
+listen($('#story-replay'),'click',()=>{goTo(0);$('#story-next').focus({preventScroll:true});});
 for(const link of document.querySelectorAll('a[href="#closing"]'))listen(link,'click',e=>{
  if(document.body.classList.contains('motion-failed')){e.preventDefault();$('.fallback .launch-button').focus();return;}
  e.preventDefault();goTo(shots.length-1);local=1;chapterStart=performance.now()-shots[index].duration*1000;render();$('.closing-card .launch-button').focus({preventScroll:true});
