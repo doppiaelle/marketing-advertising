@@ -48,6 +48,8 @@ function boot({initialScroll=0,navigationType='navigate'}={}){
  const body=get('body');
  const document={
   body,querySelector:get,querySelectorAll(){return [];},
+  addEventListener(name,fn){if(!events.has('document:'+name))events.set('document:'+name,[]);events.get('document:'+name).push(fn);},
+  removeEventListener(name,fn){events.set('document:'+name,(events.get('document:'+name)||[]).filter(x=>x!==fn));},
   createElement(tag){const el=new MockElement(tag);el.tagName=tag;
    if(tag==='iframe'){
     el.contentWindow={postMessage(){}};
