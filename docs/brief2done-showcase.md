@@ -29,32 +29,33 @@ frame fades out and the next fades in while the rocket flies independently.
 The informational title, description and simulated actions keep their
 readable pace without being scrubbable into oblivion.
 
-## Rocket motion design
+## Rocket motion design — revision 26 October 2026
 
-The PNG source `public/assets/brief2done/brief2done-icon.png` is reused as
-an SVG image twice with different clip masks: one for the rocket body, the
-other for the **original orange/red flame**. No green replacement exhaust.
-The separate rocket sprite is smaller on both desktop and mobile.
+The speed of the flying rocket is now coupled **1:1 to the real scroll
+coordinate**. The old `part / .68` acceleration was removed: a slow drag
+tracks the finger and a slow trackpad movement advances the rocket slowly,
+without snapping forward after the gesture. Wheel input is accumulated from
+actual delta values, with larger sensitivity only for fast bursts; those
+bursts are capped to one chapter. Quick mobile flicks may finish the
+neighbouring chapter with a short navigation scroll, while slow swipes
+remain at the exact position released. Button/keyboard navigation still
+provides a concise animated jump.
 
-The flight is **one connected curve sequence**, rather than separate reset
-animations. Each chapter is made of six waypoints and Catmull–Rom curves
-sampled by travelled length to provide smooth, continuous motion around and
-between the panels. Routes alternate left/right and weave several times
-over/under the composition, with distinct mobile waypoints. The endpoint
-of segment N is exactly the starting point of segment N+1. Motion is
-driven by the browser's position within the chapter, but its flight
-progress finishes in the first 68% of a transition while the UI has more
-time to appear/read. With a normal wheel gesture the document advances
-one native chapter over a smooth 1-second scroll; touch gestures advance
-the same single chapter. Scrollbar dragging always maps to the same
-continuous global flight coordinate.
+The former five waypoint S-curves per chapter are gone. There is now
+**one cubic Bézier per chapter**, with its control handles positioned
+vertically below/above the anchors. This makes entry/exit tangents point
+downward and keeps the joins continuous as the virtual world moves down.
+The viewport follows the virtual journey at 95% of the document's motion:
+the rocket slowly descends on-screen across the six chapters rather than
+being teleported back to the top at each join. The trail is a fading
+19%-of-a-chapter window behind the current scroll position.
 
-The SVG trail is a short **sliding window of the recent route**, with a
-linear gradient from transparent to pale green. As the rocket moves, older
-segments vanish automatically; it does not draw a permanent line across the
-whole page. On the final approach it shrinks, returns to the actual closing
-brand icon and fades. Motion decorations disappear for the
-`prefers-reduced-motion` setting.
+A new, standalone `public/assets/brief2done/rocket-flight.svg` replaces
+the two cropped slices of the product PNG. It retains the teal, white and
+green language of the mark, with **one solid pointed flame silhouette**
+and a separate yellow inner cone. The tip cannot be cut off by the old
+body/fire clip paths. The original product lockups elsewhere on the page
+remain unchanged.
 
 ## UI and conversion
 
@@ -86,3 +87,11 @@ Manual browser checks recommended before merge:
 - Keyboard, skip link, reduced motion, static fallback and screen adapter.
 
 The GitHub Pages deploy workflow still runs only on `main`.
+
+### Follow-up review checklist
+
+- Slowly drag upward on a mobile screen and hold mid-gesture: rocket must stop at the corresponding path point without autonomous catch-up.
+- Fast swipe / fast mouse wheel: advance at most one chapter per burst, without a fixed one-second flight.
+- All six chapter endpoints: the rocket must point down, with no abrupt upward turn.
+- Verify the new rocket SVG's **single pointed orange flame** on mobile and desktop (no old clipping artifacts).
+- Drag the browser scrollbar directly: rocket position must match chapter progress exactly.

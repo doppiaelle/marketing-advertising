@@ -404,3 +404,21 @@ body { overscroll-behavior-y: none; }
   .rocket-guide { display: none; }
   .story-nav { backdrop-filter: none; }
 }
+
+/* Scroll-coupled rocket: native finger/trackpad speed with a compact, intact SVG. */
+.rocket-guide {
+  width: 48px;
+  height: 88px;
+  transform-origin: center center;
+  filter: drop-shadow(0 5px 8px #00190c99);
+}
+.rocket-guide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+@media (max-width: 729px) {
+  .rocket-guide { width: 38px; height: 70px; }
+}
