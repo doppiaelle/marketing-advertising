@@ -812,3 +812,62 @@ body { overscroll-behavior-y: none; }
 /* Never hide or re-create the static panels while Safari moves its browser
    toolbars. The only scroll-driven animation remains translate3d on the rail
    and rocket; address bar changes do not rescale 100svh. */
+
+
+/* Fixed chapter viewport: the sections are laid out once below one another.
+   The previous mobile fade was anchored to the outer screen-wrap, far from
+   the scaled 640×940 story artwork; inactive chapters also had opacity:0.
+   This wrapper stays STILL while #scenes moves upward behind its edges. */
+.experience.is-scroll .scene-viewport {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+}
+.experience.is-scroll .scene-viewport #scenes .scene,
+.experience.is-scroll .scene-viewport #scenes .scene.active {
+  opacity: 1;
+  visibility: visible;
+  transition: none;
+}
+/* The two gradients are static overlays, not masks animated with the rail.
+   This avoids opacity/compositing updates on all six mobile illustrations. */
+@media (max-width: 729px) {
+  .experience.is-scroll:not(.is-closing) .screen-wrap::before,
+  .experience.is-scroll:not(.is-closing) .screen-wrap::after {
+    display: none;
+  }
+  .experience.is-scroll .mobile .scene-viewport::before,
+  .experience.is-scroll .mobile .scene-viewport::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .experience.is-scroll .mobile .scene-viewport::before {
+    top: 0;
+    height: 115px;
+    background: linear-gradient(to bottom, #061b15 0%, rgb(6 27 21 / .93) 19%, rgb(6 27 21 / .5) 57%, transparent 100%);
+  }
+  .experience.is-scroll .mobile .scene-viewport::after {
+    bottom: 0;
+    height: 165px;
+    background: linear-gradient(to top, #061b15 0%, rgb(6 27 21 / .93) 17%, rgb(6 27 21 / .43) 65%, transparent 100%);
+  }
+  .experience.is-scroll .mobile .scene-viewport,
+  .experience.is-scroll .mobile .scene-viewport::before,
+  .experience.is-scroll .mobile .scene-viewport::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .experience.is-scroll .scene-viewport::before,
+  .experience.is-scroll .scene-viewport::after {
+    display: none;
+  }
+}
