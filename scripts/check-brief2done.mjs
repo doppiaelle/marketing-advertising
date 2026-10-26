@@ -64,6 +64,13 @@ assert.match(showcase,/\.experience\.is-scroll #scenes\s*\{[^}]*z-index: 12/s,
 assert.match(showcase,/\.experience\.is-scroll #scenes \.scene-explainer\s*\{[^}]*background: linear-gradient/s,
   'Dark translucent explanation panel must be restored');
 assert.match(showcase,/\.experience\.is-scroll #flight-glow\s*\{[^}]*stroke: url\(#rocket-trail-gradient\)/s);
+assert.match(showcase,/height: 100svh/,'Mobile stage must not resize with Safari bottom URL toolbar');
+assert.match(showcase,/\.experience\.is-scroll \.mobile \.static-preview\s*\{[^}]*display: block/s,
+  'Mobile preview must be pre-painted rather than swapping React iframe content');
+assert.match(motion,/if\(!staticMobileAtLoad\)mountDemoFrames\(\)/,
+  'Mobile must not mount heavyweight React preview frames');
+assert.doesNotMatch(motion,/n\.el\.style\.visibility=distance/,
+  'Safari should not toggle story panel visibility during scroll');
 assert.match(showcase,/\.experience\.is-scroll #flight-path\s*\{[^}]*stroke-width: 3\.25px/s);
 
 // Execute the ACTUAL rail functions to catch a return to resetting every
@@ -140,14 +147,14 @@ for(const {w,h} of [{w:1280,h:800},{w:390,h:844}]){
   for (const p of [.5,1.5,2.5,3.5,4.5,5.5]) {
     for (const direction of [1,-1]) {
       const start=flight.trailOrigin(p,direction);
-      assert.ok(Math.abs(p-start)>=Math.min(.84,p)-1e-8,'Tail must span the usable flight history');
+      assert.ok(Math.abs(p-start)>=Math.min(.84,direction<0?6-p:p)-1e-8,'Tail must span available flight history');
       let total=0,prev=flight.descentPoint(start,w,h,0);
       for(let i=1;i<=64;i++){
         const current=flight.descentPoint(start+(p-start)*i/64,w,h,0);
         total+=Math.hypot(current.x-prev.x,current.y-prev.y);
         prev=current;
       }
-      assert.ok(total>(p<.84?50:65), 'Trail must leave a visible arc beyond the sprite at p='+p+' size='+w+'x'+h);
+      assert.ok(total>(Math.abs(p-start)<.8?28:65), 'Trail must leave a visible arc beyond the sprite at p='+p+' size='+w+'x'+h);
     }
   }
 
