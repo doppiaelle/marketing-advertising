@@ -11,11 +11,11 @@ const source=await readFile(new URL('../public/assets/brief2done/motion.js',impo
 
 function boot({initialScroll=0,navigationType='navigate',width=1280,height=800}={}){
  const events=new Map(),elements=new Map(),iframes=[],rafs=[],timers=[];
- let scrollY=initialScroll,seq=1;
+ let scrollY=initialScroll,seq=1,clock=1000;
  class MockElement {
   constructor(key='element'){
    this.key=key;this.children=[];this.nodes=new Map();this.dataset={};
-   this.attributes={};this.clientWidth=width;this.clientHeight=height;
+   this.attributes={};this.clientWidth=width;this.clientHeight=height;this.offsetWidth=48;this.offsetHeight=88;
    this.classList={values:new Set(),add(...x){x.forEach(z=>this.values.add(z));},
     remove(...x){x.forEach(z=>this.values.delete(z));},
     contains(x){return this.values.has(x);},
@@ -69,12 +69,18 @@ function boot({initialScroll=0,navigationType='navigate',width=1280,height=800}=
   get scrollY(){return scrollY;},
   set scrollY(n){scrollY=n;}
  };
+ const visualViewport={
+  width,height,
+  addEventListener(name,fn){const key='viewport:'+name;if(!events.has(key))events.set(key,[]);events.get(key).push(fn);},
+  removeEventListener(name,fn){const key='viewport:'+name;events.set(key,(events.get(key)||[]).filter(x=>x!==fn));}
+ };
+ window.visualViewport=visualViewport;
  window.parent=window;
  const reduced={matches:false,addEventListener(){},removeEventListener(){}};
  const context={
   document,window,location:window.location,history:window.history,
   matchMedia(){return reduced;},innerHeight:height,Math,Set,Map,Date,Number,
-  performance:{now(){return 1000;},getEntriesByType(){return [{type:navigationType}];}},
+  performance:{now(){return clock;},getEntriesByType(){return [{type:navigationType}];}},
   ResizeObserver:class{observe(){}disconnect(){}},
   IntersectionObserver:class{observe(){}disconnect(){}},
   CustomEvent:class{constructor(type,opts){this.type=type;this.detail=opts?.detail;}},
@@ -86,7 +92,8 @@ function boot({initialScroll=0,navigationType='navigate',width=1280,height=800}=
  };
  runInNewContext(source,context,{filename:'motion.js',timeout:3000});
  return {window,body,get,iframes,events,scroll:()=>scrollY,
-   changeBrowserToolbar(nextHeight){window.innerHeight=nextHeight;context.innerHeight=nextHeight;for(const fn of events.get('resize')||[])fn();},
+   changeBrowserToolbar(nextHeight){window.innerHeight=nextHeight;context.innerHeight=nextHeight;visualViewport.height=nextHeight;for(const fn of events.get('viewport:resize')||[])fn();for(const fn of events.get('resize')||[])fn();},
+   advanceTime(ms){clock+=ms;},
    sendReady(scene){
     for(const iframe of iframes)(events.get('message')||[]).forEach(fn=>
      fn({source:iframe.contentWindow,data:{
@@ -157,17 +164,30 @@ for(const [i,panel] of phone.get('#scenes').children.entries()){
  assert.ok(panel.innerHTML.includes('static-preview'),'Static panel '+i+' must already exist');
 }
 assert.ok(phone.get('#loading').classList.contains('hidden'),'Mobile static content must not wait for async frames');
+const payment=phone.get('#scenes').children[5].innerHTML;
+for(const expected of ['static-payment-card','€450','Payment','Reported by client','Confirm receipt','outside Brief2Done']){
+ assert.ok(payment.includes(expected),'Chapter six payment mock must visibly explain '+expected);
+}
 phone.window.Brief2DoneMotion.setProgress(2.25/6);
 assert.equal(phone.window.Brief2DoneMotion.getState().scene,2);
 const beforeRunway=phone.get('#experience').style['--journey-height'];
 const beforeCanvas=phone.get('#canvas').style.transform;
-const beforeScroll=phone.scroll();
+// Keep all fixed layout measurements from before the URL bar changes.
 // Safari's address-bar collapse expands its visual viewport without changing
 // the small stable layout viewport: avoid the forced resize that caused jumps.
 phone.changeBrowserToolbar(830);
+const sprite=phone.get('#rocket-guide').querySelector('img');
+const frozenHeading=sprite.style.transform;
+const posBefore=phone.get('#rocket-guide').style.transform;
+phone.window.Brief2DoneMotion.setProgress(2.4/6);
+assert.equal(sprite.style.transform,frozenHeading,'Banking freezes while the URL bar animates');
+assert.notEqual(phone.get('#rocket-guide').style.transform,posBefore,'Position must still follow scroll without a dead gesture');
+phone.advanceTime(250);
+phone.window.Brief2DoneMotion.setProgress(2.6/6);
+assert.notEqual(sprite.style.transform,frozenHeading,'Banking resumes once toolbar settles');
 assert.equal(phone.get('#experience').style['--journey-height'],beforeRunway);
 assert.equal(phone.get('#canvas').style.transform,beforeCanvas);
-assert.equal(phone.scroll(),beforeScroll);
+assert.ok(Math.abs(phone.scroll()-2.6*760)<.01,'Toolbar must not introduce chapter snapping');
 phone.window.Brief2DoneMotion.setProgress(5.5/6);
 assert.ok(phone.get('#scenes').style.transform.includes('translate3d'),
  'The preloaded mobile rail must move with native scroll');

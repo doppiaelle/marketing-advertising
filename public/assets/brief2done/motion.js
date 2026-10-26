@@ -10,16 +10,31 @@ const shots=[
  {source:1,label:'Pitch your skills',duration:5,title:'Pitch your skills.<br><em>Get noticed.</em>',description:'Show what you can do, apply for a brief and take the next step.',titleMode:'rise',beats:[[0,0],[.2,.12],[.47,.46],[.68,.69],[.88,.82],[1,1]]},
  {source:8,label:'Agree on clear terms',duration:4.8,title:'Clear terms.<br><em>Confident start.</em>',description:'Align on scope and expectations before the work begins.',titleMode:'center',beats:[[0,0],[.3,.33],[.7,.72],[1,1]]},
  {source:2,label:'Deliver your work',duration:5,title:'Make it.<br><em>Deliver it.</em>',description:'Turn the brief into work your client can review and approve.',titleMode:'rise',beats:[[0,0],[.18,.1],[.48,.49],[.73,.74],[.87,.84],[1,1]]},
- {source:5,label:'Get work approved',duration:5.2,title:'Work approved.<br><em>What’s next?</em>',description:'See the outcome confirmed, and bring that experience to your next opportunity.',titleMode:'center',beats:[[0,0],[.25,.3],[.58,.56],[.76,.73],[.92,.91],[1,1]]},
+ {source:5,label:'Get work approved',duration:5.2,title:'Work approved.<br><em>What’s next?</em>',description:'Work approved? Review the payment reported by your client and confirm only when received.',titleMode:'center',beats:[[0,0],[.25,.3],[.58,.56],[.76,.73],[.92,.91],[1,1]]},
  {source:null,label:'Create your account',duration:3.5,closing:true}
 ];
 const total=shots.reduce((n,s)=>n+s.duration,0),starts=shots.map((s,i)=>shots.slice(0,i).reduce((a,b)=>a+b.duration,0));
 // The six mobile previews are static markup created once, not heavy React
 // applications remounted or repainted during a Safari scroll.
-const staticPreviews=[["Open briefs","Recommended opportunities","Website for a creative studio","A responsive website for an independent creative studio.","Digital & IT · Studio Forma","€450","Brand identity for a new venture","Creative · €600"],["People and companies","Discover collaborators","Alex Morgan","Brand designer & illustrator","Verified results · Open to new work","View profile","People and companies","Find people and teams for your next project"],["Applications","Show your skills","Your application","Introduce yourself and explain why you are the right fit.","Website for a creative studio","Application sent","Open opportunity","Brief · Requirements · Milestones"],["Agreements","Clear terms, shared direction","Project terms","Scope and deliverables agreed before work begins.","Final delivery · Rights · Review rounds","Accept and start","Studio Forma → Collaborator","Terms, schedule and responsibilities"],["Delivery","Work ready for review","Complete website","Responsive layout · Home, Services and Contact pages.","Round 1 · In review","Work submitted","Project agreement","Client · €450 · 2 review rounds"],["Confirmation","Results and next steps","Work approved","The client has confirmed the completed deliverables.","Your work history, clearly recorded","Confirmed","Project complete","Approval · Payment recorded separately"]];
-function staticPreviewMarkup(d){
+const staticPreviews=[["Open briefs","Recommended opportunities","Website for a creative studio","A responsive website for an independent creative studio.","Digital & IT · Studio Forma","€450","Brand identity for a new venture","Creative · €600"],["People and companies","Discover collaborators","Alex Morgan","Brand designer & illustrator","Verified results · Open to new work","View profile","People and companies","Find people and teams for your next project"],["Applications","Show your skills","Your application","Introduce yourself and explain why you are the right fit.","Website for a creative studio","Application sent","Open opportunity","Brief · Requirements · Milestones"],["Agreements","Clear terms, shared direction","Project terms","Scope and deliverables agreed before work begins.","Final delivery · Rights · Review rounds","Accept and start","Studio Forma → Collaborator","Terms, schedule and responsibilities"],["Delivery","Work ready for review","Complete website","Responsive layout · Home, Services and Contact pages.","Round 1 · In review","Work submitted","Project agreement","Client · €450 · 2 review rounds"],["Payment","Payment after approval","Payment · €450","Client reported the payment. Confirm only once you have received it.","Paid outside Brief2Done · recorded here","Confirm receipt","Work approved","Client approved the completed deliverables"]];
+function staticPreviewMarkup(d,chapter){
  const esc=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
- return '<div class="static-preview" aria-hidden="true"><div class="static-back-card"><span class="static-eyebrow">'+esc(d[0])+'</span><strong>'+esc(d[6])+'</strong><p>'+esc(d[7])+'</p><div class="static-mock-line"></div><div class="static-mock-line short"></div></div><div class="static-front-card"><span class="static-eyebrow">'+esc(d[1])+'</span><strong>'+esc(d[2])+'</strong><p>'+esc(d[3])+'</p><div class="static-meta">'+esc(d[4])+'</div><div class="static-card-bottom"><span class="static-check">✓</span>'+esc(d[5])+'</div></div></div>';
+ const back='<div class="static-back-card"><span class="static-eyebrow">'+esc(d[0])+'</span><strong>'+esc(d[6])+'</strong><p>'+esc(d[7])+'</p><div class="static-mock-line"></div><div class="static-mock-line short"></div></div>';
+ if(chapter===5){
+  // The payment is a client-reported OFF-platform event, not a guaranteed
+  // transfer or an assertion that the collaborator has already been paid.
+  return '<div class="static-preview static-payment-preview" aria-hidden="true">'+back+
+   '<div class="static-front-card static-payment-card">'+
+    '<div class="static-payment-top"><span class="static-eyebrow">Payment</span><span class="static-payment-icon">€</span></div>'+
+    '<strong class="static-payment-amount">€450 <small>Payment</small></strong>'+
+    '<div class="static-payment-status"><span class="static-payment-dot"></span>Reported by client</div>'+
+    '<p>Paid outside Brief2Done. Confirm only after receiving it.</p>'+
+    '<div class="static-payment-action">✓ &nbsp; Confirm receipt</div>'+
+    '<div class="static-payment-note">Payment status is recorded here after your confirmation.</div>'+
+   '</div></div>';
+ }
+ return '<div class="static-preview" aria-hidden="true">'+back+
+  '<div class="static-front-card"><span class="static-eyebrow">'+esc(d[1])+'</span><strong>'+esc(d[2])+'</strong><p>'+esc(d[3])+'</p><div class="static-meta">'+esc(d[4])+'</div><div class="static-card-bottom"><span class="static-check">✓</span>'+esc(d[5])+'</div></div></div>';
 }
 const contentSources=new Set(shots.filter(s=>!s.closing).map(s=>s.source));
 let elapsed=0,index=-1,local=0,last=0,destroyed=false,ready=false,mobile=false,scale=1,frameHandle,lastSent=-Infinity,visible=true,targetElapsed=0,lastRendered=-1;
@@ -51,7 +66,7 @@ function switchScreens(source){requestedSource=source;frameScenes.clear();lastAc
 shots.forEach((shot,i)=>{
  if(shot.closing){nodes.push({el:null,pair:[]});return;}
  const el=document.createElement('section');el.className='scene';el.dataset.index=i;el.dataset.titleMode=shot.titleMode;el.setAttribute('aria-hidden','true');
- el.innerHTML='<div class="scene-eyebrow">STEP '+String(i+1).padStart(2,'0')+' / 06</div><div class="headline-mask"><'+(i===0?'h1':'h2')+' class="headline">'+shot.title+'</'+(i===0?'h1':'h2')+'></div><p class="scene-explainer">'+shot.description+'</p>'+staticPreviewMarkup(staticPreviews[i])+'<div class="intertitle" aria-hidden="true"><div>'+shot.title+'</div></div>';
+ el.innerHTML='<div class="scene-eyebrow">STEP '+String(i+1).padStart(2,'0')+' / 06</div><div class="headline-mask"><'+(i===0?'h1':'h2')+' class="headline">'+shot.title+'</'+(i===0?'h1':'h2')+'></div><p class="scene-explainer">'+shot.description+'</p>'+staticPreviewMarkup(staticPreviews[i],i)+'<div class="intertitle" aria-hidden="true"><div>'+shot.title+'</div></div>';
  $('#scenes').appendChild(el);
  nodes.push({el,primary:composition.querySelector('.primary'),secondary:composition.querySelector('.secondary'),headline:el.querySelector('.headline'),explainer:el.querySelector('.scene-explainer'),intertitle:el.querySelector('.intertitle'),composition,pair:frames});
 });
@@ -166,6 +181,7 @@ const chapterCount=shots.length-1;
 let scrollFrame=null,scrollAnim=null,previousFlightProgress=0,flightDirection=1,mirrorMix=0,lastFlightFrame=0;
 let chapterStartedAt=performance.now(),storyHeight=0,stageH=0;
 let stableWidth=0,stableHeight=0;
+let chromeSettlingUntil=0;
 let finalUnlocked=false;
 const smoother=t=>{t=clamp(t);return t*t*(3-2*t);};
 const screen=$('.screen-wrap');
@@ -240,10 +256,13 @@ function activate(next){
 // then one to the left, repeated across the six chapters. The page's actual
 // section rail rises behind the ship. There are NO jumps, viewport resets,
 // independent looping y-motion or time-based movement.
+// Wider arcs stay inside both the mobile and desktop viewports.
+// Half a chapter travels from the centre toward a safe side margin.
+function flightAmplitude(w){return Math.min(w*(w<730?.225:.29),w<730?125:390);}
 function descentPoint(progress,w,h,mirror=0){
  const p=clamp(progress,0,chapterCount);
  const side=1-2*mirror;
- const swing=Math.min(w*(w<730?.115:.17),215);
+ const swing=flightAmplitude(w);
  return {
   x:w*.5+side*swing*Math.sin(Math.PI*p),
   y:h*(.28+.45*p/chapterCount)
@@ -252,7 +271,7 @@ function descentPoint(progress,w,h,mirror=0){
 function descentTangent(progress,w,h,mirror=0){
  const p=clamp(progress,0,chapterCount);
  const side=1-2*mirror;
- const swing=Math.min(w*(w<730?.115:.17),215);
+ const swing=flightAmplitude(w);
  return {
   x:side*swing*Math.PI*Math.cos(Math.PI*p),
   y:h*.45/chapterCount
@@ -307,7 +326,9 @@ function drawFlight(progress){
  if(Math.abs(delta)>.00015)flightDirection=delta>0?1:-1;
  previousFlightProgress=progress;
  const reverse=flightDirection<0?1:0;
- mirrorMix+=(reverse-mirrorMix)*(1-Math.exp(-dt/160));
+ // During Safari's URL-bar resize, keep position scroll-linked but suspend
+ // decorative banking/mirroring until the visual viewport settles.
+ if(!mobile||now>=chromeSettlingUntil)mirrorMix+=(reverse-mirrorMix)*(1-Math.exp(-dt/160));
  const point=flightPoint(progress);
  // Nose follows the actual horizontal direction of the descent,
  // while the reverse lane points back up along its mirrored trajectory.
@@ -315,7 +336,7 @@ function drawFlight(progress){
  const docking=ease((progress-(chapterCount-.25))/.25);
  const launch=.6+.4*ease(progress/.24),size=launch*(1-.48*docking);
  tip.style.transform='translate3d('+(point.x-tip.offsetWidth/2)+'px,'+(point.y-tip.offsetHeight/2)+'px,0) scale('+size+')';
- tip.querySelector('img').style.transform='rotate('+(angle*(1-docking))+'deg)';
+ if(!mobile||now>=chromeSettlingUntil)tip.querySelector('img').style.transform='rotate('+(angle*(1-docking))+'deg)';
  const depart=ease((progress-.025)/.12);
  tip.style.opacity=String(depart*(1-ease((progress-(chapterCount-.065))/.065)));
  // The trail is a short, fading slice of the SAME serpentine path; reverse
@@ -426,9 +447,25 @@ function onResize(){
  layoutRail();
  render();
 }
+// Safari and Chromium mobile can vary visualViewport.height when their URL
+// controls open/close. The 100svh stage remains stable; only the decorative
+// heading interpolation pauses briefly. Native scroll and the rising rail NEVER
+// pause, so no extra dead gestures or snapped chapter positions are introduced.
+const visualViewport=window.visualViewport;
+let lastVisualWidth=visualViewport?.width||0,lastVisualHeight=visualViewport?.height||0;
+function onVisualViewportResize(){
+ if(!mobile||!visualViewport)return;
+ const w=visualViewport.width,h=visualViewport.height;
+ const toolbarOnly=Math.abs(w-lastVisualWidth)<3&&Math.abs(h-lastVisualHeight)>4&&Math.abs(screen.clientHeight-stableHeight)<2;
+ lastVisualWidth=w;lastVisualHeight=h;
+ if(toolbarOnly)chromeSettlingUntil=performance.now()+220;
+}
 function tick(){
  if(destroyed)return;
- if(!document.hidden&&visible)render();
+ // On phones the static rail is painted by the native scroll listener.
+ // Avoid a full SVG + DOM rewrite 60 times/second while the user is idle.
+ const morphNeeded=Math.abs(mirrorMix-(flightDirection<0?1:0))>.015;
+ if(!document.hidden&&visible&&(!mobile||performance.now()>=chromeSettlingUntil&&morphNeeded))render();
  frameHandle=requestAnimationFrame(tick);
 }
 
@@ -438,6 +475,7 @@ function tick(){
 listen(window,'scroll',onManualScroll,{passive:true});
 listen(window,'pageshow',onManualScroll);
 listen(window,'resize',onResize);
+if(visualViewport)listen(visualViewport,'resize',onVisualViewportResize,{passive:true});
 listen(reduced,'change',render);
 listen($('#story-prev'),'click',()=>scrollToStep(index-1));
 listen($('#story-next'),'click',()=>scrollToStep(index+1));
