@@ -65,6 +65,21 @@ assert.match(showcase,/\.experience\.is-scroll #scenes \.scene-explainer\s*\{[^}
   'Dark translucent explanation panel must be restored');
 assert.match(showcase,/\.experience\.is-scroll #flight-glow\s*\{[^}]*stroke: url\(#rocket-trail-gradient\)/s);
 assert.match(showcase,/height: 100svh/,'Mobile stage must not resize with Safari bottom URL toolbar');
+assert.match(showcase,/\.screen-wrap::before/, 'A fixed gradient fades sections leaving the top edge');
+assert.match(showcase,/\.screen-wrap::after/, 'A fixed gradient fades sections entering from below');
+assert.doesNotMatch(motion,/n\.el\.style\.opacity=String\(fade\)/,
+  'Never animate opacity for the entire preloaded rail per frame');
+assert.match(motion,/chromeSettlingUntil=performance\.now\(\)\+220/,
+  'Mobile browser chrome changes briefly suspend decorative bank adjustments');
+assert.match(motion,/const visualViewport=window\.visualViewport;/);
+assert.match(motion,/if\(!mobile\|\|now>=chromeSettlingUntil\)/,
+  'The rocket remains scroll-driven even if visual viewport chrome is settling');
+assert.match(showcase,/\.mobile \.static-payment-amount/,
+  'Payment in chapter six must have a prominent numeric amount');
+assert.match(motion,/Reported by client/);
+assert.match(motion,/Paid outside Brief2Done/);
+assert.match(motion,/Confirm receipt/);
+
 assert.match(showcase,/\.experience\.is-scroll \.mobile \.static-preview\s*\{[^}]*display: block/s,
   'Mobile preview must be pre-painted rather than swapping React iframe content');
 assert.match(motion,/if\(!staticMobileAtLoad\)mountDemoFrames\(\)/,
@@ -97,21 +112,26 @@ for(const h of [760,940]){
 // Execute the source geometry rather than a hand-written approximation.
 // Each chapter is one alternating horizontal swing. Its Y coordinate NEVER
 // goes upward on the forward journey (and ascends on rewind).
-const geoStart=motion.indexOf('function descentPoint(');
+const geoStart=motion.indexOf('function flightAmplitude(');
 const geoEnd=motion.indexOf('function rocketStart(){',geoStart);
 assert.ok(geoStart>0&&geoEnd>geoStart);
 const flight=runInNewContext(
   'const chapterCount=6;const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));\n'+
-  motion.slice(geoStart,geoEnd)+'\n({descentPoint,descentTangent,rocketHeading,trailOrigin})',{Math}
+  motion.slice(geoStart,geoEnd)+'\n({flightAmplitude,descentPoint,descentTangent,rocketHeading,trailOrigin})',{Math}
 );
 for(const {w,h} of [{w:1280,h:800},{w:390,h:844}]){
+  const amplitude=flight.flightAmplitude(w);
+  const oldAmplitude=Math.min(w*(w<730?.115:.17),215);
+  assert.ok(amplitude>oldAmplitude*1.45,'Both desktop and mobile should be substantially wider');
+  assert.ok(amplitude<w*.34,'Do not clip the rocket near either viewport edge');
+
   let previous=-Infinity;
   for(let j=0;j<=1200;j++){
     const p=6*j/1200;
     const point=flight.descentPoint(p,w,h,0);
     assert.ok(point.y>previous-1e-8,'Rocket must never rise in the viewport');
     previous=point.y;
-    assert.ok(point.x>=w*.26&&point.x<=w*.74,'Stay clear of screen edges');
+    assert.ok(point.x>=w*.17&&point.x<=w*.83,'Wider arcs must still leave safe side margins');
     const reversed=flight.descentPoint(p,w,h,1);
     assert.ok(Math.abs(reversed.y-point.y)<1e-8,'Return lane preserves vertical travel');
     assert.ok(Math.abs(reversed.x+point.x-w)<1e-7,'Return path mirrors x coordinates');
