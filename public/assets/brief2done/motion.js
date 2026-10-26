@@ -126,212 +126,334 @@ function sendProgress(){
  for(const f of frames)f.contentWindow?.postMessage({type:'brief2done:frame',progress:action},location.origin);
  lastSent=now;lastAction=action;
 }
-function changeScene(next){
+// Native scroll position and chapter are one source of truth. The stage remains
+// sticky over the entire six-chapter journey (and its closing landing).
+// Dragging the scrollbar scrubs the same flight instead of cutting off the stage.
+const chapterCount=shots.length-1;
+const flightPaths=[];
+let pathSize='',wheelLast=0,touchPoint=null,scrollFrame=null,scrollAnim=null;
+let chapterStartedAt=performance.now(),storyHeight=0,stageH=0;
+const smoother=t=>{t=clamp(t);return t*t*(3-2*t);};
+const screen=$('.screen-wrap');
+const logo=$('.closing-brand-icon');
+const tip=$('#rocket-guide');
+const trailSvg=$('#flight-trace'),trailPath=$('#flight-path'),trailGradient=$('#rocket-trail-gradient');
+
+function storyTop(){
+ return $('#experience').getBoundingClientRect().top+window.scrollY;
+}
+function scrollProgress(){
+ const h=stageH||Math.max(1,screen.clientHeight);
+ return clamp((window.scrollY-storyTop())/h,0,chapterCount);
+}
+function inStage(){
+ if(document.body.classList.contains('motion-failed'))return false;
+ const b=$('#experience').getBoundingClientRect();
+ return b.top<=2&&b.bottom>=screen.clientHeight-3;
+}
+function sizeRunway(){
+ const height=Math.max(1,screen.clientHeight);
+ if(stageH!==height){
+  const ratio=stageH?scrollProgress()/chapterCount:0;
+  stageH=height;
+  storyHeight=stageH*(chapterCount+1);
+  $('#experience').style.setProperty('--journey-height',storyHeight+'px');
+  // A resize must preserve the chapter even when mobile browser chrome changes.
+  if(ratio>0&&inStage())window.scrollTo({top:storyTop()+ratio*chapterCount*stageH,behavior:'instant'});
+  pathSize='';
+ }
+}
+function chapterFor(p){return clamp(Math.round(p),0,chapterCount);}
+function activate(next){
+ next=clamp(next,0,chapterCount);
  if(index===next)return;
  if(index>=0&&nodes[index].el){
   nodes[index].el.classList.remove('active');
   nodes[index].el.setAttribute('aria-hidden','true');
  }
  index=next;
+ local=0;
+ chapterStartedAt=performance.now();
  const closing=!!shots[index].closing;
  if(!closing)switchScreens(shots[index].source);
  for(const f of frames)f.contentWindow?.postMessage({type:'brief2done:visibility',visible:!closing},location.origin);
- if(closing){$('#loading').classList.add('hidden');$('#loading').setAttribute('aria-hidden','true');}
+ if(closing){
+  $('#loading').classList.add('hidden');
+  $('#loading').setAttribute('aria-hidden','true');
+ }
  if(nodes[index].el){
-  nodes[index].el.classList.add('active');nodes[index].el.setAttribute('aria-hidden','false');
+  nodes[index].el.classList.add('active');
+  nodes[index].el.setAttribute('aria-hidden','false');
  }
  $('#experience').classList.toggle('is-closing',closing);
- if(!closing)$('#experience').classList.remove('rocket-docked');
+ $('#experience').classList.remove('rocket-docked');
  $('#closing').setAttribute('aria-hidden',String(!closing));
  $('#closing').inert=!closing;
  $('#announcement').textContent=closing?'Create your Brief2Done account.':shots[index].label;
  $('.slip').classList.remove('on');
  if(!closing&&!reduced.matches)requestAnimationFrame(()=>$('.slip').classList.add('on'));
  $('#story-prev').disabled=index===0;
- $('#story-next-label').textContent=index===shots.length-2?'Finish':'Next';
- $('#story-next').setAttribute('aria-label',index===shots.length-2?'Finish walkthrough':'Next step');
+ $('#story-next').disabled=closing;
+ $('#story-next').setAttribute('aria-label',closing?'End of walkthrough':'Next chapter');
  $('#story-step-counter').textContent=String(Math.min(index+1,6)).padStart(2,'0')+' / 06';
  $('#story-step-name').textContent=shots[index].label;
- $('#story-step-progress').style.transform='scaleX('+Math.min(1,(index+1)/6)+')';
- $('#story-hint').textContent=index===0?'Scroll to begin · One step at a time':'Scroll to continue · Or use the arrows';
+ $('#story-step-progress').textContent=String(Math.round((index+1)/shots.length*100))+'%';
  const detail={scene:index,closing};
  window.dispatchEvent(new CustomEvent('brief2done:scene-change',{detail}));
  if(window.parent!==window)window.parent.postMessage({type:'brief2done:scene-change',...detail},'*');
 }
+function rocketStart(){
+ const view=screen.getBoundingClientRect(),b=$('.story-brand-icon').getBoundingClientRect();
+ return{x:b.left-view.left+b.width*.8,y:b.top-view.top+b.height*.25};
+}
+function rocketEnd(){
+ const view=screen.getBoundingClientRect(),b=logo.getBoundingClientRect();
+ return{x:b.left-view.left+b.width*.77,y:b.top-view.top+b.height*.27};
+}
+function catmull(a,b,c,d,t){
+ const t2=t*t,t3=t2*t;
+ return {
+  x:.5*((2*b.x)+(-a.x+c.x)*t+(2*a.x-5*b.x+4*c.x-d.x)*t2+(-a.x+3*b.x-3*c.x+d.x)*t3),
+  y:.5*((2*b.y)+(-a.y+c.y)*t+(2*a.y-5*b.y+4*c.y-d.y)*t2+(-a.y+3*b.y-3*c.y+d.y)*t3)
+ };
+}
+function buildFlight(){
+ const w=screen.clientWidth,h=screen.clientHeight;
+ if(!w||!h)return;
+ const mobile=w<730;
+ const landmarks=[
+  rocketStart(),
+  {x:w*.16,y:h*.81},
+  {x:w*.83,y:h*.75},
+  {x:w*.17,y:h*.83},
+  {x:w*.81,y:h*.75},
+  {x:w*.15,y:h*.84},
+  rocketEnd()
+ ];
+ flightPaths.length=0;
+ for(let i=0;i<chapterCount;i++){
+  const flip=i%2===0;
+  const targets=mobile
+   ? [[flip?.15:.82,.13],[flip?.82:.16,.30],[flip?.19:.8,.48],[flip?.84:.15,.65],[flip?.32:.69,.76]]
+   : [[flip?.17:.82,.14],[flip?.82:.18,.28],[flip?.2:.81,.44],[flip?.85:.16,.61],[flip?.31:.7,.75]];
+  // A full series of sweeping S-curves per chapter, without resetting the
+  // rocket at a scene boundary: end of i === start of i+1.
+  const pts=[landmarks[i],...targets.map(([x,y])=>({x:x*w,y:y*h})),landmarks[i+1]];
+  const samples=[pts[0]];
+  for(let j=0;j<pts.length-1;j++){
+   const a=pts[Math.max(0,j-1)],b=pts[j],d=pts[j+1],e=pts[Math.min(pts.length-1,j+2)];
+   for(let k=1;k<=22;k++)samples.push(catmull(a,b,d,e,k/22));
+  }
+  const lengths=[0];
+  for(let j=1;j<samples.length;j++){
+   const d=Math.hypot(samples[j].x-samples[j-1].x,samples[j].y-samples[j-1].y);
+   lengths.push(lengths[j-1]+d);
+  }
+  flightPaths.push({samples,lengths,total:lengths[lengths.length-1]});
+ }
+ trailSvg.setAttribute('viewBox','0 0 '+w+' '+h);
+ pathSize=w+'x'+h;
+}
+function sampleFlight(globalPhase){
+ if(!flightPaths.length)return{x:0,y:0};
+ const i=clamp(Math.floor(globalPhase),0,chapterCount-1);
+ const u=globalPhase>=chapterCount?1:clamp(globalPhase-i);
+ const route=flightPaths[i];
+ const at=u*route.total;
+ let lo=0,hi=route.lengths.length-1;
+ while(lo<hi){const m=(lo+hi)>>1;if(route.lengths[m]<at)lo=m+1;else hi=m;}
+ const j=Math.max(1,lo),s0=route.lengths[j-1],s1=route.lengths[j];
+ const blend=s1===s0?0:(at-s0)/(s1-s0);
+ const a=route.samples[j-1],b=route.samples[j];
+ return{x:a.x+(b.x-a.x)*blend,y:a.y+(b.y-a.y)*blend};
+}
+function drawFlight(progress){
+ if(reduced.matches){
+  tip.style.opacity='0';
+  trailSvg.style.opacity='0';
+  return;
+ }
+ if(pathSize!==screen.clientWidth+'x'+screen.clientHeight)buildFlight();
+ if(!flightPaths.length)return;
+ const segment=Math.min(chapterCount-1,Math.floor(progress));
+ const part=progress>=chapterCount?1:progress-segment;
+ // Rocket finishes most of its lap before the accompanying title / app motion.
+ const fast=clamp(part/.68);
+ const flown=segment+smoother(fast);
+ const position=sampleFlight(flown);
+ const ahead=sampleFlight(Math.min(chapterCount,flown+.009));
+ const behind=sampleFlight(Math.max(0,flown-.009));
+ const angle=Math.atan2(ahead.y-behind.y,ahead.x-behind.x)*180/Math.PI+45;
+ const docking=ease((progress-(chapterCount-.25))/.25);
+ const size=1-.52*docking;
+ tip.style.transform='translate3d('+(position.x-tip.offsetWidth/2)+'px,'+(position.y-tip.offsetHeight/2)+'px,0) rotate('+angle+'deg) scale('+size+')';
+ tip.style.opacity=String(1-ease((progress-(chapterCount-.055))/.055));
+ const start=Math.max(0,flown-.17);
+ const n=32,points=[];
+ for(let j=0;j<=n;j++)points.push(sampleFlight(start+(flown-start)*j/n));
+ const first=points[0],lastPoint=points[points.length-1];
+ trailPath.setAttribute('d',points.map((p,j)=>(j?'L ':'M ')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' '));
+ trailGradient.setAttribute('x1',first.x);
+ trailGradient.setAttribute('y1',first.y);
+ trailGradient.setAttribute('x2',lastPoint.x);
+ trailGradient.setAttribute('y2',lastPoint.y);
+ trailSvg.style.opacity=String(1-docking*.75);
+ $('#experience').classList.toggle('rocket-docked',docking>.94);
+}
 function render(){
  if(index<0)return;
- if(shots[index].closing){
-  const enter=reduced.matches?1:ease(local/.24);
-  $('#closing').style.opacity=String(enter);
-  $('#closing').style.transform='scale('+(1.04-.04*enter)+')';
+ const p=scrollProgress();
+ const nearest=chapterFor(p);
+ if(nearest!==index)activate(nearest);
+ const shot=shots[index];
+ local=ready?clamp((performance.now()-chapterStartedAt)/(shot.duration*1000)):0;
+ // An unbroken pinned stage: screenshots fade during the travelling portion;
+ // the rocket keeps moving on its independent, faster trajectory.
+ const fraction=p-Math.floor(p),travelling=Math.abs(p-Math.round(p))>.015;
+ let opacity=1;
+ if(travelling){
+  opacity=fraction<.5?1-ease((fraction-.32)/.18):ease((fraction-.5)/.22);
+ }
+ $('#canvas').style.opacity=String(clamp(opacity));
+ if(shot.closing){
+  const enter=reduced.matches?1:ease(local/.32);
+  $('#closing').style.opacity=String(enter*clamp(opacity));
+  $('#closing').style.transform='scale('+(1.025-.025*enter)+')';
   $('.cursor').classList.remove('visible');
-  const arrival=reduced.matches?1:ease((local-.06)/.38);
   const card=$('.closing-card');
-  card.style.opacity=String(arrival);
-  card.style.transform='translate3d(0,'+((1-arrival)*Math.min(innerHeight*.62,520))+'px,0) scale('+(.94+.06*arrival)+')';
-  $('#closing').inert=arrival<.85;
-  $('.closing-brand-icon').style.opacity=String(reduced.matches?1:.32+.68*ease((local-.7)/.25));
-  $('#experience').classList.toggle('rocket-docked',local>.92);
+  card.style.opacity=String(enter);
+  card.style.transform='translate3d(0,'+((1-enter)*Math.min(innerHeight*.27,180))+'px,0)';
+  $('#closing').inert=enter<.8;
+  logo.style.opacity=String(reduced.matches?1:.45+.55*ease((local-.75)/.2));
  }else{
-  paintTitle(nodes[index],local,shots[index].titleMode);
+  paintTitle(nodes[index],local,shot.titleMode);
   sendProgress();
   compose(index,local);
  }
- updateFlight(local);
+ drawFlight(p);
 }
-function cubic(a,b,c,d,t){
- const u=1-t;
- return u*u*u*a+3*u*u*t*b+3*u*t*t*c+t*t*t*d;
-}
-function flightAnchor(){
- const wrap=$('.screen-wrap').getBoundingClientRect(),img=$('.story-brand-icon').getBoundingClientRect();
- return{x:img.left-wrap.left+img.width*.77,y:img.top-wrap.top+img.height*.3};
-}
-function flightDestination(i,w,h){
- if(i===shots.length-1){
-  const wrap=$('.screen-wrap').getBoundingClientRect();
-  const logo=$('.closing-brand-icon').getBoundingClientRect();
-  return{x:logo.left-wrap.left+logo.width*.78,y:logo.top-wrap.top+logo.height*.31};
+function scrollToStep(to,focus=false){
+ to=clamp(Math.round(to),0,chapterCount);
+ if(document.body.classList.contains('motion-failed'))return;
+ if(scrollAnim)cancelAnimationFrame(scrollAnim.id);
+ const from=window.scrollY,target=storyTop()+to*stageH;
+ const begun=performance.now();
+ const duration=reduced.matches?0:1000;
+ function advance(now){
+  const frac=duration?clamp((now-begun)/duration):1;
+  // This is the native document scroll, not a separate visual-only counter.
+  window.scrollTo({top:from+(target-from)*smoother(frac),behavior:'instant'});
+  render();
+  if(frac<1){scrollAnim={id:requestAnimationFrame(advance)};}
+  else{scrollAnim=null; if(focus)$('#story-prev').focus({preventScroll:true});}
  }
- return{x:targets[i][0]*w,y:targets[i][1]*h};
+ advance(begun);
 }
-function updateFlight(t){
- if(index<0)return;
- if(reduced.matches){flyer.style.opacity='0';trail.style.opacity='0';return;}
- const wrap=$('.screen-wrap');
- const w=wrap.clientWidth,h=wrap.clientHeight;
- const from=index===0?flightAnchor():flightDestination(index-1,w,h);
- const to=flightDestination(index,w,h);
- const closing=!!shots[index].closing;
- const outerY=(index%2===0?.11:.88)*h;
- const dx=to.x-from.x;
- const c1={x:from.x+dx*.2,y:closing?from.y-.15*h:outerY};
- const c2={x:to.x-dx*.2,y:closing?to.y-.18*h:outerY};
- const durationRatio=closing?clamp((t-.05)/.88):clamp((t-.025)/.84);
- const move=ease(durationRatio);
- const pos=u=>({x:cubic(from.x,c1.x,c2.x,to.x,u),y:cubic(from.y,c1.y,c2.y,to.y,u)});
- const p=pos(move),a=pos(Math.max(0,move-.015)),b=pos(Math.min(1,move+.015));
- const angle=closing?45*(1-ease((t-.65)/.27)):Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI+45;
- const landingScale=closing?1-.61*ease((t-.42)/.48):.92+.08*ease(t/.24);
- const launchScale=index===0?.19+.81*ease(t/.26):1;
- const scale=landingScale*launchScale;
- const rx=flyer.offsetWidth/2,ry=flyer.offsetHeight/2;
- flyer.style.transform='translate3d('+(p.x-rx)+'px,'+(p.y-ry)+'px,0) rotate('+angle+'deg) scale('+scale+')';
- flyer.style.opacity=String(closing?1-ease((t-.84)/.14):1);
- trail.setAttribute('viewBox','0 0 '+w+' '+h);
- const d='M '+from.x+' '+from.y+' C '+c1.x+' '+c1.y+', '+c2.x+' '+c2.y+', '+to.x+' '+to.y;
- if(flightPath.getAttribute('d')!==d)flightPath.setAttribute('d',d);
- const len=flightPath.getTotalLength();
- flightPath.style.strokeDasharray=Math.max(0,move*len)+' '+(len+10);
- flightPath.style.strokeDashoffset='0';
- trail.style.opacity=String(closing?.36:.62);
-}
-function goTo(i){
- i=clamp(Math.floor(Number(i)||0),0,shots.length-1);
- if(index!==i)changeScene(i);
- local=0;
- chapterStart=performance.now();
- pendingDirection=0;
+function goTo(i){scrollToStep(i);}
+function setProgress(value){
+ const p=clamp(Number(value)||0)*chapterCount;
+ if(scrollAnim)cancelAnimationFrame(scrollAnim.id);
+ scrollAnim=null;
+ window.scrollTo({top:storyTop()+p*stageH,behavior:'instant'});
  render();
 }
-function requestStep(dir,force=false){
- if(!ready){pendingDirection=dir;return;}
- const now=performance.now();
- if(!force&&now<gestureUntil)return;
- gestureUntil=now+620;
- if(index===0&&dir<0)return;
- if(index===shots.length-1&&dir>0)return;
- // One step per gesture; an early flick queues exactly one step rather than skipping chapters.
- if(!force&&local<.46){pendingDirection=dir;return;}
- goTo(index+dir);
-}
-// The stage is one viewport tall. Wheel and touch gestures advance one chapter
-// at a time; there is no multi-viewport dead zone before the first transition.
-// The rest of the page still scrolls normally at the first/last boundary.
-function inStage(){
- const r=$('#experience').getBoundingClientRect();
- return r.top<=2&&r.bottom>=innerHeight*.72;
-}
 function onWheel(e){
- if(!inStage()||e.ctrlKey||Math.abs(e.deltaY)<3)return;
+ if(!inStage()||e.ctrlKey||Math.abs(e.deltaY)<4)return;
  const dir=e.deltaY>0?1:-1;
- if((index===0&&dir<0)||(index===shots.length-1&&dir>0))return;
+ const p=scrollProgress();
+ if((dir<0&&p<.02)||(dir>0&&p>=chapterCount-.02))return;
  e.preventDefault();
- // Inertial trackpad events belong to one gesture, even if they last > 620ms.
- const now=performance.now(),newGesture=now-lastWheelAt>440;
- lastWheelAt=now;
- if(newGesture)requestStep(dir);
+ const now=performance.now(),startGesture=now-wheelLast>480;
+ wheelLast=now;
+ if(!startGesture||scrollAnim||!ready)return;
+ // Exactly one lap and one chapter for every wheel/trackpad gesture.
+ scrollToStep(chapterFor(p)+dir);
 }
 function onTouchStart(e){
- if(!inStage()||e.touches.length!==1||e.target.closest('a,button')){touchStart=null;return;}
- touchStart={y:e.touches[0].clientY,x:e.touches[0].clientX};
+ if(!inStage()||e.touches.length!==1||e.target.closest('button,a')){touchPoint=null;return;}
+ touchPoint={y:e.touches[0].clientY,x:e.touches[0].clientX};
 }
 function onTouchMove(e){
- if(!touchStart||!inStage()||!e.cancelable)return;
- const dy=touchStart.y-e.touches[0].clientY;
- if((index===0&&dy<0)||(index===shots.length-1&&dy>0))return;
+ if(!touchPoint||!inStage()||!e.cancelable)return;
+ const dir=Math.sign(touchPoint.y-e.touches[0].clientY),p=scrollProgress();
+ if((dir<0&&p<.02)||(dir>0&&p>=chapterCount-.02))return;
  e.preventDefault();
 }
 function onTouchEnd(e){
- if(!touchStart||!e.changedTouches.length)return;
- const dy=touchStart.y-e.changedTouches[0].clientY;
- const dx=touchStart.x-e.changedTouches[0].clientX;
- touchStart=null;
- if(Math.abs(dy)>42&&Math.abs(dy)>Math.abs(dx)*1.1)requestStep(dy>0?1:-1);
+ if(!touchPoint||!e.changedTouches.length)return;
+ const dy=touchPoint.y-e.changedTouches[0].clientY;
+ const dx=touchPoint.x-e.changedTouches[0].clientX;
+ touchPoint=null;
+ if(Math.abs(dy)<40||Math.abs(dy)<Math.abs(dx)*1.15||scrollAnim||!ready)return;
+ const dir=Math.sign(dy),p=scrollProgress();
+ if((dir<0&&p<.02)||(dir>0&&p>=chapterCount-.02))return;
+ scrollToStep(chapterFor(p)+dir);
 }
-function tick(now){
- if(destroyed)return;
- if(!document.hidden&&visible){
-  if(ready){
-   local=clamp((now-chapterStart)/(shots[index].duration*1000));
-   if(pendingDirection&&local>=.46){
-    const dir=pendingDirection;pendingDirection=0;goTo(index+dir);
-   }
-  }else local=0;
-  render();
+function onManualScroll(){
+ // The scrollbar and keyboard scrollbar controls use the SAME chapter position.
+ // On thumb drag, cancel any previous wheel animation instead of fighting it.
+ if(scrollFrame)return;
+ scrollFrame=requestAnimationFrame(()=>{scrollFrame=null;render();});
+}
+function onResize(){
+ const before=scrollProgress();
+ const oldH=stageH;
+ resize();
+ sizeRunway();
+ if(oldH!==stageH&&inStage()){
+  window.scrollTo({top:storyTop()+before*stageH,behavior:'instant'});
  }
- frameHandle=requestAnimationFrame(tick);
-}
-function setProgress(progress){
- const e=clamp(Number(progress)||0)*total;
- let next=shots.length-1;
- for(let i=0;i<shots.length;i++)if(e<starts[i]+shots[i].duration){next=i;break;}
- changeScene(next);
- local=clamp((e-starts[next])/shots[next].duration);
- chapterStart=performance.now()-local*shots[next].duration*1000;
+ buildFlight();
  render();
 }
+function tick(){
+ if(destroyed)return;
+ if(!document.hidden&&visible)render();
+ frameHandle=requestAnimationFrame(tick);
+}
 listen(window,'wheel',onWheel,{passive:false});
-listen($('.screen-wrap'),'touchstart',onTouchStart,{passive:true});
-listen($('.screen-wrap'),'touchmove',onTouchMove,{passive:false});
-listen($('.screen-wrap'),'touchend',onTouchEnd,{passive:true});
-listen(window,'resize',()=>{resize();updateFlight(local);});
-listen(reduced,'change',()=>{render();});
-listen($('#story-prev'),'click',()=>requestStep(-1,true));
-listen($('#story-next'),'click',()=>requestStep(1,true));
-listen($('#story-replay'),'click',()=>{goTo(0);$('#story-next').focus({preventScroll:true});});
+listen(screen,'touchstart',onTouchStart,{passive:true});
+listen(screen,'touchmove',onTouchMove,{passive:false});
+listen(screen,'touchend',onTouchEnd,{passive:true});
+listen(window,'scroll',onManualScroll,{passive:true});
+listen(window,'resize',onResize);
+listen(reduced,'change',render);
+listen($('#story-prev'),'click',()=>scrollToStep(index-1));
+listen($('#story-next'),'click',()=>scrollToStep(index+1));
+listen($('#story-replay'),'click',()=>{scrollToStep(0);$('#story-prev').focus({preventScroll:true});});
 for(const link of document.querySelectorAll('a[href="#closing"]'))listen(link,'click',e=>{
  if(document.body.classList.contains('motion-failed')){e.preventDefault();$('.fallback .launch-button').focus();return;}
- e.preventDefault();goTo(shots.length-1);local=1;chapterStart=performance.now()-shots[index].duration*1000;render();$('.closing-card .launch-button').focus({preventScroll:true});
+ e.preventDefault();
+ scrollToStep(chapterCount);
+ // Focus only when final card becomes focusable, without jumping past sticky stage.
+ const focusWhenReady=()=>{if($('#closing').inert){requestAnimationFrame(focusWhenReady);}else $('.closing-card .launch-button').focus({preventScroll:true});};
+ requestAnimationFrame(focusWhenReady);
 });
 listen(document,'keydown',e=>{
  if(!inStage()||e.altKey||e.ctrlKey||e.metaKey||e.target.closest('a,button,input,textarea,select,[contenteditable]'))return;
- const forward=['ArrowDown','ArrowRight','PageDown',' '];
- const backward=['ArrowUp','ArrowLeft','PageUp'];
- if(forward.includes(e.key)&&index<shots.length-1){e.preventDefault();requestStep(1,true);}
- if(backward.includes(e.key)&&index>0){e.preventDefault();requestStep(-1,true);}
+ const dir=['ArrowDown','ArrowRight','PageDown',' '].includes(e.key)?1:
+           ['ArrowUp','ArrowLeft','PageUp'].includes(e.key)?-1:0;
+ const p=scrollProgress();
+ if(!dir||dir<0&&p<.02||dir>0&&p>=chapterCount-.02)return;
+ e.preventDefault();if(!scrollAnim)scrollToStep(chapterFor(p)+dir);
 });
-const observer=new IntersectionObserver(([e])=>{visible=e.isIntersecting;},{threshold:.02});
-observer.observe($('.screen-wrap'));
-changeScene(0);
-local=0;
+const observer=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;},{threshold:.01});
+observer.observe(screen);
+$('#experience').classList.add('is-scroll');
+sizeRunway();
+buildFlight();
+activate(chapterFor(scrollProgress()));
 render();
 frameHandle=requestAnimationFrame(tick);
-
 window.Brief2DoneMotion=Object.freeze({
  setProgress,goTo,
- getState:()=>({mode:'guided-scroll',progress:(starts[index]+shots[index].duration*local)/total,scene:index,closing:!!shots[index]?.closing,ready,duration:total}),
- destroy(){destroyed=true;cancelAnimationFrame(frameHandle);cleanup.forEach(fn=>fn());ro.disconnect();observer.disconnect();frames.forEach(f=>f.remove());}
+ getState:()=>({mode:'continuous-scroll',progress:scrollProgress()/chapterCount,scene:index,closing:!!shots[index]?.closing,ready,duration:total}),
+ destroy(){
+  destroyed=true;
+  cancelAnimationFrame(frameHandle);
+  if(scrollFrame)cancelAnimationFrame(scrollFrame);
+  if(scrollAnim)cancelAnimationFrame(scrollAnim.id);
+  cleanup.forEach(fn=>fn());ro.disconnect();observer.disconnect();frames.forEach(f=>f.remove());
+ }
 });
-
 })();
