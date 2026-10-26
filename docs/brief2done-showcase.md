@@ -1,103 +1,85 @@
-# Brief2Done showcase — native scroll, forward descent and mirrored rewind
+# Brief2Done showcase — a continuous falling rocket and rising story
 
-## Overview
+## Intent
 
-The public showcase is a six-chapter static demonstration followed by a
-registration CTA. It uses the existing two persistent demo iframes and
-`brief2done:scene`/`brief2done:ready`/`brief2done:frame`/`brief2done:visibility`
-protocol. The demo does not represent real available work or guaranteed
-earnings. The live destination is
-`https://brief2done.doppiaelletech.workers.dev/`.
+One intuitive movement from first scroll to final registration CTA: visitors
+follow a small rocket drifting slowly downward in the centre of their screen,
+oscillating **right, left, right, left** as real product content rises from
+below behind it. No scene is teleported back to the top, no camera shoots back
+up, and there are no pauses while the user keeps scrolling.
 
-## Scroll physics — October 2026 follow-up
+The marketing page is `public/brief2done/index.html`; the live application
+is `https://brief2done.doppiaelletech.workers.dev/`. Example projects and
+budgets remain illustrative and are not guaranteed income.
 
-The earlier implementation separately handled wheel bursts and touch swipes.
-It clamped each burst to a chapter boundary for 290 ms, so subsequent wheel
-events could be consumed without moving the rocket. This caused the observed
-one- or two-scroll pauses.
+## One native vertical storyboard rail
 
-**The new version no longer prevents or handles native wheel/touch events.**
-All scroll input — including slow touch drags, trackpad inertia, scrollbar
-thumb dragging and fast wheel motion — modifies the browser document scroll
-directly. The scroll event and animation frame sample exactly the same
-`scrollProgress()` value. There is no gesture cap, input deadline, auto-snap,
-separate scroll position or first-scroll delay. The small chapter up/down
-buttons and ArrowLeft/Right are the only programmatic navigation gestures.
+The page maintains six consecutive product chapters and a closing CTA. A
+single `#scenes` rail lays them out at `i * designViewportHeight`, in the
+same order as the story. The rail translates upward at
+`-scrollProgress * designViewportHeight`. Therefore, the next section is
+physically **below** the previous one and enters from the bottom as the
+visitor scrolls forward. Reversing scroll replays the same physical
+movement backward. No hidden camera handoff or chapter-boundary reposition.
 
-The story remains six screen-height chapters plus a closing chapter, with a
-sticky full-viewport stage. The footer remains gated until the final CTA is
-visible. Chapter changes no longer trigger dramatic title lifts or panel
-whips: titles and compositions settle immediately, while chapter transitions
-use a scroll-dependent dissolve. Demo action animations may still take time,
-but they never hold or block the rocket.
+A small opacity transition near the visible scene edges keeps text readable.
+The two existing shared iframe demo frames move with the currently selected
+chapter. They fade out before their source switches and fade in after the
+next chapter becomes active, to avoid a visible snap or extra iframe mounts.
 
-## Rocket path — full-height chapter sweep (October 2026)
+The final CTA is also a real screen entering from below using
+`(6 - scrollProgress) * windowHeight`. The usual footer only becomes
+reachable after the closing panel has entered and the existing release
+condition has been satisfied.
 
-**What was broken:** the former layout built six flight segments between a header
-point and a footer point, dividing their *total* vertical difference by six.
-Consequently every chapter had only ~80 pixels of vertical travel on an
-800-pixel desktop, although its lateral movement was much larger. That is
-why the screenshots showed a rocket gliding horizontally near the top.
+No wheel/touch interception was added; the native scroll coordinate drives
+both background movement and rocket travel. Keyboard ArrowUp/ArrowDown,
+PageUp/PageDown and Space retain browser-native incremental scrolling.
+The small translucent previous/next controls retain explicit chapter jumps.
 
-**New vertical design:** the world-space route uses six connected cubic Bézier
-segments, with the first five covering at least 78% of the viewport height.
-On desktop and mobile the vertical sweep is calculated from the live viewport
-size and the rocket's actual header position. Each route has one broad arc,
-alternating sides. The final segment lands on the actual closing logo.
+## The rocket — vertical serpentine, not an infinity symbol
 
-To make a full-height descent on each screen while preserving continuous
-world coordinates, the **last 22%** of each of the first five chapters acts
-as a scroll-synchronized *camera handoff*: the virtual camera catches up
-with the world route to show the top of the next section. The marketing
-screen dissolves while the camera moves. Both the rocket and its fading
-trail use precisely the same camera projection, preventing detached traces.
-There are no time-based accelerators or intercepted wheel/touch gestures.
-The return route remains mirrored and faces upward, using the same
-scroll-coordinate geometry and reversed trailing line.
+The flying sprite remains the standalone
+`public/assets/brief2done/rocket-flight.svg` with its complete orange
+cone-shaped flame. It stays hidden at scroll zero, fades in as it leaves
+the header icon, and docks into the mark at the end.
 
-This is a cinematic handoff (there is a brief upward movement **relative to
-the viewport** during the camera catch-up), not a teleport between unrelated
-curves: the world-space rocket path always descends and the projected
-coordinates remain continuous at each chapter boundary. Native scroll
-controls the speed both ways, even when dragged slowly.
+The route is one continuous analytic curve. Its horizontal movement is
+`x = centre + amplitude * sin(pi * scrollProgress)`, with desktop
+amplitude capped at 215 px and tighter oscillations on mobile. Each chapter
+makes one half-wave, alternating right and left; the path is smooth at
+integer chapter boundaries, without teleports or sharp turns.
 
-The standalone vector rocket keeps its intact orange cone flame. It remains
-hidden before departure from the header and fades out again on returning.
+The screen-space vertical movement is
+`y = viewportHeight * (0.28 + 0.45 * scrollProgress / 6)`.
+It grows monotonically from around 28% to 73% of viewport height across
+the full story. The rocket remains near the visual centre, *never
+visually rises during forward scroll*, and the rising panels communicate
+the larger descent through the page. In reverse, y declines with
+scrollProgress, the nose points up, the lane mirrors gradually and the
+fading short trail follows behind.
 
-**Regression tests** execute the actual production cubic and camera functions
-with both 1280×800 desktop and 390×844 mobile fixtures. They check that
-every chapter travels down at least 46% of its viewport during the visible
-sweep, that world-space y never reverses, that projected endpoints remain
-continuous between chapters, and that the final destination is the rendered
-logo anchor. They also verify the trail and rocket share a camera projection.
+The last small portion of the journey aligns the sprite to the actual
+closing logo, with a scale/fade docking treatment. It does not restart a
+new curve or reset the background.
 
-## Navigation and conversion
+## Accessibility and tests
 
-The small translucent arrows at bottom right remain available with accessible
-labels. The always-visible Get started link and the final Create your account
-CTA go to the Brief2Done app. No new account/payments logic is implemented in
-this marketing repository.
+Reduced-motion users retain the scrollable product story but have no
+decorative rocket/trail. The persistent Get started CTA, closing Create
+your account CTA, replay link and static fallback remain available.
 
-## Verification
+`scripts/check-brief2done.mjs` tests the actual production functions for:
+- Upward motion of the six real chapter panels.
+- Downward monotonic rocket y for desktop (1280×800) and mobile (390×844).
+- Alternating right/left half-wave direction and smooth chapter joints.
+- Smaller mobile x amplitude, mirrored reverse travel and no x teleports.
+- Native input behavior, final panel entering from below and two-frame
+  reuse, along with the existing asset and link checks.
 
-`scripts/check-brief2done.mjs` verifies integration and uses the actual
-pure cubic geometry functions from `motion.js` to check both forward and
-mirrored lanes at 101 positions per chapter, continuity, matched tangents,
-positive downward motion and non-zero velocity at all chapter joins.
+Manual QA is required on desktop Safari/Chrome, touchscreens and especially
+mobile Safari for sticky layout, the shared iframe handoff, full-scene text
+legibility and docking accuracy. The GitHub Actions check is structural, not
+a screenshot-based visual certification.
 
-Manual browser review before merge is still important:
-- Initial load: no floating duplicate near the brand logo.
-- Slow mobile swipe, small wheel deltas and scrollbar dragging: immediate
-  proportional rocket motion without input-consuming pauses.
-- Fast or slow scroll through all six steps, then rewind: a large downward arc
-  per chapter, continuous cinematic camera handoffs, mirrored return lane,
-  nose up on rewind and trailing line behind the rocket.
-- Desktop and mobile: confirm the rocket visibly crosses the vertical height
-  of **each** chapter, rather than remaining high along a horizontal arc.
-  Verify the short camera handoff near the end of each chapter.
-- Final CTA and normal footer accessible, including reduced motion and
-  keyboard navigation.
-- Visual test on iPhone Safari and a real Android phone for sticky scroll,
-  SVG rotation and partial-scroll resumes.
-
-The GitHub Pages deploy workflow only publishes changes merged into `main`.
+This branch is not deployed by GitHub Pages until merged into `main`.
