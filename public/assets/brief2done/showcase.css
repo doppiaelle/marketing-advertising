@@ -271,3 +271,136 @@ body:has(.is-closing) .story-header .story-portal:hover { background: #0e3b2b; c
 @media (max-width: 729px) and (max-height: 620px) {
   .closing-replay { min-height: 32px; margin-top: 4px; font-size: 10px; }
 }
+
+
+/* v2 — Native scrollbar, pinned story and the uninterrupted flight form one timeline. */
+html { scroll-behavior: auto; overscroll-behavior-y: none; }
+body { overscroll-behavior-y: none; }
+.experience.is-scroll {
+  display: block;
+  height: var(--journey-height, 700dvh);
+  min-height: 700svh;
+}
+.experience.is-scroll .shell {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+}
+.experience.is-scroll .screen-wrap {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+}
+.flight-trace { z-index: 16; overflow: hidden; pointer-events: none; }
+.flight-trace path {
+  stroke: url(#rocket-trail-gradient);
+  fill: none;
+  stroke-width: 2.25px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 6px #b7ff7f70);
+}
+.rocket-guide {
+  z-index: 61;
+  width: 73px;
+  height: 92px;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 12px #000a) drop-shadow(0 0 9px #ff8e2760);
+}
+.rocket-guide svg { overflow: visible; }
+.rocket-exhaust { display: none !important; }
+/* Entirely replace the bulky progress/Next bar. These are overlay controls,
+   not a second scrolling container. */
+.story-nav {
+  position: absolute;
+  left: auto;
+  right: clamp(12px, 2.5vw, 38px);
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  transform: none;
+  z-index: 62;
+  width: 42px;
+  min-height: 86px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid #d6ffc22b;
+  border-radius: 30px;
+  background: #062b2080;
+  backdrop-filter: blur(8px);
+  box-shadow: none;
+}
+.story-nav .story-nav-button,
+.story-nav .story-nav-next {
+  min-width: 32px;
+  width: 32px;
+  min-height: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #d8f4cf;
+  background: transparent;
+  font-size: 16px;
+}
+.story-nav .story-nav-button svg { fill:none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.story-nav .story-nav-button:hover:not(:disabled) { background: #bff58c25; color: #fff; }
+.story-nav .story-nav-button:disabled { opacity: .24; }
+.is-closing .story-nav { display: flex; }
+.is-closing .story-hint { display: none; }
+#story-hint.sr-only { position: absolute; }
+.scene-explainer {
+  left: 48px;
+  top: 320px;
+  width: 355px;
+  padding: 15px 18px;
+  font-size: 19px;
+  line-height: 1.38;
+  background: #061b15ee;
+  box-shadow: 0 14px 30px #00211226;
+}
+.scene-eyebrow { color: #d1fa9a; }
+.is-closing.rocket-docked .closing-brand-icon {
+  filter: drop-shadow(0 0 12px #b7ff7b99);
+}
+@media (max-width: 729px) {
+  .experience.is-scroll { min-height: 700svh; }
+  .rocket-guide { width: 54px; height: 70px; }
+  .flight-trace path { stroke-width: 2px; }
+  .story-nav {
+    right: 11px;
+    bottom: calc(22px + env(safe-area-inset-bottom,0px));
+    width: 36px;
+    min-height: 76px;
+    padding: 3px;
+    border-radius: 22px;
+  }
+  .story-nav .story-nav-button,
+  .story-nav .story-nav-next {
+    min-width: 30px;
+    width: 30px;
+    min-height: 31px;
+    height: 31px;
+  }
+  .mobile .scene-explainer {
+    top: 326px;
+    left: 29px;
+    width: 550px;
+    font-size: 23px;
+    line-height: 1.4;
+    padding: 14px 18px;
+    background: #061b15f0;
+  }
+  .demo-note { bottom: 85px; right: 62px; }
+}
+@media (max-width: 729px) and (max-height: 620px) {
+  .story-nav { bottom: calc(8px + env(safe-area-inset-bottom,0px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flight-trace { display: none; }
+  .rocket-guide { display: none; }
+  .story-nav { backdrop-filter: none; }
+}
