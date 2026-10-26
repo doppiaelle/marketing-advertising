@@ -10,7 +10,7 @@ const shots=[
  {source:1,label:'Pitch your skills',duration:5,title:'Pitch your skills.<br><em>Get noticed.</em>',description:'Show what you can do, apply for a brief and take the next step.',titleMode:'rise',beats:[[0,0],[.2,.12],[.47,.46],[.68,.69],[.88,.82],[1,1]]},
  {source:8,label:'Agree on clear terms',duration:4.8,title:'Clear terms.<br><em>Confident start.</em>',description:'Align on scope and expectations before the work begins.',titleMode:'center',beats:[[0,0],[.3,.33],[.7,.72],[1,1]]},
  {source:2,label:'Deliver your work',duration:5,title:'Make it.<br><em>Deliver it.</em>',description:'Turn the brief into work your client can review and approve.',titleMode:'rise',beats:[[0,0],[.18,.1],[.48,.49],[.73,.74],[.87,.84],[1,1]]},
- {source:5,label:'Get work approved',duration:5.2,title:'Work approved.<br><em>What’s next?</em>',description:'See the outcome confirmed, and bring that experience to your next opportunity.',titleMode:'center',beats:[[0,0],[.25,.3],[.58,.56],[.76,.73],[.92,.91],[1,1]]},
+ {source:5,label:'Get work approved',duration:5.2,title:'Work approved.<br><em>What’s next?</em>',description:'Work approved? Review the payment reported by your client and confirm only when received.',titleMode:'center',beats:[[0,0],[.25,.3],[.58,.56],[.76,.73],[.92,.91],[1,1]]},
  {source:null,label:'Create your account',duration:3.5,closing:true}
 ];
 const total=shots.reduce((n,s)=>n+s.duration,0),starts=shots.map((s,i)=>shots.slice(0,i).reduce((a,b)=>a+b.duration,0));
