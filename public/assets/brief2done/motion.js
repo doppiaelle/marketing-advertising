@@ -157,7 +157,7 @@ const smoother=t=>{t=clamp(t);return t*t*(3-2*t);};
 const screen=$('.screen-wrap');
 const logo=$('.closing-brand-icon');
 const tip=$('#rocket-guide');
-const trailSvg=$('#flight-trace'),trailPath=$('#flight-path'),trailGradient=$('#rocket-trail-gradient');
+const trailSvg=$('#flight-trace'),trailPath=$('#flight-path'),trailGlow=$('#flight-glow'),trailGradient=$('#rocket-trail-gradient');
 
 function storyTop(){
  return $('#experience').getBoundingClientRect().top+window.scrollY;
@@ -244,6 +244,19 @@ function descentTangent(progress,w,h,mirror=0){
   y:h*.45/chapterCount
  };
 }
+// The SVG rocket's unrotated nose points up: forward down/right needs an
+// angle SMALLER than 180°, not larger. Reverse keeps the matching up heading.
+function rocketHeading(progress,w,h,direction,mirror=0){
+ const t=descentTangent(progress,w,h,mirror);
+ const bank=clamp(Math.atan2(t.x,Math.max(40,Math.abs(t.y)))*180/Math.PI,-40,40);
+ return (direction<0?0:180)-bank;
+}
+// A nearly full-chapter trail leaves a visible sweep outside the rocket
+// silhouette, especially on narrow phones. The oldest part fades to zero.
+function trailOrigin(progress,direction){
+ const visibleLength=.84;
+ return direction<0?Math.min(chapterCount,progress+visibleLength):Math.max(0,progress-visibleLength);
+}
 function rocketStart(){
  const view=screen.getBoundingClientRect(),b=$('.story-brand-icon').getBoundingClientRect();
  return{x:b.left-view.left+b.width*.77,y:b.top-view.top+b.height*.36};
@@ -282,11 +295,9 @@ function drawFlight(progress){
  const reverse=flightDirection<0?1:0;
  mirrorMix+=(reverse-mirrorMix)*(1-Math.exp(-dt/160));
  const point=flightPoint(progress);
- const tangent=descentTangent(progress,w,h,mirrorMix);
- // The rocket always descends on forward scroll, and ascends on reverse.
- // The serpentine arcs bank gently without fighting the travel direction.
- const bank=clamp(Math.atan2(tangent.x,Math.max(40,Math.abs(tangent.y)))*180/Math.PI,-40,40);
- const angle=(flightDirection<0?0:180)+bank*(flightDirection<0?-1:1);
+ // Nose follows the actual horizontal direction of the descent,
+ // while the reverse lane points back up along its mirrored trajectory.
+ const angle=rocketHeading(progress,w,h,flightDirection,mirrorMix);
  const docking=ease((progress-(chapterCount-.25))/.25);
  const launch=.6+.4*ease(progress/.24),size=launch*(1-.48*docking);
  tip.style.transform='translate3d('+(point.x-tip.offsetWidth/2)+'px,'+(point.y-tip.offsetHeight/2)+'px,0) scale('+size+')';
@@ -295,17 +306,21 @@ function drawFlight(progress){
  tip.style.opacity=String(depart*(1-ease((progress-(chapterCount-.065))/.065)));
  // The trail is a short, fading slice of the SAME serpentine path; reverse
  // direction samples AHEAD of progress so the old line stays behind the ship.
- const from=flightDirection<0?Math.min(chapterCount,progress+.16):Math.max(0,progress-.16);
- const n=32,points=[];
+ const from=trailOrigin(progress,flightDirection);
+ const n=64,points=[];
  for(let j=0;j<=n;j++)points.push(flightPoint(from+(progress-from)*j/n));
  trailSvg.setAttribute('viewBox','0 0 '+w+' '+h);
  const tail=points[0],head=points[n];
- trailPath.setAttribute('d',points.map((p,j)=>(j?'L ':'M ')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(''));
+ const flightD=points.map((p,j)=>(j?'L ':'M ')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join('');
+ trailPath.setAttribute('d',flightD);
+ trailGlow.setAttribute('d',flightD);
  trailGradient.setAttribute('x1',tail.x);
  trailGradient.setAttribute('y1',tail.y);
  trailGradient.setAttribute('x2',head.x);
  trailGradient.setAttribute('y2',head.y);
- trailSvg.style.opacity=String(depart*(1-docking*.75));
+ // Keep the illuminated trail present throughout each chapter; the fade at
+ // the very beginning/end is intentional while the rocket docks to the logo.
+ trailSvg.style.opacity=String(depart*(1-ease((progress-(chapterCount-.09))/.09)));
  $('#experience').classList.toggle('rocket-docked',docking>.94);
 }
 function render(){
