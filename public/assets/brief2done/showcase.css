@@ -444,3 +444,16 @@ body { overscroll-behavior-y: none; }
 @media (prefers-reduced-motion: reduce) {
   .rocket-guide, .rocket-guide img { transition: none !important; }
 }
+
+
+/* The final brand lockup is the low landing point of the descending journey.
+   On tall viewports the action comes first, then the rocket docks below it. */
+@media (min-height: 700px) {
+  .closing-card { display: flex; flex-direction: column; align-items: center; }
+  .closing-card .closing-eyebrow { order: 0; }
+  .closing-card .closing-line { order: 1; margin-top: 10px; }
+  .closing-card .closing-description { order: 2; }
+  .closing-card .launch-button { order: 3; width: min(100%, 330px); }
+  .closing-card .closing-replay { order: 4; }
+  .closing-card .closing-brand { order: 5; margin: 18px auto 0; }
+}
