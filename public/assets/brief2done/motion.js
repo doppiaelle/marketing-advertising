@@ -16,10 +16,25 @@ const shots=[
 const total=shots.reduce((n,s)=>n+s.duration,0),starts=shots.map((s,i)=>shots.slice(0,i).reduce((a,b)=>a+b.duration,0));
 // The six mobile previews are static markup created once, not heavy React
 // applications remounted or repainted during a Safari scroll.
-const staticPreviews=[["Open briefs","Recommended opportunities","Website for a creative studio","A responsive website for an independent creative studio.","Digital & IT · Studio Forma","€450","Brand identity for a new venture","Creative · €600"],["People and companies","Discover collaborators","Alex Morgan","Brand designer & illustrator","Verified results · Open to new work","View profile","People and companies","Find people and teams for your next project"],["Applications","Show your skills","Your application","Introduce yourself and explain why you are the right fit.","Website for a creative studio","Application sent","Open opportunity","Brief · Requirements · Milestones"],["Agreements","Clear terms, shared direction","Project terms","Scope and deliverables agreed before work begins.","Final delivery · Rights · Review rounds","Accept and start","Studio Forma → Collaborator","Terms, schedule and responsibilities"],["Delivery","Work ready for review","Complete website","Responsive layout · Home, Services and Contact pages.","Round 1 · In review","Work submitted","Project agreement","Client · €450 · 2 review rounds"],["Confirmation","Results and next steps","Work approved","The client has confirmed the completed deliverables.","Your work history, clearly recorded","Confirmed","Project complete","Approval · Payment recorded separately"]];
-function staticPreviewMarkup(d){
+const staticPreviews=[["Open briefs","Recommended opportunities","Website for a creative studio","A responsive website for an independent creative studio.","Digital & IT · Studio Forma","€450","Brand identity for a new venture","Creative · €600"],["People and companies","Discover collaborators","Alex Morgan","Brand designer & illustrator","Verified results · Open to new work","View profile","People and companies","Find people and teams for your next project"],["Applications","Show your skills","Your application","Introduce yourself and explain why you are the right fit.","Website for a creative studio","Application sent","Open opportunity","Brief · Requirements · Milestones"],["Agreements","Clear terms, shared direction","Project terms","Scope and deliverables agreed before work begins.","Final delivery · Rights · Review rounds","Accept and start","Studio Forma → Collaborator","Terms, schedule and responsibilities"],["Delivery","Work ready for review","Complete website","Responsive layout · Home, Services and Contact pages.","Round 1 · In review","Work submitted","Project agreement","Client · €450 · 2 review rounds"],["Payment","Payment after approval","Payment · €450","Client reported the payment. Confirm only once you have received it.","Paid outside Brief2Done · recorded here","Confirm receipt","Work approved","Client approved the completed deliverables"]];
+function staticPreviewMarkup(d,chapter){
  const esc=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
- return '<div class="static-preview" aria-hidden="true"><div class="static-back-card"><span class="static-eyebrow">'+esc(d[0])+'</span><strong>'+esc(d[6])+'</strong><p>'+esc(d[7])+'</p><div class="static-mock-line"></div><div class="static-mock-line short"></div></div><div class="static-front-card"><span class="static-eyebrow">'+esc(d[1])+'</span><strong>'+esc(d[2])+'</strong><p>'+esc(d[3])+'</p><div class="static-meta">'+esc(d[4])+'</div><div class="static-card-bottom"><span class="static-check">✓</span>'+esc(d[5])+'</div></div></div>';
+ const back='<div class="static-back-card"><span class="static-eyebrow">'+esc(d[0])+'</span><strong>'+esc(d[6])+'</strong><p>'+esc(d[7])+'</p><div class="static-mock-line"></div><div class="static-mock-line short"></div></div>';
+ if(chapter===5){
+  // The payment is a client-reported OFF-platform event, not a guaranteed
+  // transfer or an assertion that the collaborator has already been paid.
+  return '<div class="static-preview static-payment-preview" aria-hidden="true">'+back+
+   '<div class="static-front-card static-payment-card">'+
+    '<div class="static-payment-top"><span class="static-eyebrow">Payment</span><span class="static-payment-icon">€</span></div>'+
+    '<strong class="static-payment-amount">€450 <small>Payment</small></strong>'+
+    '<div class="static-payment-status"><span class="static-payment-dot"></span>Reported by client</div>'+
+    '<p>Paid outside Brief2Done. Confirm only after receiving it.</p>'+
+    '<div class="static-payment-action">✓ &nbsp; Confirm receipt</div>'+
+    '<div class="static-payment-note">Payment status is recorded here after your confirmation.</div>'+
+   '</div></div>';
+ }
+ return '<div class="static-preview" aria-hidden="true">'+back+
+  '<div class="static-front-card"><span class="static-eyebrow">'+esc(d[1])+'</span><strong>'+esc(d[2])+'</strong><p>'+esc(d[3])+'</p><div class="static-meta">'+esc(d[4])+'</div><div class="static-card-bottom"><span class="static-check">✓</span>'+esc(d[5])+'</div></div></div>';
 }
 const contentSources=new Set(shots.filter(s=>!s.closing).map(s=>s.source));
 let elapsed=0,index=-1,local=0,last=0,destroyed=false,ready=false,mobile=false,scale=1,frameHandle,lastSent=-Infinity,visible=true,targetElapsed=0,lastRendered=-1;
@@ -51,7 +66,7 @@ function switchScreens(source){requestedSource=source;frameScenes.clear();lastAc
 shots.forEach((shot,i)=>{
  if(shot.closing){nodes.push({el:null,pair:[]});return;}
  const el=document.createElement('section');el.className='scene';el.dataset.index=i;el.dataset.titleMode=shot.titleMode;el.setAttribute('aria-hidden','true');
- el.innerHTML='<div class="scene-eyebrow">STEP '+String(i+1).padStart(2,'0')+' / 06</div><div class="headline-mask"><'+(i===0?'h1':'h2')+' class="headline">'+shot.title+'</'+(i===0?'h1':'h2')+'></div><p class="scene-explainer">'+shot.description+'</p>'+staticPreviewMarkup(staticPreviews[i])+'<div class="intertitle" aria-hidden="true"><div>'+shot.title+'</div></div>';
+ el.innerHTML='<div class="scene-eyebrow">STEP '+String(i+1).padStart(2,'0')+' / 06</div><div class="headline-mask"><'+(i===0?'h1':'h2')+' class="headline">'+shot.title+'</'+(i===0?'h1':'h2')+'></div><p class="scene-explainer">'+shot.description+'</p>'+staticPreviewMarkup(staticPreviews[i],i)+'<div class="intertitle" aria-hidden="true"><div>'+shot.title+'</div></div>';
  $('#scenes').appendChild(el);
  nodes.push({el,primary:composition.querySelector('.primary'),secondary:composition.querySelector('.secondary'),headline:el.querySelector('.headline'),explainer:el.querySelector('.scene-explainer'),intertitle:el.querySelector('.intertitle'),composition,pair:frames});
 });
@@ -240,10 +255,13 @@ function activate(next){
 // then one to the left, repeated across the six chapters. The page's actual
 // section rail rises behind the ship. There are NO jumps, viewport resets,
 // independent looping y-motion or time-based movement.
+// Wider arcs stay inside both the mobile and desktop viewports.
+// Half a chapter travels from the centre toward a safe side margin.
+function flightAmplitude(w){return Math.min(w*(w<730?.225:.29),w<730?125:390);}
 function descentPoint(progress,w,h,mirror=0){
  const p=clamp(progress,0,chapterCount);
  const side=1-2*mirror;
- const swing=Math.min(w*(w<730?.115:.17),215);
+ const swing=flightAmplitude(w);
  return {
   x:w*.5+side*swing*Math.sin(Math.PI*p),
   y:h*(.28+.45*p/chapterCount)
@@ -252,7 +270,7 @@ function descentPoint(progress,w,h,mirror=0){
 function descentTangent(progress,w,h,mirror=0){
  const p=clamp(progress,0,chapterCount);
  const side=1-2*mirror;
- const swing=Math.min(w*(w<730?.115:.17),215);
+ const swing=flightAmplitude(w);
  return {
   x:side*swing*Math.PI*Math.cos(Math.PI*p),
   y:h*.45/chapterCount
