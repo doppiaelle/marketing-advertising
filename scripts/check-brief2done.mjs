@@ -33,7 +33,10 @@ const showcase = await readFile(new URL('assets/brief2done/showcase.css', root),
 const scenes = motion.match(/\{source:(?:0|6|1|8|2|5),label:/g) || [];
 assert.equal(scenes.length, 6, 'Keep the guided story to six readable chapters');
 assert.match(motion, /const chapterCount=shots\.length-1;/);
-assert.match(motion, /storyHeight=stageH\*\(chapterCount\+1\)/, 'Runway must last until the closing scene');
+assert.match(motion, /storyHeight=stageH\*\(chapterCount\*scrollStretch\+1\)/, 'Runway must extend for the slower-paced six scenes');
+assert.match(motion,/const scrollStretch=1\.18;/,'One physical scroll chapter must take 18% more distance');
+assert.match(motion,/\(h\*scrollStretch\)/,'Actual scroll speed is scaled without wheel interception');
+assert.match(motion,/target=storyTop\(\)\+to\*stageH\*scrollStretch/,'Chapter arrows must use the same slower scale');
 assert.match(motion, /scrollProgress\(\)/, 'Scrollbar position must be the source of truth');
 assert.match(motion, /Math\.round\(p\)/, 'Nearest chapter must track manual scrubbing');
 assert.match(motion, /window\.scrollTo\(\{top:from\+\(target-from\)\*smoother\(frac\)/, 'Native scroll must advance with the animation');
@@ -65,8 +68,18 @@ assert.match(showcase,/\.experience\.is-scroll #scenes \.scene-explainer\s*\{[^}
   'Dark translucent explanation panel must be restored');
 assert.match(showcase,/\.experience\.is-scroll #flight-glow\s*\{[^}]*stroke: url\(#rocket-trail-gradient\)/s);
 assert.match(showcase,/height: 100svh/,'Mobile stage must not resize with Safari bottom URL toolbar');
-assert.match(showcase,/\.screen-wrap::before/, 'A fixed gradient fades sections leaving the top edge');
-assert.match(showcase,/\.screen-wrap::after/, 'A fixed gradient fades sections entering from below');
+assert.match(html, /class="scene-viewport"><div id="scenes"><\/div><\/div>/,
+  'Scene rail must be inside a fixed, clipping fade viewport');
+assert.match(showcase,/\.experience\.is-scroll \.scene-viewport\s*\{[^}]*position: absolute;[^}]*overflow: hidden/s,
+  'Fade viewport must stay still while the story rail moves');
+assert.match(showcase,/\.experience\.is-scroll \.scene-viewport #scenes \.scene,[\s\S]*?opacity: 1;[\s\S]*?visibility: visible;/,
+  'All inactive and active scenes must remain painted, preventing abrupt mobile phase changes');
+assert.match(showcase,/\.mobile \.scene-viewport::before/, 'Top fade must be anchored to the scaled story viewport');
+assert.match(showcase,/\.mobile \.scene-viewport::after/, 'Bottom fade must be anchored to the scaled story viewport');
+assert.match(showcase,/\.screen-wrap::before,[\s\S]*?\.screen-wrap::after\s*\{\s*display: none;/,
+  'Old outer mobile gradients must not conflict with the new inner fade');
+assert.doesNotMatch(motion,/n\.el\.style\.opacity=String\(fade\)/,
+  'Never animate per-panel opacity while scrolling');
 assert.doesNotMatch(motion,/n\.el\.style\.opacity=String\(fade\)/,
   'Never animate opacity for the entire preloaded rail per frame');
 assert.match(motion,/chromeSettlingUntil=performance\.now\(\)\+220/,
@@ -121,9 +134,20 @@ const flight=runInNewContext(
 );
 for(const {w,h} of [{w:1280,h:800},{w:390,h:844}]){
   const amplitude=flight.flightAmplitude(w);
-  const oldAmplitude=Math.min(w*(w<730?.115:.17),215);
-  assert.ok(amplitude>oldAmplitude*1.45,'Both desktop and mobile should be substantially wider');
+  if(w>=730) {
+    const formerlyWide=Math.min(w*.29,390);
+    assert.ok(amplitude<formerlyWide*.85,'Desktop arc must be visibly narrower than previous overly wide version');
+    assert.ok(amplitude>formerlyWide*.55,'Desktop still needs a readable lateral arc');
+  } else {
+    assert.equal(amplitude,Math.min(w*.225,125),'Mobile retains its approved generous arc');
+  }
   assert.ok(amplitude<w*.34,'Do not clip the rocket near either viewport edge');
+  const overallDrop=flight.descentPoint(6,w,h).y-flight.descentPoint(0,w,h).y;
+  assert.ok(overallDrop>=h*.66,'The rocket must travel much farther down vertically than before');
+  for(let i=0;i<6;i++){
+    const drop=flight.descentPoint(i+1,w,h).y-flight.descentPoint(i,w,h).y;
+    assert.ok(drop>=h*.11,'Each chapter must show a meaningful downward displacement');
+  }
 
   let previous=-Infinity;
   for(let j=0;j<=1200;j++){
@@ -148,7 +172,7 @@ for(const {w,h} of [{w:1280,h:800},{w:390,h:844}]){
     assert.ok(Math.hypot(join.x-before.x,join.y-before.y)<.005,
       'Continuous path at chapter boundary');
   }
-  assert.ok(flight.descentPoint(6,w,h).y-flight.descentPoint(0,w,h).y>=h*.44,
+  assert.ok(flight.descentPoint(6,w,h).y-flight.descentPoint(0,w,h).y>=h*.66,
     'The nose slowly descends while the page rises behind it');
   // The sprite art points up when unrotated: its rotated heading must have
   // the same horizontal sign as the forward tangent, and the opposite sign
@@ -212,4 +236,4 @@ assert.match(html, /Create your account/);
 const legacy = await readFile(new URL('taskhub/index.html', root), 'utf8');
 assert.ok(legacy.includes('../brief2done/'));
 assert.ok(legacy.includes('location.search+location.hash'));
-console.log('PASS: readable dark scene panels, forward/reverse heading, full-length glowing fading trail, upward story rail, native scroll and assets.');
+console.log('PASS: mobile fixed-viewport fades, continuously prepainted panels, slower native scroll, smoother desktop arc and larger vertical flight, payment and other assets.');
