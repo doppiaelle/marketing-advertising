@@ -14,6 +14,13 @@ const shots=[
  {source:null,label:'Create your account',duration:3.5,closing:true}
 ];
 const total=shots.reduce((n,s)=>n+s.duration,0),starts=shots.map((s,i)=>shots.slice(0,i).reduce((a,b)=>a+b.duration,0));
+// The six mobile previews are static markup created once, not heavy React
+// applications remounted or repainted during a Safari scroll.
+const staticPreviews=[["Open briefs","Recommended opportunities","Website for a creative studio","A responsive website for an independent creative studio.","Digital & IT · Studio Forma","€450","Brand identity for a new venture","Creative · €600"],["People and companies","Discover collaborators","Alex Morgan","Brand designer & illustrator","Verified results · Open to new work","View profile","People and companies","Find people and teams for your next project"],["Applications","Show your skills","Your application","Introduce yourself and explain why you are the right fit.","Website for a creative studio","Application sent","Open opportunity","Brief · Requirements · Milestones"],["Agreements","Clear terms, shared direction","Project terms","Scope and deliverables agreed before work begins.","Final delivery · Rights · Review rounds","Accept and start","Studio Forma → Collaborator","Terms, schedule and responsibilities"],["Delivery","Work ready for review","Complete website","Responsive layout · Home, Services and Contact pages.","Round 1 · In review","Work submitted","Project agreement","Client · €450 · 2 review rounds"],["Confirmation","Results and next steps","Work approved","The client has confirmed the completed deliverables.","Your work history, clearly recorded","Confirmed","Project complete","Approval · Payment recorded separately"]];
+function staticPreviewMarkup(d){
+ const esc=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ return '<div class="static-preview" aria-hidden="true"><div class="static-back-card"><span class="static-eyebrow">'+esc(d[0])+'</span><strong>'+esc(d[6])+'</strong><p>'+esc(d[7])+'</p><div class="static-mock-line"></div><div class="static-mock-line short"></div></div><div class="static-front-card"><span class="static-eyebrow">'+esc(d[1])+'</span><strong>'+esc(d[2])+'</strong><p>'+esc(d[3])+'</p><div class="static-meta">'+esc(d[4])+'</div><div class="static-card-bottom"><span class="static-check">✓</span>'+esc(d[5])+'</div></div></div>';
+}
 const contentSources=new Set(shots.filter(s=>!s.closing).map(s=>s.source));
 let elapsed=0,index=-1,local=0,last=0,destroyed=false,ready=false,mobile=false,scale=1,frameHandle,lastSent=-Infinity,visible=true,targetElapsed=0,lastRendered=-1;
 const cleanup=[],frames=[],bounds=new Map(),nodes=[],frameScenes=new Map();
@@ -22,23 +29,29 @@ let chapterStart=performance.now(),gestureUntil=0,pendingDirection=0,touchStart=
 let flightFrom={x:0,y:0},flightTo={x:0,y:0},flightCurve=null;
 const flyer=$('#rocket-guide'),trail=$('#flight-trace'),flightPath=$('#flight-path');
 const targets=[[.12,.75],[.84,.15],[.12,.2],[.88,.78],[.13,.78],[.85,.20]];
-// Exactly two documents are reused for every chapter; hidden chapters have no apps.
+// Desktop reuses two illustrative React frames. On mobile we avoid them
+// entirely; each chapter already owns a lightweight static demonstration.
+const staticMobileAtLoad=$('.screen-wrap').clientWidth<730;
 const composition=document.createElement('div');composition.className='composition';
 composition.innerHTML='<div class="fragment secondary" aria-hidden="true"></div><div class="fragment primary" aria-hidden="true"></div>';
 $('#canvas').insertBefore(composition,$('.cursor'));
-for(const role of ['primary','secondary']){
- const f=document.createElement('iframe');f.title='Brief2Done illustrative '+role+' screen';f.tabIndex=-1;f.setAttribute('aria-hidden','true');
- f.src='../assets/brief2done/frame.html?scene=0&v=20261026-guided';
- f.addEventListener('load',()=>{f.contentWindow?.postMessage({type:'brief2done:scene',scene:requestedSource},location.origin);f.contentWindow?.postMessage({type:'brief2done:visibility',visible:!shots[index]?.closing},location.origin);});
- composition.querySelector('.'+role).appendChild(f);frames.push(f);
+function mountDemoFrames(){
+ if(frames.length)return;
+ for(const role of ['primary','secondary']){
+  const f=document.createElement('iframe');f.title='Brief2Done illustrative '+role+' screen';f.tabIndex=-1;f.setAttribute('aria-hidden','true');
+  f.src='../assets/brief2done/frame.html?scene=0&v=20261026-guided';
+  f.addEventListener('load',()=>{f.contentWindow?.postMessage({type:'brief2done:scene',scene:requestedSource},location.origin);f.contentWindow?.postMessage({type:'brief2done:visibility',visible:!shots[index]?.closing},location.origin);});
+  composition.querySelector('.'+role).appendChild(f);frames.push(f);
+ }
 }
-function screensReady(){return !shots[index]?.closing&&frames.every(f=>frameScenes.get(f.contentWindow)===shots[index]?.source);}
-function switchScreens(source){requestedSource=source;frameScenes.clear();lastAction=-1;lastSent=-Infinity;for(const f of frames)f.contentWindow?.postMessage({type:'brief2done:scene',scene:source},location.origin);}
+if(!staticMobileAtLoad)mountDemoFrames();
+function screensReady(){return !mobile&&!shots[index]?.closing&&frames.length===2&&frames.every(f=>frameScenes.get(f.contentWindow)===shots[index]?.source);}
+function switchScreens(source){requestedSource=source;frameScenes.clear();lastAction=-1;lastSent=-Infinity;if(mobile)return;for(const f of frames)f.contentWindow?.postMessage({type:'brief2done:scene',scene:source},location.origin);}
 
 shots.forEach((shot,i)=>{
  if(shot.closing){nodes.push({el:null,pair:[]});return;}
  const el=document.createElement('section');el.className='scene';el.dataset.index=i;el.dataset.titleMode=shot.titleMode;el.setAttribute('aria-hidden','true');
- el.innerHTML='<div class="scene-eyebrow">STEP '+String(i+1).padStart(2,'0')+' / 06</div><div class="headline-mask"><'+(i===0?'h1':'h2')+' class="headline">'+shot.title+'</'+(i===0?'h1':'h2')+'></div><p class="scene-explainer">'+shot.description+'</p><div class="intertitle" aria-hidden="true"><div>'+shot.title+'</div></div>';
+ el.innerHTML='<div class="scene-eyebrow">STEP '+String(i+1).padStart(2,'0')+' / 06</div><div class="headline-mask"><'+(i===0?'h1':'h2')+' class="headline">'+shot.title+'</'+(i===0?'h1':'h2')+'></div><p class="scene-explainer">'+shot.description+'</p>'+staticPreviewMarkup(staticPreviews[i])+'<div class="intertitle" aria-hidden="true"><div>'+shot.title+'</div></div>';
  $('#scenes').appendChild(el);
  nodes.push({el,primary:composition.querySelector('.primary'),secondary:composition.querySelector('.secondary'),headline:el.querySelector('.headline'),explainer:el.querySelector('.scene-explainer'),intertitle:el.querySelector('.intertitle'),composition,pair:frames});
 });
@@ -63,7 +76,7 @@ listen(window,'message',e=>{
  }
 });
 const timeout=setTimeout(()=>{if(!ready){document.body.classList.add('motion-failed');$('#loading').classList.add('hidden');}},20000);cleanup.push(()=>clearTimeout(timeout));
-function resize(){mobile=$('.screen-wrap').clientWidth<730;const w=mobile?640:1280,h=mobile?940:760,area=$('.screen-wrap');scale=Math.min(area.clientWidth/w,(area.clientHeight||innerHeight)/h);$('#canvas').classList.toggle('mobile',mobile);$('#canvas').style.transform='scale('+scale+')';$('#canvas').style.left=((area.clientWidth-w*scale)/2)+'px';$('#canvas').style.top=(((area.clientHeight||innerHeight)-h*scale)/2)+'px';if(index>=0&&!shots[index].closing)compose(index,local);}
+function resize(){const area=$('.screen-wrap');mobile=area.clientWidth<730;if(!mobile&&frames.length===0)mountDemoFrames();const w=mobile?640:1280,h=mobile?940:760;scale=Math.min(area.clientWidth/w,(area.clientHeight||innerHeight)/h);$('#canvas').classList.toggle('mobile',mobile);$('#canvas').style.transform='scale('+scale+')';$('#canvas').style.left=((area.clientWidth-w*scale)/2)+'px';$('#canvas').style.top=(((area.clientHeight||innerHeight)-h*scale)/2)+'px';if(index>=0&&!mobile&&!shots[index].closing)compose(index,local);}
 const ro=new ResizeObserver(resize);ro.observe($('.screen-wrap'));resize();
 // A real vertical visual rail contains all six already-laid-out story scenes.
 // The rail (rather than a simulated camera) moves UP behind a center-flight rocket.
@@ -152,12 +165,13 @@ function sendProgress(){
 const chapterCount=shots.length-1;
 let scrollFrame=null,scrollAnim=null,previousFlightProgress=0,flightDirection=1,mirrorMix=0,lastFlightFrame=0;
 let chapterStartedAt=performance.now(),storyHeight=0,stageH=0;
+let stableWidth=0,stableHeight=0;
 let finalUnlocked=false;
 const smoother=t=>{t=clamp(t);return t*t*(3-2*t);};
 const screen=$('.screen-wrap');
 const logo=$('.closing-brand-icon');
 const tip=$('#rocket-guide');
-const trailSvg=$('#flight-trace'),trailPath=$('#flight-path'),trailGradient=$('#rocket-trail-gradient');
+const trailSvg=$('#flight-trace'),trailPath=$('#flight-path'),trailGlow=$('#flight-glow'),trailGradient=$('#rocket-trail-gradient');
 
 function storyTop(){
  return $('#experience').getBoundingClientRect().top+window.scrollY;
@@ -244,6 +258,19 @@ function descentTangent(progress,w,h,mirror=0){
   y:h*.45/chapterCount
  };
 }
+// The SVG rocket's unrotated nose points up: forward down/right needs an
+// angle SMALLER than 180°, not larger. Reverse keeps the matching up heading.
+function rocketHeading(progress,w,h,direction,mirror=0){
+ const t=descentTangent(progress,w,h,mirror);
+ const bank=clamp(Math.atan2(t.x,Math.max(40,Math.abs(t.y)))*180/Math.PI,-40,40);
+ return (direction<0?0:180)-bank;
+}
+// A nearly full-chapter trail leaves a visible sweep outside the rocket
+// silhouette, especially on narrow phones. The oldest part fades to zero.
+function trailOrigin(progress,direction){
+ const visibleLength=.84;
+ return direction<0?Math.min(chapterCount,progress+visibleLength):Math.max(0,progress-visibleLength);
+}
 function rocketStart(){
  const view=screen.getBoundingClientRect(),b=$('.story-brand-icon').getBoundingClientRect();
  return{x:b.left-view.left+b.width*.77,y:b.top-view.top+b.height*.36};
@@ -282,11 +309,9 @@ function drawFlight(progress){
  const reverse=flightDirection<0?1:0;
  mirrorMix+=(reverse-mirrorMix)*(1-Math.exp(-dt/160));
  const point=flightPoint(progress);
- const tangent=descentTangent(progress,w,h,mirrorMix);
- // The rocket always descends on forward scroll, and ascends on reverse.
- // The serpentine arcs bank gently without fighting the travel direction.
- const bank=clamp(Math.atan2(tangent.x,Math.max(40,Math.abs(tangent.y)))*180/Math.PI,-40,40);
- const angle=(flightDirection<0?0:180)+bank*(flightDirection<0?-1:1);
+ // Nose follows the actual horizontal direction of the descent,
+ // while the reverse lane points back up along its mirrored trajectory.
+ const angle=rocketHeading(progress,w,h,flightDirection,mirrorMix);
  const docking=ease((progress-(chapterCount-.25))/.25);
  const launch=.6+.4*ease(progress/.24),size=launch*(1-.48*docking);
  tip.style.transform='translate3d('+(point.x-tip.offsetWidth/2)+'px,'+(point.y-tip.offsetHeight/2)+'px,0) scale('+size+')';
@@ -295,17 +320,21 @@ function drawFlight(progress){
  tip.style.opacity=String(depart*(1-ease((progress-(chapterCount-.065))/.065)));
  // The trail is a short, fading slice of the SAME serpentine path; reverse
  // direction samples AHEAD of progress so the old line stays behind the ship.
- const from=flightDirection<0?Math.min(chapterCount,progress+.16):Math.max(0,progress-.16);
- const n=32,points=[];
+ const from=trailOrigin(progress,flightDirection);
+ const n=64,points=[];
  for(let j=0;j<=n;j++)points.push(flightPoint(from+(progress-from)*j/n));
  trailSvg.setAttribute('viewBox','0 0 '+w+' '+h);
  const tail=points[0],head=points[n];
- trailPath.setAttribute('d',points.map((p,j)=>(j?'L ':'M ')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(''));
+ const flightD=points.map((p,j)=>(j?'L ':'M ')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join('');
+ trailPath.setAttribute('d',flightD);
+ trailGlow.setAttribute('d',flightD);
  trailGradient.setAttribute('x1',tail.x);
  trailGradient.setAttribute('y1',tail.y);
  trailGradient.setAttribute('x2',head.x);
  trailGradient.setAttribute('y2',head.y);
- trailSvg.style.opacity=String(depart*(1-docking*.75));
+ // Keep the illuminated trail present throughout each chapter; the fade at
+ // the very beginning/end is intentional while the rocket docks to the logo.
+ trailSvg.style.opacity=String(depart*(1-ease((progress-(chapterCount-.09))/.09)));
  $('#experience').classList.toggle('rocket-docked',docking>.94);
 }
 function render(){
@@ -316,29 +345,27 @@ function render(){
  // Consecutive panels are already laid out BELOW each other. Native scroll
  // lifts the entire rail upward pixel-for-pixel; there is NO camera reset.
  sceneRail.style.transform='translate3d(0,'+railOffset(p,h)+'px,0)';
- nodes.forEach((n,i)=>{
-  if(!n.el)return;
-  const distance=Math.abs(p-i);
-  const fade=clamp((1.12-distance)/.15);
-  n.el.style.visibility=distance<1.12?'visible':'hidden';
-  n.el.style.opacity=String(fade);
- });
+ // All panel DOM remains visible within the clipped story stage.
+ // Per-frame visibility/opacity toggles triggered Safari layer flashes.
+ // The native rail transform alone determines what comes into view.
  const closingShift=Math.max(0,chapterCount-p)*screen.clientHeight;
  const endPanel=$('#closing');
  endPanel.style.transform='translate3d(0,'+closingShift+'px,0)';
  endPanel.style.opacity='1';
  // The two shared demo frames ride the current panel and crossfade while
  // ownership changes between adjacent, physically present chapters.
- const distance=Math.abs(p-index);
- composition.style.transform='translate3d(0,'+((index-p)*h)+'px,0)';
- const previewFade=clamp((.48-distance)/.22);
- $('.cursor').classList.remove('visible');
- if(!shots[index].closing){
-  paintTitle(nodes[index],1,shots[index].titleMode);
-  sendProgress();
-  compose(index,.68);
-  composition.style.opacity=String((screensReady()?1:0)*previewFade);
- }else composition.style.opacity='0';
+ if(!mobile){
+  const distance=Math.abs(p-index);
+  composition.style.transform='translate3d(0,'+((index-p)*h)+'px,0)';
+  const previewFade=clamp((.48-distance)/.22);
+  $('.cursor').classList.remove('visible');
+  if(!shots[index].closing){
+   paintTitle(nodes[index],1,shots[index].titleMode);
+   sendProgress();
+   compose(index,.68);
+   composition.style.opacity=String((screensReady()?1:0)*previewFade);
+  }else composition.style.opacity='0';
+ }
  // The closing item rides up from below just like the six preceding panels.
  const entered=clamp((p-(chapterCount-.86))/.86);
  endPanel.inert=entered<.83;
@@ -387,13 +414,15 @@ function onManualScroll(){
  scrollFrame=requestAnimationFrame(()=>{scrollFrame=null;render();});
 }
 function onResize(){
- const before=scrollProgress();
- const oldH=stageH;
+ const area=$('.screen-wrap');
+ // Safari's bottom URL bar changes visualViewport/innerHeight during the
+ // first swipe. Ignore those changes when our stable stage size is unchanged.
+ if(Math.abs(area.clientWidth-stableWidth)<2&&Math.abs(area.clientHeight-stableHeight)<2)return;
+ const before=scrollProgress(),oldH=stageH;
  resize();
  sizeRunway();
- if(oldH!==stageH&&inStage()){
-  window.scrollTo({top:storyTop()+before*stageH,behavior:'instant'});
- }
+ stableWidth=area.clientWidth;stableHeight=area.clientHeight;
+ if(oldH!==stageH&&inStage())window.scrollTo({top:storyTop()+before*stageH,behavior:'instant'});
  layoutRail();
  render();
 }
@@ -442,7 +471,9 @@ if(!window.location.hash&&navigation?.type!=='back_forward'){
  window.scrollTo({top:0,left:0,behavior:'instant'});
 }
 $('#experience').classList.add('is-scroll');
+if(mobile){ready=true;$('#loading').classList.add('hidden');$('#loading').setAttribute('aria-hidden','true');}
 sizeRunway();
+stableWidth=screen.clientWidth;stableHeight=screen.clientHeight;
 layoutRail();
 activate(chapterFor(scrollProgress()));
 render();

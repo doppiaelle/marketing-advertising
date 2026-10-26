@@ -83,3 +83,60 @@ legibility and docking accuracy. The GitHub Actions check is structural, not
 a screenshot-based visual certification.
 
 This branch is not deployed by GitHub Pages until merged into `main`.
+
+
+## Mobile Safari hardening — static story panels and stable toolbar layout
+
+Mobile Safari previously displayed the same two continuously changing,
+heavyweight React preview iframes as desktop. When a scene changed they
+switched React trees, then updated bounds and transforms while scrolling;
+the rail also wrote visibility/opacity to every chapter on every animation
+frame. These independent repaints could flicker during both fast and slow
+scrolling.
+
+On mobile (`screen-wrap` width below 730px), the six previews are now
+**pre-rendered lightweight HTML mockups**, created synchronously along with
+the six chapter sections. Their labels and project examples are illustrative.
+No preview iframe or React screen application is initialized on a narrow
+screen. The mobile rail and the rocket are the only elements that need
+scroll-dependent movement: previews are static, with no per-frame fade,
+visibility toggling, CSS animations or focusable controls. Desktop retains
+the two shared React iframes and their dynamic illustrative flows.
+
+The viewport uses **`100svh`** for the sticky mobile stage and its clipping
+frame. Unlike `100dvh`, the small viewport unit does not resize merely
+because Safari expands/collapses its bottom URL/navigation bar. The resize
+handler also ignores events that do not change the measured stable stage
+width or height; rotation and actual layout changes are still supported.
+The page cannot disable Safari's browser UI itself, but internal scene
+positions, scroll-runway height and rocket coordinates remain stable.
+
+The description panel is elevated above the previews, with a dark
+translucent background for contrast. The rocket's bank follows the forward
+horizontal tangent correctly; its reversed orientation stays intact. The
+trailing glow uses a longer sliding window with a gradient from transparent
+at the oldest end to visible green near the rocket. Mobile avoids blur filters
+on the trail to reduce frequent GPU re-rasterization.
+
+### Mobile QA
+
+- iPhone Safari, URL bar expanded: start at chapter one and drag slowly.
+  Panel titles and mockups must be visible immediately, with no flickering
+  at chapter boundaries.
+- Safari toolbar collapses on the first downward swipe and expands on
+  upward swipes: the page may naturally change its browser chrome, but the
+  composition, panels and rocket should not resize or jump.
+- Fast flick forward/reverse: the six *already-rendered* static panels flow
+  past as a vertical rail, while the rocket follows the native scroll position.
+- Mobile landscape/orientation change: geometry should remeasure when the
+  stable viewport genuinely changes.
+- Desktop remains visually unchanged except restored description-layer
+  contrast, corrected rocket heading and longer visible trailing glow.
+- Reduced-motion retains readable static previews but hides decorative
+  rocket/trail.
+
+**Verification limit:** this development environment cannot operate a
+physical iPhone or a physical Safari installation. CI runs the real
+JavaScript in a simulated DOM for desktop and mobile viewport sizes, including
+a synthetic Safari toolbar height-change event. Actual Safari device testing
+remains a release review requirement, not a claimed result.

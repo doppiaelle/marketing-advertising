@@ -52,13 +52,26 @@ assert.match(motion,/nodes\.forEach\(\(n,i\)=>/);
 assert.match(motion,/const closingShift=Math\.max\(0,chapterCount-p\)\*screen\.clientHeight/);
 assert.match(motion,/endPanel\.style\.transform='translate3d\(0,'\+closingShift/);
 assert.match(motion,/const point=descentPoint\(p,w,h,mirror\)/);
-assert.match(motion,/const tangent=descentTangent\(progress,w,h,mirrorMix\)/);
-assert.match(motion,/const angle=\(flightDirection<0\?0:180\)/);
-assert.match(motion,/flightDirection<0\?Math\.min\(chapterCount,progress\+\.16\)/);
+assert.match(motion,/const angle=rocketHeading\(progress,w,h,flightDirection,mirrorMix\)/);
+assert.match(motion,/return \(direction<0\?0:180\)-bank;/);
+assert.match(motion,/const from=trailOrigin\(progress,flightDirection\)/);
 assert.match(motion,/mirrorMix\+=\(reverse-mirrorMix\)/);
 assert.match(motion,/tip\.style\.opacity=String\(depart/);
 assert.match(showcase,/\.experience\.is-scroll #scenes\s*\{[^}]*will-change: transform/s);
 assert.match(showcase,/\.experience\.is-scroll #closing\s*\{[^}]*visibility: visible/s);
+assert.match(showcase,/\.experience\.is-scroll #scenes\s*\{[^}]*z-index: 12/s,
+  'Scene labels must paint above product preview cards');
+assert.match(showcase,/\.experience\.is-scroll #scenes \.scene-explainer\s*\{[^}]*background: linear-gradient/s,
+  'Dark translucent explanation panel must be restored');
+assert.match(showcase,/\.experience\.is-scroll #flight-glow\s*\{[^}]*stroke: url\(#rocket-trail-gradient\)/s);
+assert.match(showcase,/height: 100svh/,'Mobile stage must not resize with Safari bottom URL toolbar');
+assert.match(showcase,/\.experience\.is-scroll \.mobile \.static-preview\s*\{[^}]*display: block/s,
+  'Mobile preview must be pre-painted rather than swapping React iframe content');
+assert.match(motion,/if\(!staticMobileAtLoad\)mountDemoFrames\(\)/,
+  'Mobile must not mount heavyweight React preview frames');
+assert.doesNotMatch(motion,/n\.el\.style\.visibility=distance/,
+  'Safari should not toggle story panel visibility during scroll');
+assert.match(showcase,/\.experience\.is-scroll #flight-path\s*\{[^}]*stroke-width: 3\.25px/s);
 
 // Execute the ACTUAL rail functions to catch a return to resetting every
 // panel at the top rather than physically lifting one column of content.
@@ -89,7 +102,7 @@ const geoEnd=motion.indexOf('function rocketStart(){',geoStart);
 assert.ok(geoStart>0&&geoEnd>geoStart);
 const flight=runInNewContext(
   'const chapterCount=6;const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));\n'+
-  motion.slice(geoStart,geoEnd)+'\n({descentPoint,descentTangent})',{Math}
+  motion.slice(geoStart,geoEnd)+'\n({descentPoint,descentTangent,rocketHeading,trailOrigin})',{Math}
 );
 for(const {w,h} of [{w:1280,h:800},{w:390,h:844}]){
   let previous=-Infinity;
@@ -117,6 +130,34 @@ for(const {w,h} of [{w:1280,h:800},{w:390,h:844}]){
   }
   assert.ok(flight.descentPoint(6,w,h).y-flight.descentPoint(0,w,h).y>=h*.44,
     'The nose slowly descends while the page rises behind it');
+  // The sprite art points up when unrotated: its rotated heading must have
+  // the same horizontal sign as the forward tangent, and the opposite sign
+  // on rewind. Test BOTH alternating sides, desktop and phone geometry.
+  for (const p of [.25,.75,1.25,1.75,2.25,3.25,4.75,5.25]) {
+    const vx=flight.descentTangent(p,w,h,0).x;
+    for (const direction of [1,-1]) {
+      const radians=flight.rocketHeading(p,w,h,direction,0)*Math.PI/180;
+      const noseX=Math.sin(radians),noseY=-Math.cos(radians);
+      assert.ok(noseX*vx*direction>0,
+        'Rocket nose must match horizontal movement at '+p+' direction '+direction);
+      assert.ok(noseY*direction>0,
+        'Rocket must point down in forward scroll and up on rewind');
+    }
+  }
+  for (const p of [.5,1.5,2.5,3.5,4.5,5.5]) {
+    for (const direction of [1,-1]) {
+      const start=flight.trailOrigin(p,direction);
+      assert.ok(Math.abs(p-start)>=Math.min(.84,direction<0?6-p:p)-1e-8,'Tail must span available flight history');
+      let total=0,prev=flight.descentPoint(start,w,h,0);
+      for(let i=1;i<=64;i++){
+        const current=flight.descentPoint(start+(p-start)*i/64,w,h,0);
+        total+=Math.hypot(current.x-prev.x,current.y-prev.y);
+        prev=current;
+      }
+      assert.ok(total>(Math.abs(p-start)<.8?28:65), 'Trail must leave a visible arc beyond the sprite at p='+p+' size='+w+'x'+h);
+    }
+  }
+
 }
 assert.match(motion,/paintTitle\(nodes\[index\],1,shots\[index\]\.titleMode\)/);
 assert.match(motion,/const previewFade=clamp\(\(\.48-distance\)\/\.22\)/,
@@ -130,7 +171,7 @@ assert.match(rocket, /60 219/, 'Flame must reach its complete conical tip');
 assert.match(rocket, /id="flame-core"/);
 assert.match(html, /<img src="\.\.\/assets\/brief2done\/rocket-flight\.svg"/);
 assert.doesNotMatch(html, /rocket-fire-cut|rocket-body-cut/, 'Broken logo cropping masks must be removed');
-for (const id of ['rocket-guide', 'flight-trace', 'flight-path', 'story-prev', 'story-next', 'closing', 'story-replay']) {
+for (const id of ['rocket-guide', 'flight-trace', 'flight-glow', 'flight-path', 'story-prev', 'story-next', 'closing', 'story-replay']) {
   assert.ok(html.includes('id="'+id+'"'), 'Missing guided flight element: '+id);
 }
 assert.match(html, /id="rocket-trail-gradient"/);
@@ -151,4 +192,4 @@ assert.match(html, /Create your account/);
 const legacy = await readFile(new URL('taskhub/index.html', root), 'utf8');
 assert.ok(legacy.includes('../brief2done/'));
 assert.ok(legacy.includes('location.search+location.hash'));
-console.log('PASS: Brief2Done physical upward story rail, monotonic serpentine rocket, mirrored return, native scroll, staged CTA, and assets.');
+console.log('PASS: readable dark scene panels, forward/reverse heading, full-length glowing fading trail, upward story rail, native scroll and assets.');
