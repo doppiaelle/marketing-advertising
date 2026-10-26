@@ -511,3 +511,62 @@ body { overscroll-behavior-y: none; }
   .experience.is-scroll .composition,
   .experience.is-scroll #closing { will-change: auto; }
 }
+
+
+/* Readability and flight polish: on the single rising story rail the shared
+   product preview is a sibling painted later than #scenes. Explicit stacking
+   keeps the description panel in FRONT of the preview cards. */
+.experience.is-scroll #scenes {
+  z-index: 12;
+}
+.experience.is-scroll #scenes .scene-explainer {
+  z-index: 14;
+  color: #eff8e8;
+  background: linear-gradient(108deg,
+    rgb(4 27 21 / .97) 0%,
+    rgb(4 29 23 / .93) 78%,
+    rgb(4 29 23 / .84) 100%);
+  border-left: 3px solid #cbf58b;
+  border-radius: 0 13px 13px 0;
+  box-shadow: 0 12px 36px rgb(0 18 12 / .42);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+/* Keep the flight line in front of the content but behind the rocket,
+   and illuminate the newer long trail even on narrow phone screens. */
+.experience.is-scroll .flight-trace {
+  z-index: 61;
+  overflow: hidden;
+  pointer-events: none;
+}
+.experience.is-scroll #flight-glow {
+  fill: none;
+  stroke: url(#rocket-trail-gradient);
+  stroke-width: 9px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: none;
+  filter: blur(5px);
+}
+.experience.is-scroll #flight-path {
+  fill: none;
+  stroke: url(#rocket-trail-gradient);
+  stroke-width: 3.25px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 4px rgb(194 255 140 / .75));
+}
+@media (max-width: 729px) {
+  .experience.is-scroll #flight-glow { stroke-width: 7px; filter: blur(4px); }
+  .experience.is-scroll #flight-path { stroke-width: 2.9px; }
+  .experience.is-scroll #scenes .scene-explainer {
+    background: linear-gradient(108deg,
+      rgb(4 27 21 / .98) 0%,
+      rgb(4 29 23 / .95) 80%,
+      rgb(4 29 23 / .9) 100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .experience.is-scroll .flight-trace { display: none; }
+}
