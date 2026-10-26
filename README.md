@@ -135,7 +135,8 @@ Vedi [asset, animazioni e verifiche](docs/secura-branding.md).
 Feeddy ha una vetrina compatta con Manrope locale, antracite e oro:
 tre benefici chiari (scheduling, supporto AI opzionale e controllo), una demo
 interattiva focalizzata su calendario e post editor e una CTA. L'intro pinball
-mantiene i cinque loghi e i rimbalzi, ma dura ~5,8 s invece di ~9,3 s.
+parte direttamente dall'impatto su Instagram, salta Meta e mantiene
+quattro rimbalzi visibili: ~3,3 s invece di ~5,8 s.
 La scena approda al logo originale, rispetta il movimento ridotto e sospende
 il rendering fuori vista. La pubblicazione automatica dipende dalle API
 dei social supportati e dai permessi dei profili connessi.
