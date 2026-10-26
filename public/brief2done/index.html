@@ -11,9 +11,9 @@
   <title>Brief2Done — Connections into collaboration.</title>
   <link rel="icon" type="image/png" href="../assets/brief2done/brief2done-icon.png">
   <link rel="preload" href="../assets/brief2done/inter.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../assets/brief2done/motion.css?v=20261026-flight-v3">
-  <link rel="stylesheet" href="../assets/brief2done/showcase.css?v=20261026-flight-v3">
-  <script defer src="../assets/brief2done/motion.js?v=20261026-flight-v3"></script>
+  <link rel="stylesheet" href="../assets/brief2done/motion.css?v=20261026-scroll-physics-v1">
+  <link rel="stylesheet" href="../assets/brief2done/showcase.css?v=20261026-scroll-physics-v1">
+  <script defer src="../assets/brief2done/motion.js?v=20261026-scroll-physics-v1"></script>
   <link rel="stylesheet" href="../assets/ui-icons.css?v=20261024">
   <link rel="stylesheet" href="../assets/product-footer.css">
 </head>
@@ -38,14 +38,7 @@
             <path id="flight-path" stroke="url(#rocket-trail-gradient)"></path>
           </svg>
           <div id="rocket-guide" class="rocket-guide" aria-hidden="true">
-            <svg viewBox="242 43 263 350" focusable="false" role="presentation" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <clipPath id="rocket-fire-cut"><path d="M373 187 Q405 180 414 207 Q402 231 378 257 L342 295 Q345 267 355 237 Z"/></clipPath>
-                <clipPath id="rocket-body-cut"><path d="M500 43 Q507 77 485 123 Q471 160 451 194 L442 220 Q418 242 394 251 L372 225 Q349 228 330 220 Q311 195 325 166 Q345 135 390 112 Q447 59 500 43 Z"/></clipPath>
-              </defs>
-              <image href="../assets/brief2done/brief2done-icon.png" width="500" height="500" clip-path="url(#rocket-fire-cut)"/>
-              <image href="../assets/brief2done/brief2done-icon.png" width="500" height="500" clip-path="url(#rocket-body-cut)"/>
-            </svg>
+            <img src="../assets/brief2done/rocket-flight.svg" width="120" height="220" alt="" decoding="async">
           </div>
           <nav class="story-nav" aria-label="Walkthrough chapters">
             <button id="story-prev" class="story-nav-button" type="button" aria-label="Previous chapter" disabled><svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>
