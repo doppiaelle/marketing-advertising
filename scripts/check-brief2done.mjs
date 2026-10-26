@@ -99,9 +99,9 @@ for (const mirror of [0,1]) {
     }
   }
 }
-assert.match(showcase, /\\.rocket-guide\s*\\{\s*opacity: 0;/,
+assert.match(showcase, /\.rocket-guide\s*\{\s*opacity: 0;/,
   'The rocket must be invisible before the first scroll');
-assert.match(showcase, /\\.rocket-guide img\s*\\{[^}]*transition: transform/s,
+assert.match(showcase, /\.rocket-guide img\s*\{[^}]*transition: transform/s,
   'Reverse heading must rotate smoothly');
 const rocket = await readFile(new URL('assets/brief2done/rocket-flight.svg', root), 'utf8');
 assert.match(rocket, /viewBox="0 0 120 220"/);
