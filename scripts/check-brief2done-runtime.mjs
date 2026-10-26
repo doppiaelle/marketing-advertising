@@ -110,6 +110,26 @@ fresh.sendReady(0);
 assert.equal(fresh.window.Brief2DoneMotion.getState().ready,true);
 assert.ok(fresh.get('#loading').classList.contains('hidden'));
 
+// Exercise actual scroll-driven painting, not merely geometry helpers.
+// The long glowing path must be produced by render(), and the forward nose
+// must tilt in the same left/right direction as its serpentine segment.
+function noseX(){
+ const transform=fresh.get('#rocket-guide').querySelector('img').style.transform;
+ const degrees=Number(transform.match(/rotate\\(([-\\d.]+)deg\\)/)?.[1]);
+ assert.ok(Number.isFinite(degrees),'Rocket must have a computed rotation');
+ return Math.sin(degrees*Math.PI/180);
+}
+fresh.window.Brief2DoneMotion.setProgress(1.25/6);
+assert.ok(noseX()<-.1,'Forward leftward descent should face left');
+fresh.window.Brief2DoneMotion.setProgress(2.25/6);
+assert.ok(noseX()>.1,'Forward rightward descent should face right');
+const d=fresh.get('#flight-path').getAttribute('d');
+assert.ok((d.match(/L /g)||[]).length>=64,'Trail should contain the longer rendered arc');
+assert.equal(fresh.get('#flight-glow').getAttribute('d'),d,'Glow and gradient path must stay aligned');
+assert.ok(Number(fresh.get('#flight-trace').style.opacity)>.8,'Trail should be visible during the main flight');
+fresh.window.Brief2DoneMotion.setProgress(1.25/6);
+assert.ok(noseX()>.1,'Reverse motion should face back up the route');
+
 fresh.window.Brief2DoneMotion.setProgress(1/6);
 assert.equal(fresh.window.Brief2DoneMotion.getState().scene,1,'Next chapter must render');
 fresh.sendReady(6);
@@ -127,4 +147,4 @@ const restored=boot({initialScroll:2400,navigationType:'back_forward'});
 assert.equal(restored.scroll(),2400,'Back/forward history must retain its scroll position');
 assert.equal(restored.window.Brief2DoneMotion.getState().scene,3);
 
-console.log('PASS: Browser startup after reload, two-frame readiness, all scene transitions, closing CTA, reverse, and back/forward scroll restoration.');
+console.log('PASS: Browser startup, heading on forward/reverse scroll, illuminated long trail, six scenes, CTA, reverse and browser history.');
