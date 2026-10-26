@@ -359,37 +359,77 @@ function setProgress(value){
  render();
 }
 function onWheel(e){
- if(!inStage()||e.ctrlKey||Math.abs(e.deltaY)<4)return;
- const dir=e.deltaY>0?1:-1;
- const p=scrollProgress();
- if((dir<0&&p<.02)||(dir>0&&p>=chapterCount-.02))return;
+ if(!inStage()||e.ctrlKey)return;
+ const factor=e.deltaMode===1?16:e.deltaMode===2?stageH:1;
+ const delta=e.deltaY*factor;
+ if(Math.abs(delta)<.5)return;
+ const dir=Math.sign(delta),p=scrollProgress();
+ // At the two outer boundaries, native document scrolling may reach the
+ // previous page position or footer without trapping the visitor.
+ if(dir<0&&p<.001||dir>0&&p>=chapterCount-.001)return;
  e.preventDefault();
- const now=performance.now(),startGesture=now-wheelLast>480;
- wheelLast=now;
- if(!startGesture||scrollAnim)return;
  if(!ready){queuedFirstGesture=dir;return;}
- // Exactly one lap and one chapter for every wheel/trackpad gesture.
- scrollToStep(chapterFor(p)+dir);
+ const now=performance.now();
+ // A wheel/trackpad burst is allowed to cover AT MOST one chapter. Slow
+ // deltas advance the real document by small proportional increments.
+ if(!wheelGesture||now-wheelLast>290||dir!==wheelGesture.dir){
+  const anchor=chapterFor(p);
+  wheelGesture={dir,at:window.scrollY,delta:0,
+   min:storyTop()+Math.max(0,anchor-1)*stageH,
+   max:storyTop()+Math.min(chapterCount,anchor+1)*stageH};
+ }
+ const previous=wheelLast;
+ wheelLast=now;
+ if(scrollAnim){cancelAnimationFrame(scrollAnim.id);scrollAnim=null;}
+ const fast=Math.abs(delta)>100||now-previous<55&&Math.abs(delta)>65;
+ const sensitivity=fast?2.25:Math.abs(delta)>35?1.5:1;
+ wheelGesture.delta+=delta*sensitivity;
+ const target=clamp(wheelGesture.at+wheelGesture.delta,wheelGesture.min,wheelGesture.max);
+ window.scrollTo({top:target,behavior:'instant'});
+ // Do not auto-snap an unfinished slow gesture: a finger or trackpad must be
+ // able to hold the rocket anywhere on its path without it flying ahead.
 }
 function onTouchStart(e){
  if(!inStage()||e.touches.length!==1||e.target.closest('button,a')){touchPoint=null;return;}
- touchPoint={y:e.touches[0].clientY,x:e.touches[0].clientX};
+ if(scrollAnim){cancelAnimationFrame(scrollAnim.id);scrollAnim=null;}
+ touchPoint={
+  x:e.touches[0].clientX,y:e.touches[0].clientY,
+  at:window.scrollY,startTime:performance.now(),
+  max:storyTop()+Math.min(chapterCount,chapterFor(scrollProgress())+1)*stageH,
+  min:storyTop()+Math.max(0,chapterFor(scrollProgress())-1)*stageH,
+  currentY:e.touches[0].clientY,lastTime:performance.now()
+ };
 }
 function onTouchMove(e){
- if(!touchPoint||!inStage()||!e.cancelable)return;
- const dir=Math.sign(touchPoint.y-e.touches[0].clientY),p=scrollProgress();
- if((dir<0&&p<.02)||(dir>0&&p>=chapterCount-.02))return;
+ if(!touchPoint||!inStage()||!e.cancelable||e.touches.length!==1)return;
+ const touch=e.touches[0];
+ const dy=touchPoint.y-touch.clientY,dx=touchPoint.x-touch.clientX;
+ if(Math.abs(dx)>Math.abs(dy)*1.4)return;
+ const p=scrollProgress();
+ if(dy<0&&p<=.001||dy>0&&p>=chapterCount-.001)return;
  e.preventDefault();
+ if(ready){
+  // The rocket is driven directly by finger distance, not by a 1s animation
+  // triggered on touchend. This also keeps very slow swipes proportional.
+  const target=clamp(touchPoint.at+dy*1.12,touchPoint.min,touchPoint.max);
+  window.scrollTo({top:target,behavior:'instant'});
+ }
+ touchPoint.lastTime=performance.now();
+ touchPoint.currentY=touch.clientY;
 }
 function onTouchEnd(e){
  if(!touchPoint||!e.changedTouches.length)return;
- const dy=touchPoint.y-e.changedTouches[0].clientY;
- const dx=touchPoint.x-e.changedTouches[0].clientX;
- touchPoint=null;
- if(Math.abs(dy)<40||Math.abs(dy)<Math.abs(dx)*1.15||scrollAnim||!ready)return;
- const dir=Math.sign(dy),p=scrollProgress();
- if((dir<0&&p<.02)||(dir>0&&p>=chapterCount-.02))return;
- scrollToStep(chapterFor(p)+dir);
+ const point=touchPoint;touchPoint=null;
+ const dy=point.y-e.changedTouches[0].clientY;
+ const dx=point.x-e.changedTouches[0].clientX;
+ if(!ready||Math.abs(dy)<28||Math.abs(dy)<Math.abs(dx)*1.2)return;
+ const velocity=Math.abs(dy)/Math.max(16,performance.now()-point.startTime);
+ // A fast flick reaches exactly the neighbouring stage quickly. A slow
+ // swipe stops where the user's finger stops; no forced rocket acceleration.
+ if(velocity>.85&&Math.abs(dy)>85){
+  const target=clamp(chapterFor((point.at-storyTop())/stageH)+Math.sign(dy),0,chapterCount);
+  scrollToStep(target);
+ }
 }
 function onManualScroll(){
  // The document's scrollbar cannot expose the footer until landing has played.
