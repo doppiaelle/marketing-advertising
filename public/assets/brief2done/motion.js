@@ -48,7 +48,8 @@ listen(window,'message',e=>{
  if(e.data?.type==='brief2done:ready'&&fromFrame(e)){
   if(!contentSources.has(e.data.scene)||!e.data.primary)return;
   bounds.set(e.data.scene,e.data);frameScenes.set(e.source,e.data.scene);
-  if(!ready&&frames.every(f=>frameScenes.has(f.contentWindow))){ready=true;chapterStart=performance.now();$('#loading').classList.add('hidden');$('#loading').setAttribute('aria-hidden','true');document.body.classList.remove('motion-failed');}
+  if(!ready&&frames.every(f=>frameScenes.has(f.contentWindow))){ready=true;chapterStart=performance.now();$('#loading').classList.add('hidden');
+   if(queuedFirstGesture){const dir=queuedFirstGesture;queuedFirstGesture=0;requestAnimationFrame(()=>scrollToStep(clamp(chapterFor(scrollProgress())+dir,0,chapterCount)));}$('#loading').setAttribute('aria-hidden','true');document.body.classList.remove('motion-failed');}
   if(screensReady()){
    compose(index,local);paintTitle(nodes[index],local,shots[index].titleMode);sendProgress();
   }
@@ -133,6 +134,7 @@ const chapterCount=shots.length-1;
 const flightPaths=[];
 let pathSize='',wheelLast=0,touchPoint=null,scrollFrame=null,scrollAnim=null;
 let chapterStartedAt=performance.now(),storyHeight=0,stageH=0;
+let queuedFirstGesture=0,finalUnlocked=false;
 const smoother=t=>{t=clamp(t);return t*t*(3-2*t);};
 const screen=$('.screen-wrap');
 const logo=$('.closing-brand-icon');
@@ -321,6 +323,7 @@ function render(){
   $('#closing').style.transform='scale('+(1.025-.025*enter)+')';
   $('.cursor').classList.remove('visible');
   const card=$('.closing-card');
+  if(local>.94&&!finalUnlocked){finalUnlocked=true;document.body.classList.add('story-unlocked');}
   card.style.opacity=String(enter);
   card.style.transform='translate3d(0,'+((1-enter)*Math.min(innerHeight*.27,180))+'px,0)';
   $('#closing').inert=enter<.8;
@@ -365,7 +368,8 @@ function onWheel(e){
  e.preventDefault();
  const now=performance.now(),startGesture=now-wheelLast>480;
  wheelLast=now;
- if(!startGesture||scrollAnim||!ready)return;
+ if(!startGesture||scrollAnim)return;
+ if(!ready){queuedFirstGesture=dir;return;}
  // Exactly one lap and one chapter for every wheel/trackpad gesture.
  scrollToStep(chapterFor(p)+dir);
 }
@@ -390,6 +394,11 @@ function onTouchEnd(e){
  scrollToStep(chapterFor(p)+dir);
 }
 function onManualScroll(){
+ // The document's scrollbar cannot expose the footer until landing has played.
+ if(!finalUnlocked&&stageH){
+  const limit=storyTop()+chapterCount*stageH;
+  if(window.scrollY>limit+1){window.scrollTo({top:limit,behavior:'instant'});}
+ }
  // The scrollbar and keyboard scrollbar controls use the SAME chapter position.
  // On thumb drag, cancel any previous wheel animation instead of fighting it.
  if(scrollFrame)return;
@@ -416,6 +425,7 @@ listen(screen,'touchstart',onTouchStart,{passive:true});
 listen(screen,'touchmove',onTouchMove,{passive:false});
 listen(screen,'touchend',onTouchEnd,{passive:true});
 listen(window,'scroll',onManualScroll,{passive:true});
+listen(window,'pageshow',onManualScroll);
 listen(window,'resize',onResize);
 listen(reduced,'change',render);
 listen($('#story-prev'),'click',()=>scrollToStep(index-1));
