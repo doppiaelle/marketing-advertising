@@ -132,7 +132,7 @@ function sendProgress(){
 // Dragging the scrollbar scrubs the same flight instead of cutting off the stage.
 const chapterCount=shots.length-1;
 const flightPaths=[];
-let pathSize='',wheelLast=0,touchPoint=null,scrollFrame=null,scrollAnim=null;
+let pathSize='',wheelLast=0,touchPoint=null,scrollFrame=null,scrollAnim=null,wheelGesture=null;
 let chapterStartedAt=performance.now(),storyHeight=0,stageH=0;
 let queuedFirstGesture=0,finalUnlocked=false;
 const smoother=t=>{t=clamp(t);return t*t*(3-2*t);};
@@ -212,104 +212,91 @@ function rocketEnd(){
  const view=screen.getBoundingClientRect(),b=logo.getBoundingClientRect();
  return{x:b.left-view.left+b.width*.77,y:b.top-view.top+b.height*.27};
 }
-function catmull(a,b,c,d,t){
- const t2=t*t,t3=t2*t;
+// One cubic per stage. Y values are in a continuous vertical world instead of
+// restarting inside every pinned viewport. Tangents at joins point DOWN.
+function cubicPoint(segment,t){
+ const u=1-t, a=segment.a,b=segment.b,c=segment.c,d=segment.d;
  return {
-  x:.5*((2*b.x)+(-a.x+c.x)*t+(2*a.x-5*b.x+4*c.x-d.x)*t2+(-a.x+3*b.x-3*c.x+d.x)*t3),
-  y:.5*((2*b.y)+(-a.y+c.y)*t+(2*a.y-5*b.y+4*c.y-d.y)*t2+(-a.y+3*b.y-3*c.y+d.y)*t3)
+  x:u*u*u*a.x+3*u*u*t*b.x+3*u*t*t*c.x+t*t*t*d.x,
+  y:u*u*u*a.y+3*u*u*t*b.y+3*u*t*t*c.y+t*t*t*d.y
  };
 }
+function cubicTangent(segment,t){
+ const u=1-t,a=segment.a,b=segment.b,c=segment.c,d=segment.d;
+ return {
+  x:3*u*u*(b.x-a.x)+6*u*t*(c.x-b.x)+3*t*t*(d.x-c.x),
+  y:3*u*u*(b.y-a.y)+6*u*t*(c.y-b.y)+3*t*t*(d.y-c.y)
+ };
+}
+function worldCamera(progress){return .95*progress*screen.clientHeight;}
 function buildFlight(){
  const w=screen.clientWidth,h=screen.clientHeight;
  if(!w||!h)return;
- const mobile=w<730;
- const landmarks=[
-  rocketStart(),
-  {x:w*.16,y:h*.81},
-  {x:w*.83,y:h*.75},
-  {x:w*.17,y:h*.83},
-  {x:w*.81,y:h*.75},
-  {x:w*.15,y:h*.84},
-  rocketEnd()
- ];
+ const start=rocketStart(),end=rocketEnd();
+ // Last point is the logo's location in document/world coordinates. Interior
+ // waypoints swap sides but every following Y grows by one whole viewport.
+ const anchors=[start];
+ for(let i=1;i<chapterCount;i++){
+  anchors.push({x:w*(i%2?.25:.75),y:start.y+i*h});
+ }
+ anchors.push({x:end.x,y:end.y+worldCamera(chapterCount)});
  flightPaths.length=0;
  for(let i=0;i<chapterCount;i++){
-  const flip=i%2===0;
-  const targets=mobile
-   ? [[flip?.15:.82,.13],[flip?.82:.16,.30],[flip?.19:.8,.48],[flip?.84:.15,.65],[flip?.32:.69,.76]]
-   : [[flip?.17:.82,.14],[flip?.82:.18,.28],[flip?.2:.81,.44],[flip?.85:.16,.61],[flip?.31:.7,.75]];
-  // A full series of sweeping S-curves per chapter, without resetting the
-  // rocket at a scene boundary: end of i === start of i+1.
-  const pts=[landmarks[i],...targets.map(([x,y])=>({x:x*w,y:y*h})),landmarks[i+1]];
-  const samples=[pts[0]];
-  for(let j=0;j<pts.length-1;j++){
-   const a=pts[Math.max(0,j-1)],b=pts[j],d=pts[j+1],e=pts[Math.min(pts.length-1,j+2)];
-   for(let k=1;k<=22;k++)samples.push(catmull(a,b,d,e,k/22));
-  }
-  const lengths=[0];
-  for(let j=1;j<samples.length;j++){
-   const d=Math.hypot(samples[j].x-samples[j-1].x,samples[j].y-samples[j-1].y);
-   lengths.push(lengths[j-1]+d);
-  }
-  flightPaths.push({samples,lengths,total:lengths[lengths.length-1]});
+  const a=anchors[i],d=anchors[i+1],vertical=(d.y-a.y);
+  // Vertical tangents on both sides are deliberate: no upward-pointing
+  // rocket when arriving at a phase boundary, and no sharp join/cusp.
+  flightPaths.push({
+   a,b:{x:a.x,y:a.y+vertical*.32},
+   c:{x:d.x,y:d.y-vertical*.32},d
+  });
  }
  trailSvg.setAttribute('viewBox','0 0 '+w+' '+h);
  pathSize=w+'x'+h;
 }
-function sampleFlight(globalPhase){
+function sampleFlight(progress){
  if(!flightPaths.length)return{x:0,y:0};
- const i=clamp(Math.floor(globalPhase),0,chapterCount-1);
- const u=globalPhase>=chapterCount?1:clamp(globalPhase-i);
- const route=flightPaths[i];
- const at=u*route.total;
- let lo=0,hi=route.lengths.length-1;
- while(lo<hi){const m=(lo+hi)>>1;if(route.lengths[m]<at)lo=m+1;else hi=m;}
- const j=Math.max(1,lo),s0=route.lengths[j-1],s1=route.lengths[j];
- const blend=s1===s0?0:(at-s0)/(s1-s0);
- const a=route.samples[j-1],b=route.samples[j];
- return{x:a.x+(b.x-a.x)*blend,y:a.y+(b.y-a.y)*blend};
+ const i=Math.min(chapterCount-1,Math.floor(progress));
+ return cubicPoint(flightPaths[i],progress>=chapterCount?1:clamp(progress-i));
+}
+function flightTangent(progress){
+ const i=Math.min(chapterCount-1,Math.floor(progress));
+ return cubicTangent(flightPaths[i],progress>=chapterCount?1:clamp(progress-i));
 }
 function drawFlight(progress){
- if(reduced.matches){
-  tip.style.opacity='0';
-  trailSvg.style.opacity='0';
-  return;
- }
+ if(reduced.matches){tip.style.opacity='0';trailSvg.style.opacity='0';return;}
  if(pathSize!==screen.clientWidth+'x'+screen.clientHeight)buildFlight();
  if(!flightPaths.length)return;
- const segment=Math.min(chapterCount-1,Math.floor(progress));
- const part=progress>=chapterCount?1:progress-segment;
- // Rocket finishes most of its lap before the accompanying title / app motion.
- const fast=clamp(part/.68);
- const flown=segment+smoother(fast);
- const position=sampleFlight(flown);
- const ahead=sampleFlight(Math.min(chapterCount,flown+.009));
- const behind=sampleFlight(Math.max(0,flown-.009));
- const travelAngle=Math.atan2(ahead.y-behind.y,ahead.x-behind.x)*180/Math.PI+45;
- const docking=ease((progress-(chapterCount-.25))/.25);
- // Match the final mark's live rectangle after its entrance transform settles.
- // The correction starts at zero: all intermediate route joins remain exact.
- if(flown>=chapterCount-1){
-  const stored=flightPaths[chapterCount-1].samples.at(-1),live=rocketEnd();
-  const adjust=smoother(flown-(chapterCount-1));
-  position.x+=(live.x-stored.x)*adjust;
-  position.y+=(live.y-stored.y)*adjust;
- }
- const angle=travelAngle*(1-docking);
- const launch=.42+.58*ease(progress/.18);
- const size=launch*(1-.52*docking);
- tip.style.transform='translate3d('+(position.x-tip.offsetWidth/2)+'px,'+(position.y-tip.offsetHeight/2)+'px,0) rotate('+angle+'deg) scale('+size+')';
+ // No independent easing/acceleration: the rocket's position is a pure
+ // function of ACTUAL document scroll. A slow mobile drag is a slow flight.
+ const camera=worldCamera(progress);
+ const position=sampleFlight(progress);
+ const tangent=flightTangent(progress);
+ const docking=ease((progress-(chapterCount-.23))/.23);
+ const live=rocketEnd();
+ const correction=progress>chapterCount-1?ease((progress-(chapterCount-1))):0;
+ const finalBase=sampleFlight(chapterCount);
+ position.x+=(live.x-finalBase.x)*correction;
+ position.y+=((live.y+worldCamera(chapterCount))-finalBase.y)*correction;
+ const angle=Math.atan2(tangent.y,tangent.x)*180/Math.PI+90;
+ const launch=.5+.5*ease(progress/.28);
+ const size=launch*(1-.48*docking);
+ tip.style.transform='translate3d('+(position.x-tip.offsetWidth/2)+'px,'+(position.y-camera-tip.offsetHeight/2)+'px,0) rotate('+(angle*(1-docking))+ 'deg) scale('+size+')';
  tip.style.opacity=String(1-ease((progress-(chapterCount-.055))/.055));
- const start=Math.max(0,flown-.17);
- const n=32,points=[];
- for(let j=0;j<=n;j++)points.push(sampleFlight(start+(flown-start)*j/n));
- const first=points[0],lastPoint=points[points.length-1];
- trailPath.setAttribute('d',points.map((p,j)=>(j?'L ':'M ')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' '));
- trailGradient.setAttribute('x1',first.x);
- trailGradient.setAttribute('y1',first.y);
- trailGradient.setAttribute('x2',lastPoint.x);
- trailGradient.setAttribute('y2',lastPoint.y);
- trailSvg.style.opacity=String(1-docking*.75);
+ // Draw only a short recent segment. The line recedes gradually behind the
+ // rocket, and the SVG gradient fades its oldest end completely.
+ const start=Math.max(0,progress-.19),steps=28;
+ const points=[];
+ for(let i=0;i<=steps;i++){
+  const p=sampleFlight(start+(progress-start)*i/steps);
+  points.push({x:p.x,y:p.y-camera});
+ }
+ const head=points[points.length-1],tail=points[0];
+ trailPath.setAttribute('d',points.map((p,i)=>(i?'L ':'M ')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(''));
+ trailGradient.setAttribute('x1',tail.x);
+ trailGradient.setAttribute('y1',tail.y);
+ trailGradient.setAttribute('x2',head.x);
+ trailGradient.setAttribute('y2',head.y);
+ trailSvg.style.opacity=String(1-docking*.7);
  $('#experience').classList.toggle('rocket-docked',docking>.94);
 }
 function render(){
@@ -324,7 +311,8 @@ function render(){
  const fraction=p-Math.floor(p),travelling=Math.abs(p-Math.round(p))>.015;
  let opacity=1;
  if(travelling){
-  opacity=fraction<.5?1-ease((fraction-.32)/.18):ease((fraction-.5)/.22);
+  // Preserve legibility even when the visitor drags very slowly between stages.
+  opacity=1-.26*Math.sin(Math.PI*fraction);
  }
  $('#canvas').style.opacity=String(clamp(opacity));
  if(shot.closing){
@@ -351,7 +339,7 @@ function scrollToStep(to,focus=false){
  if(scrollAnim)cancelAnimationFrame(scrollAnim.id);
  const from=window.scrollY,target=storyTop()+to*stageH;
  const begun=performance.now();
- const duration=reduced.matches?0:1000;
+ const duration=reduced.matches?0:460;
  function advance(now){
   const frac=duration?clamp((now-begun)/duration):1;
   // This is the native document scroll, not a separate visual-only counter.
