@@ -181,6 +181,7 @@ const chapterCount=shots.length-1;
 let scrollFrame=null,scrollAnim=null,previousFlightProgress=0,flightDirection=1,mirrorMix=0,lastFlightFrame=0;
 let chapterStartedAt=performance.now(),storyHeight=0,stageH=0;
 let stableWidth=0,stableHeight=0;
+let chromeSettlingUntil=0;
 let finalUnlocked=false;
 const smoother=t=>{t=clamp(t);return t*t*(3-2*t);};
 const screen=$('.screen-wrap');
@@ -325,7 +326,9 @@ function drawFlight(progress){
  if(Math.abs(delta)>.00015)flightDirection=delta>0?1:-1;
  previousFlightProgress=progress;
  const reverse=flightDirection<0?1:0;
- mirrorMix+=(reverse-mirrorMix)*(1-Math.exp(-dt/160));
+ // During Safari's URL-bar resize, keep position scroll-linked but suspend
+ // decorative banking/mirroring until the visual viewport settles.
+ if(!mobile||now>=chromeSettlingUntil)mirrorMix+=(reverse-mirrorMix)*(1-Math.exp(-dt/160));
  const point=flightPoint(progress);
  // Nose follows the actual horizontal direction of the descent,
  // while the reverse lane points back up along its mirrored trajectory.
@@ -333,7 +336,7 @@ function drawFlight(progress){
  const docking=ease((progress-(chapterCount-.25))/.25);
  const launch=.6+.4*ease(progress/.24),size=launch*(1-.48*docking);
  tip.style.transform='translate3d('+(point.x-tip.offsetWidth/2)+'px,'+(point.y-tip.offsetHeight/2)+'px,0) scale('+size+')';
- tip.querySelector('img').style.transform='rotate('+(angle*(1-docking))+'deg)';
+ if(!mobile||now>=chromeSettlingUntil)tip.querySelector('img').style.transform='rotate('+(angle*(1-docking))+'deg)';
  const depart=ease((progress-.025)/.12);
  tip.style.opacity=String(depart*(1-ease((progress-(chapterCount-.065))/.065)));
  // The trail is a short, fading slice of the SAME serpentine path; reverse
@@ -444,9 +447,25 @@ function onResize(){
  layoutRail();
  render();
 }
+// Safari and Chromium mobile can vary visualViewport.height when their URL
+// controls open/close. The 100svh stage remains stable; only the decorative
+// heading interpolation pauses briefly. Native scroll and the rising rail NEVER
+// pause, so no extra dead gestures or snapped chapter positions are introduced.
+const visualViewport=window.visualViewport;
+let lastVisualWidth=visualViewport?.width||0,lastVisualHeight=visualViewport?.height||0;
+function onVisualViewportResize(){
+ if(!mobile||!visualViewport)return;
+ const w=visualViewport.width,h=visualViewport.height;
+ const toolbarOnly=Math.abs(w-lastVisualWidth)<3&&Math.abs(h-lastVisualHeight)>4&&Math.abs(screen.clientHeight-stableHeight)<2;
+ lastVisualWidth=w;lastVisualHeight=h;
+ if(toolbarOnly)chromeSettlingUntil=performance.now()+220;
+}
 function tick(){
  if(destroyed)return;
- if(!document.hidden&&visible)render();
+ // On phones the static rail is painted by the native scroll listener.
+ // Avoid a full SVG + DOM rewrite 60 times/second while the user is idle.
+ const morphNeeded=Math.abs(mirrorMix-(flightDirection<0?1:0))>.015;
+ if(!document.hidden&&visible&&(!mobile||performance.now()>=chromeSettlingUntil&&morphNeeded))render();
  frameHandle=requestAnimationFrame(tick);
 }
 
@@ -456,6 +475,7 @@ function tick(){
 listen(window,'scroll',onManualScroll,{passive:true});
 listen(window,'pageshow',onManualScroll);
 listen(window,'resize',onResize);
+if(visualViewport)listen(visualViewport,'resize',onVisualViewportResize,{passive:true});
 listen(reduced,'change',render);
 listen($('#story-prev'),'click',()=>scrollToStep(index-1));
 listen($('#story-next'),'click',()=>scrollToStep(index+1));
