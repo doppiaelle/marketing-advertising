@@ -141,6 +141,7 @@ function changeScene(next){
   nodes[index].el.classList.add('active');nodes[index].el.setAttribute('aria-hidden','false');
  }
  $('#experience').classList.toggle('is-closing',closing);
+ if(!closing)$('#experience').classList.remove('rocket-docked');
  $('#closing').setAttribute('aria-hidden',String(!closing));
  $('#closing').inert=!closing;
  $('#announcement').textContent=closing?'Create your Brief2Done account.':shots[index].label;
@@ -170,6 +171,7 @@ function render(){
   card.style.transform='translate3d(0,'+((1-arrival)*Math.min(innerHeight*.62,520))+'px,0) scale('+(.94+.06*arrival)+')';
   $('#closing').inert=arrival<.85;
   $('.closing-brand-icon').style.opacity=String(reduced.matches?1:.32+.68*ease((local-.7)/.25));
+  $('#experience').classList.toggle('rocket-docked',local>.92);
  }else{
   paintTitle(nodes[index],local,shots[index].titleMode);
   sendProgress();
