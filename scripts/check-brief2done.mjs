@@ -113,18 +113,18 @@ for(const {w,h,start,end} of [
   }
  }
  for(let i=0;i<6;i++){
-  const top=project(i).y;
-  const bottom=project(i+.76).y;
+  const top=projected(i).y;
+  const bottom=projected(i+.76).y;
   assert.ok(bottom-top>=h*.46,
     'Each chapter must visibly sweep down at least 46% of the viewport; chapter '+i+
     ' moved '+Math.round(bottom-top)+'px of '+h+'px');
   if(i<5){
-   const before=project(i+1-0.000001),after=project(i+1);
+   const before=projected(i+1-0.000001),after=projected(i+1);
    assert.ok(Math.hypot(before.x-after.x,before.y-after.y)<.01,
     'Viewport/camera must remain continuous at chapter '+(i+1));
   }
  }
- assert.ok(Math.abs(project(6).y-end.y)<1e-6,'Final landing must meet brand icon');
+ assert.ok(Math.abs(projected(6).y-end.y)<1e-6,'Final landing must meet brand icon');
 }
 assert.match(motion,/function flightCamera\(progress\)/);
 assert.match(motion,/flightSweep\*\(i\+ease\(\(u-\.78\)\/\.22\)\)/,
