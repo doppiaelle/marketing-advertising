@@ -39,18 +39,34 @@ assert.match(motion, /window\.scrollTo\(\{top:from\+\(target-from\)\*smoother\(f
 assert.match(motion, /if\(!finalUnlocked&&stageH\)/, 'Footer must be gated before the closing reveal');
 assert.match(motion, /story-unlocked/, 'The footer must unlock after the final scene');
 assert.match(motion, /queuedFirstGesture/, 'A first gesture during loading must not be lost');
-assert.match(motion, /startGesture=now-wheelLast>480/, 'Trackpad inertia must not skip chapters');
-assert.match(motion, /const fast=clamp\(part\/\.68\)/, 'Rocket should move ahead of the informational pacing');
-assert.match(motion, /function catmull\(/, 'Flight should use smooth multi-curve paths');
-assert.match(motion, /Math\.min\(pts\.length-1,j\+2\)/, 'Curves must join without discontinuity');
-assert.match(motion, /sampleFlight\(start\+\(flown-start\)\*j\/n\)/, 'Trail must be a fading recent-path window');
+// Both slow devices and fast bursts must use native scroll as the control.
+assert.match(motion, /function cubicPoint\(/, 'One cubic per chapter must replace multi-waypoint spline');
+assert.match(motion, /flightPaths\.push\(\{/, 'A single cubic segment is created for each chapter');
+assert.doesNotMatch(motion, /function catmull\(/, 'Old high-speed multi-curve implementation must be removed');
+assert.doesNotMatch(motion, /const fast=clamp\(part\/\.68\)/, 'Remove artificially accelerated rocket timeline');
+assert.match(motion, /const camera=worldCamera\(progress\)/);
+assert.match(motion, /const position=sampleFlight\(progress\)/, 'Rocket must follow true scroll position');
+assert.match(motion, /x:a\.x,y:a\.y\+vertical\*\.32/, 'Cubic must leave the boundary vertically down');
+assert.match(motion, /x:d\.x,y:d\.y-vertical\*\.32/, 'Cubic must arrive vertically down');
+assert.match(motion, /window\.scrollTo\(\{top:target,behavior:'instant'\}\)/, 'Slow gesture should move scroll directly');
+assert.match(motion, /touchPoint\.at\+dy\*1\.12/, 'Touchmove must track finger distance');
+assert.match(motion, /velocity>\.85/, 'Quick mobile fling can finish its chapter');
+assert.match(motion, /wheelGesture\.delta\+=delta\*sensitivity/, 'Wheel distance must accumulate continuously');
+assert.match(motion, /progress-\.19/, 'Tail must fade as it travels');
+const rocket = await readFile(new URL('assets/brief2done/rocket-flight.svg', root), 'utf8');
+assert.match(rocket, /viewBox="0 0 120 220"/);
+assert.match(rocket, /Entire cone flame: an unbroken silhouette ending at a single tip/);
+assert.match(rocket, /60 219/, 'Flame must reach its complete conical tip');
+assert.match(rocket, /id="flame-core"/);
+assert.match(html, /<img src="\.\.\/assets\/brief2done\/rocket-flight\.svg"/);
+assert.doesNotMatch(html, /rocket-fire-cut|rocket-body-cut/, 'Broken logo cropping masks must be removed');
 for (const id of ['rocket-guide', 'flight-trace', 'flight-path', 'story-prev', 'story-next', 'closing', 'story-replay']) {
   assert.ok(html.includes('id="'+id+'"'), 'Missing guided flight element: '+id);
 }
 assert.match(html, /id="rocket-trail-gradient"/);
-assert.match(html, /id="rocket-fire-cut"/);
-assert.match(html, /id="rocket-body-cut"/);
-assert.match(html, /viewBox="242 43 263 350"/);
+
+
+
 assert.match(html, /id="story-prev"[^>]*aria-label="Previous chapter"/);
 assert.match(html, /id="story-next"[^>]*aria-label="Next chapter"/);
 assert.ok(!html.includes('class="story-step-info"'), 'Remove the large Next/progress bar');
@@ -58,11 +74,11 @@ assert.match(showcase, /height: var\(--journey-height, 700dvh\)/);
 assert.match(showcase, /\.experience\.is-scroll \.shell \{\s*position: sticky;/);
 assert.match(showcase, /\.is-closing \.story-nav \{ display: flex; \}/);
 assert.match(showcase, /stroke: url\(#rocket-trail-gradient\)/);
-assert.match(showcase, /width: 73px;\s*height: 92px;/);
+
 assert.match(html, /class="story-portal".*>Get started<\/span>/);
 assert.match(html, /Create your account/);
 
 const legacy = await readFile(new URL('taskhub/index.html', root), 'utf8');
 assert.ok(legacy.includes('../brief2done/'));
 assert.ok(legacy.includes('location.search+location.hash'));
-console.log('PASS: Brief2Done sticky native-scroll journey, uninterrupted curved rocket with original flame, fading trail, compact arrows, footer lock and legacy redirect.');
+console.log('PASS: Brief2Done scroll-coupled six-cubic rocket, responsive touch/wheel control, intact vector flame, fading trail, accessible navigation and footer lock.');
