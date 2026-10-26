@@ -17,8 +17,6 @@
 .feeddy-stage .feeddy-tiktok svg { width:54%;height:54%; }
 .feeddy-stage .feeddy-googleads .feeddy-app-icon { background:#fcfdff; }
 .feeddy-stage .feeddy-googleads svg { width:61%;height:61%; }
-.feeddy-stage .feeddy-meta .feeddy-app-icon { background:#f8faff; }
-.feeddy-stage .feeddy-meta svg { width:72%;height:72%; }
 .feeddy-stage .feeddy-icon.is-hit .feeddy-app-icon { transform:scale(1.16); filter:drop-shadow(0 0 13px #f9c48c58); }
 .feeddy-stage .feeddy-light-canvas { position:absolute; inset:0; width:100%; height:100%; z-index:3; pointer-events:none; }
 .feeddy-stage .feeddy-ball { position:absolute;z-index:5;pointer-events:none;left:50%;top:0; width:18px;height:18px; border-radius:50%; background:radial-gradient(circle at 30% 28%,#fffefa 0%,#fff6d9 23%,#f7d69d 50%,#f0a95a 83%,#c67c36 100%); box-shadow:0 0 9px 3px #fff2c3c4,0 0 27px 8px #e8b47179,0 0 50px 14px #e4a85e35;transform:translate(-50%,-50%);will-change:left,top,opacity; }

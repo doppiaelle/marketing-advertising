@@ -15,20 +15,19 @@
     {name:'YouTube', x:.21, y:.82},
     {name:'TikTok', x:-.21, y:1.64},
     {name:'Google Ads', x:.21, y:2.46},
-    {name:'Meta', x:-.21, y:3.28},
-    {name:'Feeddy', x:0, y:4.10}
+    {name:'Feeddy', x:0, y:3.28}
   ];
-  const FIRST = {x:P[0].x, y:-.72};
+  const FINAL_INDEX = P.length - 1;
   const SEGMENTS = [];
   const add=(kind,duration,from,to)=>SEGMENTS.push({kind,duration,from,to});
-  // Faster travelling, with a longer contact pause before each visible recoil.
-  add('flight',580,-1,0);
-  for(let i=0;i<5;i++) {
-    add('impact',235,i,i);
-    add('flight',i===4?650:615,i,i+1);
+  // Start with the Instagram collision on the very first frame: no intro fall.
+  // Preserve a readable hit/recoil; spend the saved time accelerating the falls.
+  for(let i=0;i<FINAL_INDEX;i++) {
+    add('impact',210,i,i);
+    add('flight',i===FINAL_INDEX-1?460:420,i,i+1);
   }
-  add('reveal',720,5,5);
-  add('hold',250,5,5);
+  add('reveal',620,FINAL_INDEX,FINAL_INDEX);
+  add('hold',120,FINAL_INDEX,FINAL_INDEX);
   let LENGTH=0;
   SEGMENTS.forEach(s=>{s.start=LENGTH; LENGTH+=s.duration;s.end=LENGTH;});
   const clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
@@ -48,8 +47,8 @@
       this.toggleBtn=document.querySelector('[data-motion-toggle]');
       this.status=document.querySelector('[data-motion-status]');
       this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-      this.camera={x:P[0].x,y:-.3};
-      this.ballWorld={...FIRST};
+      this.camera={...P[0]};
+      this.ballWorld={...P[0]};
       this.history=[];this.impacts=[];this.visited=new Set();
       this.lastFrame=null;this.clock=0;this.playing=false;this.finished=false;this.raf=0;
       this.width=0;this.height=0;this.dpr=1;
@@ -86,16 +85,16 @@
       });
     }
     currentFlight(from,to,t){
-      const a=from<0?FIRST:P[from], b=P[to];
+      const a=P[from], b=P[to];
       // Contact is held in the impact segment. Then the ball rebounds
       // briefly upwards before the squared fall makes it speed up again.
       const u=smooth(t);
       const x=mix(a.x,b.x,u);
-      const launch=from<0?0:.32;
+      const launch=.32;
       const y=mix(a.y,b.y,t*t) - launch*Math.sin(Math.PI*t)*(1-.15*t);
       // Follow the path with a delayed virtual camera: the ball moves sideways
       // on screen, while OLD icons are pushed up and out of the viewport.
-      const camStart=from<0?{x:P[0].x,y:-.3}:P[from];
+      const camStart=P[from];
       const scroll=smooth(clamp((t-.12)/.88));
       const camX=smooth(clamp((t-.28)/.72));
       this.camera.x=mix(camStart.x,b.x,camX);
@@ -120,7 +119,7 @@
       let ballVisible=1,stretch=1;
       if(segment.kind==='flight'){
         this.currentFlight(segment.from,segment.to,t);
-        stretch=1.04+(segment.from<0?0:.13)*Math.min(1,t*2);
+        stretch=1.04+.13*Math.min(1,t*2);
         this.setStatus('Towards '+P[segment.to].name);
       } else if(segment.kind==='impact'){
         this.ballWorld={...P[segment.from]};
@@ -129,12 +128,12 @@
         stretch=1 - .23*Math.sin(Math.PI*t);
         this.setStatus('Impact · '+P[segment.from].name);
       } else {
-        this.camera={...P[5]};
-        this.ballWorld={...P[5]};
+        this.camera={...P[FINAL_INDEX]};
+        this.ballWorld={...P[FINAL_INDEX]};
         ballVisible=segment.kind==='reveal'?1-clamp(t*5):0;
         this.stage.classList.add('is-revealing');
         if(!this.revealed){this.revealed=true;this.stage.dispatchEvent(new CustomEvent('feeddy:ready',{bubbles:true}));}
-        if(!this.impacts.some(s=>s.final))this.impacts.push({point:P[5],born:segment.start,final:true});
+        if(!this.impacts.some(s=>s.final))this.impacts.push({point:P[FINAL_INDEX],born:segment.start,final:true});
         this.setStatus(segment.kind==='hold'?'Feeddy logo':'Feeddy');
       }
       this.positionWorld();
@@ -236,7 +235,7 @@
     }
     showFinal(){
       if(this.raf)cancelAnimationFrame(this.raf);this.raf=0;this.lastFrame=null;
-      this.camera={...P[5]};this.positionWorld();
+      this.camera={...P[FINAL_INDEX]};this.positionWorld();
       this.history=[];this.impacts=[];this.ctx.clearRect(0,0,this.width,this.height);
       this.stage.classList.add('is-revealing');
         if(!this.revealed){this.revealed=true;this.stage.dispatchEvent(new CustomEvent('feeddy:ready',{bubbles:true}));}

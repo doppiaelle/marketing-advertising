@@ -27,18 +27,21 @@ L’animazione è estratta da `feeddy-motion-v2-demo.html`, fornito il 23 ottobr
 la scia canvas e il logo originale. Il PNG incorporato diventa un asset locale.
 Shell della demo, bordi, label, stato e pulsanti esterni vengono rimossi.
 
-Riproduzione automatica unica di circa 5,8 secondi (prima ~9,3 s).
-Tutte e cinque le collisioni rimangono in sequenza: impatto e compressione
-durano 235 ms, poi la sfera rimbalza in alto e accelera nella caduta
-successiva (580 ms iniziali, 615/650 ms tra i loghi). Reveal 720 ms e finale
-250 ms. La durata segue il tempo effettivo anche a frame rate ridotto.
-Al reveal il logo e la copy della hero compaiono progressivamente.
+Riproduzione automatica unica di **3,3 secondi** (prima 5,835 s).
+Il primo frame mostra già l'impatto su Instagram, senza la caduta introduttiva.
+L'ordine è Instagram → YouTube → TikTok → Google Ads → Feeddy: Meta è stato
+eliminato dalla scena. I quattro impatti durano 210 ms ciascuno e conservano
+compressione, scia luminosa e contraccolpo; i voli durano 420 ms (ultimo
+verso Feeddy: 460 ms), con una salita breve e caduta quadratica accelerata.
+Il logo appare dall'inizio del reveal, dopo 2,56 s; reveal 620 ms e hold 120 ms.
+Anche il movimento d'ingresso di logo, testi e CTA è stato anticipato.
+La durata usa il tempo effettivo anche con frame rate ridotto.
 Lo scroll rimane libero. I link interni consentono di saltare subito al prodotto.
 Sono disponibili comandi accessibili da tastiera per salto e pausa dell’intro.
 Fuori vista e a scheda nascosta il rendering si sospende, senza ripartire da capo.
 Con `prefers-reduced-motion` si mostra direttamente la composizione finale.
-Senza JavaScript, logo e informazioni restano leggibili, così come tutti i pannelli
-dimostrativi e le FAQ native.
+Senza JavaScript, logo e informazioni restano leggibili, così come entrambi i pannelli
+dimostrativi.
 
 ## Landing più sintetica
 
@@ -54,7 +57,7 @@ La demo è illustrativa, non pubblica contenuti reali.
 
 Le ancore di navigazione sono `#scopri`, `#spazio` e `#inizia`.
 Le schede rimaste usano ruoli tab, frecce, Home/End e contenuti disponibili
-anche senza JavaScript. Logo e sequenza pinball rimangono invariati nell'ordine.
+anche senza JavaScript. Il logo originale rimane invariato; la sequenza pinball ora salta Meta.
 
 ## Collegamenti
 
