@@ -1,0 +1,27 @@
+name: Brief2Done PR checks
+
+on:
+  pull_request:
+    paths:
+      - 'public/brief2done/**'
+      - 'public/assets/brief2done/**'
+      - 'scripts/check-brief2done.mjs'
+      - 'docs/brief2done-showcase.md'
+      - '.github/workflows/brief2done-pr.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JavaScript syntax
+        run: |
+          node --check public/assets/brief2done/motion.js
+          node --check public/assets/brief2done/screens.js
+      - name: Verify Brief2Done integration and links
+        run: |
+          node scripts/check-brief2done.mjs
+          node scripts/check-contact-links.mjs
