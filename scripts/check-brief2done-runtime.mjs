@@ -110,8 +110,11 @@ const fresh=boot({initialScroll:4800,navigationType:'reload'});
 assert.ok(fresh.window.Brief2DoneMotion,'The page must finish startup and expose the controller');
 assert.equal(fresh.scroll(),0,'Fresh reload must not start at the closing scene');
 assert.equal(fresh.window.Brief2DoneMotion.getState().scene,0);
-assert.equal(fresh.get('#experience').style['--journey-height'],'5600px');
+assert.equal(fresh.get('#experience').style['--journey-height'],'6464px',
+ '18% extended native-scroll runway must account for the closing scene');
 assert.equal(fresh.get('#scenes').children.length,6,'All six chapter panels must be built');
+assert.ok(fresh.get('#scenes').children.every(p=>p.style.opacity===undefined),
+ 'Inactive chapter elements must not be toggled with inline opacity');
 assert.equal(fresh.iframes.length,2,'The preview must reuse exactly two iframes');
 
 fresh.sendReady(0);
@@ -127,6 +130,12 @@ function noseX(){
  assert.ok(Number.isFinite(degrees),'Rocket must have a computed rotation');
  return Math.sin(degrees*Math.PI/180);
 }
+fresh.window.Brief2DoneMotion.setProgress(1/6);
+assert.ok(Math.abs(fresh.scroll()-944)<1e-7,'Chapter 02 starts after 1.18 viewport scroll lengths');
+fresh.window.scrollTo({top:472});
+const actualSlowProgress=fresh.window.Brief2DoneMotion.getState().progress;
+assert.ok(Math.abs(actualSlowProgress-(472/944/6))<1e-8,
+ 'Half a scroll stride must produce half a chapter, no snapping or dead gestures');
 fresh.window.Brief2DoneMotion.setProgress(1.25/6);
 assert.ok(noseX()<-.1,'Forward leftward descent should face left');
 fresh.window.Brief2DoneMotion.setProgress(2.25/6);
@@ -187,9 +196,9 @@ phone.window.Brief2DoneMotion.setProgress(2.6/6);
 assert.notEqual(sprite.style.transform,frozenHeading,'Banking resumes once toolbar settles');
 assert.equal(phone.get('#experience').style['--journey-height'],beforeRunway);
 assert.equal(phone.get('#canvas').style.transform,beforeCanvas);
-assert.ok(Math.abs(phone.scroll()-2.6*760)<.01,'Toolbar must not introduce chapter snapping');
+assert.ok(Math.abs(phone.scroll()-2.6*760*1.18)<.01,'Toolbar must not introduce chapter snapping');
 phone.window.Brief2DoneMotion.setProgress(5.5/6);
 assert.ok(phone.get('#scenes').style.transform.includes('translate3d'),
  'The preloaded mobile rail must move with native scroll');
 
-console.log('PASS: Browser startup, heading on forward/reverse scroll, illuminated long trail, mobile static panels, stable Safari toolbar, scenes, CTA and history.');
+console.log('PASS: extended native-scroll pacing, boot, wide/smooth flight, mobile static previews, stable Safari toolbar, six scenes and reverse.');

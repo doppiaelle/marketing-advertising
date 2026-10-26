@@ -182,3 +182,51 @@ the fade at both scene edges, and the first down/up scroll that changes
 browser chrome. Real physical-device visual QA is not available in this
 connector environment, so the tests above are *not* a claim of a live Safari
 pass.
+
+## PR follow-up: real mobile fade, calmer desktop arc and slower scroll — October 2026
+
+### Why the mobile scene fade was missing
+
+The earlier solution placed gradients at the **outer mobile viewport edges**
+while the 640×940 storyboard canvas was *scaled and vertically centered* inside
+that viewport. The gradients were therefore detached from the actual artwork.
+Worse, inactive chapters still inherited `.scene {opacity:0}`; they abruptly
+became visible only when the `.active` class changed near each midpoint.
+
+The six static HTML panels now remain painted (both active and inactive
+`opacity:1`). They sit in one upward-scrolling `#scenes` rail within a
+**stationary `.scene-viewport`**. Two static, dark-to-transparent edge overlays
+at the top and bottom of that fixed design-size viewport cause *every* panel
+to fade in from below and fade out above. These overlays never animate or
+repaint chapter opacity; native scrolling changes only the rail transform.
+The closing CTA still appears separately, and the rocket, its scia and the
+fixed header are outside those overlays.
+
+### Flight geometry and scroll pacing
+
+- Desktop horizontal swing reduced from `min(width × .29, 390px)` to
+  `min(width × .225, 300px)`. This removes the near-horizontal, wide
+  lateral excursions while keeping alternating left/right bends.
+- Mobile keeps its approved `min(width × .225, 125px)` swing.
+- Vertical rocket movement grows from `28–73%` of the visible height to
+  `16–84%` across the full six-part route. Forward world/screen Y remains
+  strictly increasing and reverse scroll rewinds the same positions; no
+  per-chapter return-to-top was introduced.
+- Each chapter requires **1.18 times the former native-scroll distance**.
+  `scrollProgress`, chapter arrow targets, runway height, footer unlock
+  limit and resize restoration all use that *same* factor. The rail and rocket
+  therefore slow down together without wheel/touch interception, timer locks
+  or inert gestures. Optional chapter-button interpolation increases from
+  460ms to 520ms.
+
+### Verification
+
+GitHub Actions should run syntax, integration/geometry checks and a real
+JavaScript startup smoke test. The smoke test verifies the extended runway,
+halfway native-scroll progress, preloaded panels and forward/reverse travel.
+Geometry tests verify the reduced desktop width, retained mobile width,
+larger strictly downward travel and contiguous chapter joins.
+
+A physical Safari/Chrome test is still required to validate visual fades,
+fast scrolling, URL-bar transitions and the CTA. DOM mocks and CSS assertions
+cannot establish actual mobile rendering performance.
