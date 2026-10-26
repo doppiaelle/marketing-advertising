@@ -235,7 +235,9 @@ assert.match(showcase, /stroke: url\(#rocket-trail-gradient\)/);
 assert.match(html, /class="story-portal".*>Get started<\/span>/);
 assert.match(html, /Create your account/);
 
-const legacy = await readFile(new URL('taskhub/index.html', root), 'utf8');
-assert.ok(legacy.includes('../brief2done/'));
-assert.ok(legacy.includes('location.search+location.hash'));
+// TaskHub was deliberately retired. Verify the supported entry point
+// (the main product catalog), not a deleted legacy redirect page.
+const catalog = await readFile(new URL('index.html', root), 'utf8');
+assert.match(catalog, /class="catalog-product" href="brief2done\/"[^>]*aria-labelledby="brief2done-title/,
+  'The current catalog must still link directly to Brief2Done');
 console.log('PASS: mobile fixed-viewport fades, continuously prepainted panels, slower native scroll, smoother desktop arc and larger vertical flight, payment and other assets.');
