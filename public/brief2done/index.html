@@ -12,8 +12,8 @@
   <link rel="icon" type="image/png" href="../assets/brief2done/brief2done-icon.png">
   <link rel="preload" href="../assets/brief2done/inter.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../assets/brief2done/motion.css?v=20261026-serpentine-rail-v1">
-  <link rel="stylesheet" href="../assets/brief2done/showcase.css?v=20261026-serpentine-rail-v1">
-  <script defer src="../assets/brief2done/motion.js?v=20261026-runtime-hotfix-v2"></script>
+  <link rel="stylesheet" href="../assets/brief2done/showcase.css?v=20261026-visibility-trail-v1">
+  <script defer src="../assets/brief2done/motion.js?v=20261026-visibility-trail-v1"></script>
   <link rel="stylesheet" href="../assets/ui-icons.css?v=20261024">
   <link rel="stylesheet" href="../assets/product-footer.css">
 </head>
@@ -34,7 +34,8 @@
             <div class="slip" aria-hidden="true"></div>
           </div>
           <svg id="flight-trace" class="flight-trace" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="rocket-trail-gradient" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#cbf58b" stop-opacity="0"/><stop offset="48%" stop-color="#b8ff86" stop-opacity=".32"/><stop offset="100%" stop-color="#d8ffa0" stop-opacity=".88"/></linearGradient></defs>
+            <defs><linearGradient id="rocket-trail-gradient" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#cbf58b" stop-opacity="0"/><stop offset="38%" stop-color="#a7ff88" stop-opacity=".38"/><stop offset="76%" stop-color="#b9ffa1" stop-opacity=".82"/><stop offset="100%" stop-color="#e0ffc0" stop-opacity="1"/></linearGradient></defs>
+            <path id="flight-glow" stroke="url(#rocket-trail-gradient)"></path>
             <path id="flight-path" stroke="url(#rocket-trail-gradient)"></path>
           </svg>
           <div id="rocket-guide" class="rocket-guide" aria-hidden="true">
