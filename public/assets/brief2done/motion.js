@@ -65,6 +65,24 @@ listen(window,'message',e=>{
 const timeout=setTimeout(()=>{if(!ready){document.body.classList.add('motion-failed');$('#loading').classList.add('hidden');}},20000);cleanup.push(()=>clearTimeout(timeout));
 function resize(){mobile=$('.screen-wrap').clientWidth<730;const w=mobile?640:1280,h=mobile?940:760,area=$('.screen-wrap');scale=Math.min(area.clientWidth/w,(area.clientHeight||innerHeight)/h);$('#canvas').classList.toggle('mobile',mobile);$('#canvas').style.transform='scale('+scale+')';$('#canvas').style.left=((area.clientWidth-w*scale)/2)+'px';$('#canvas').style.top=(((area.clientHeight||innerHeight)-h*scale)/2)+'px';if(index>=0&&!shots[index].closing)compose(index,local);}
 const ro=new ResizeObserver(resize);ro.observe($('.screen-wrap'));resize();
+// A real vertical visual rail contains all six already-laid-out story scenes.
+// The rail (rather than a simulated camera) moves UP behind a center-flight rocket.
+const sceneRail=$('#scenes');
+const sceneDesignHeight=()=>mobile?940:760;
+function layoutRail(){
+ const h=sceneDesignHeight();
+ sceneRail.style.height=(chapterCount*h)+'px';
+ nodes.forEach((n,i)=>{
+  if(!n.el)return;
+  n.el.style.top=(i*h)+'px';
+  n.el.style.bottom='auto';
+  n.el.style.height=h+'px';
+  n.headline.style.opacity='1';n.headline.style.transform='translateY(0)';
+  n.explainer.style.opacity='1';n.explainer.style.transform='none';
+  n.intertitle.style.opacity='0';
+ });
+}
+layoutRail();
 function paintTitle(n,t,titleMode){
  const arrival=reduced.matches?1:ease(t/.19);
  const center=titleMode==='center'&&!reduced.matches;
@@ -131,8 +149,7 @@ function sendProgress(){
 // sticky over the entire six-chapter journey (and its closing landing).
 // Dragging the scrollbar scrubs the same flight instead of cutting off the stage.
 const chapterCount=shots.length-1;
-const flightPaths=[];
-let pathSize='',scrollFrame=null,scrollAnim=null,previousFlightProgress=0,flightDirection=1,mirrorMix=0,lastFlightFrame=0;
+let scrollFrame=null,scrollAnim=null,previousFlightProgress=0,flightDirection=1,mirrorMix=0,lastFlightFrame=0;
 let chapterStartedAt=performance.now(),storyHeight=0,stageH=0;
 let finalUnlocked=false;
 const smoother=t=>{t=clamp(t);return t*t*(3-2*t);};
@@ -204,131 +221,86 @@ function activate(next){
  window.dispatchEvent(new CustomEvent('brief2done:scene-change',{detail}));
  if(window.parent!==window)window.parent.postMessage({type:'brief2done:scene-change',...detail},'*');
 }
+// One uninterrupted infinity-sign route, centered over a normal vertical
+// content rail. Rocket movement never has to reset between chapters: each
+// integer progress marks a loop junction with continuous velocity.
+function infinityPoint(progress,w,h,mirror=0){
+ const theta=2*Math.PI*progress;
+ const side=1-2*mirror;
+ return {
+  x:w*.5+side*Math.min(w*.29,350)*Math.sin(theta),
+  y:h*.49+Math.min(h*.15,128)*Math.sin(2*theta)
+ };
+}
+function infinityTangent(progress,w,h,mirror=0){
+ const theta=2*Math.PI*progress;
+ return {
+  x:(1-2*mirror)*Math.min(w*.29,350)*2*Math.PI*Math.cos(theta),
+  y:Math.min(h*.15,128)*4*Math.PI*Math.cos(2*theta)
+ };
+}
 function rocketStart(){
  const view=screen.getBoundingClientRect(),b=$('.story-brand-icon').getBoundingClientRect();
- // Start just below the real header mark; keep the sprite hidden until it
- // has actually left the logo so there is never a second icon at rest.
- return{x:b.left-view.left+b.width*.72,y:b.bottom-view.top+14};
+ return{x:b.left-view.left+b.width*.77,y:b.top-view.top+b.height*.36};
 }
-function rocketEnd(){
+function rocketEnd(progress){
  const view=screen.getBoundingClientRect(),b=logo.getBoundingClientRect();
- return{x:b.left-view.left+b.width*.77,y:b.top-view.top+b.height*.30};
+ // The entire closing panel rises from below. Subtract its current shift to
+ // read the FINAL docking point rather than chasing a moving DOM rectangle.
+ const panelShift=Math.max(0,chapterCount-progress)*screen.clientHeight;
+ return{x:b.left-view.left+b.width*.77,y:b.top-view.top+b.height*.30-panelShift};
 }
-function cubicPoint(segment,t,mirror=0){
- const u=1-t,a=segment.a,d=segment.d,offset=segment.bow*(1-2*mirror);
- const b={x:a.x+offset,y:segment.b.y},c={x:d.x+offset,y:segment.c.y};
- return{x:u*u*u*a.x+3*u*u*t*b.x+3*u*t*t*c.x+t*t*t*d.x,
-        y:u*u*u*a.y+3*u*u*t*b.y+3*u*t*t*c.y+t*t*t*d.y};
-}
-function cubicTangent(segment,t,mirror=0){
- const u=1-t,a=segment.a,d=segment.d,offset=segment.bow*(1-2*mirror);
- const b={x:a.x+offset,y:segment.b.y},c={x:d.x+offset,y:segment.c.y};
- return{x:3*u*u*(b.x-a.x)+6*u*t*(c.x-b.x)+3*t*t*(d.x-c.x),
-        y:3*u*u*(b.y-a.y)+6*u*t*(c.y-b.y)+3*t*t*(d.y-c.y)};
-}
-// One scroll chapter = one near-full-screen DOWNWARD sweep. The old path
-// spread the total header-to-footer difference across *all* six chapters,
-// leaving only ~1/6 of the viewport in each; it looked almost horizontal.
-//
-// Geometry is stored in continuous world coordinates. In the last 22% of
-// chapters 1–5 a deterministic camera handoff catches up with the rocket,
-// scrolling the visual window to the top of the next chapter. This creates a
-// film-like page descent without teleporting the flight or changing wheel/
-// touch physics. The sixth sweep lands directly on the final brand mark.
-let flightSweep=0;
-function flightCamera(progress){
- const p=clamp(progress,0,chapterCount);
- const i=Math.min(chapterCount-1,Math.floor(p));
- if(i===chapterCount-1)return (chapterCount-1)*flightSweep;
- const u=p-i;
- return flightSweep*(i+ease((u-.78)/.22));
-}
-function screenFlight(progress,mirror=mirrorMix){
- const point=sampleFlight(progress,mirror);
- return{x:point.x,y:point.y-flightCamera(progress)};
-}
-function buildFlight(){
- const w=screen.clientWidth,h=screen.clientHeight;
- if(!w||!h)return;
- const start=rocketStart(),end=rocketEnd();
- // Aim near the bottom of the visible stage before its camera handoff.
- // The value is recalculated with the viewport on every resize.
- flightSweep=Math.max(h*.78,h*.96-start.y);
- const anchors=[start];
- for(let i=1;i<chapterCount;i++){
-  anchors.push({x:w*(i%2===0?.76:.22),y:start.y+i*flightSweep});
+function flightPoint(progress,mirror=mirrorMix){
+ const w=screen.clientWidth,h=screen.clientHeight,p=clamp(progress,0,chapterCount);
+ const point=infinityPoint(p,w,h,mirror);
+ if(p<.24){
+  const start=rocketStart(),blend=ease(p/.24);
+  point.x=start.x+(point.x-start.x)*blend;
+  point.y=start.y+(point.y-start.y)*blend;
  }
- // The last stage has no rollover; the brand icon is its true landing spot.
- anchors.push({x:end.x,y:end.y+(chapterCount-1)*flightSweep});
- flightPaths.length=0;
- const bow=Math.min(w*.20,260);
- for(let i=0;i<chapterCount;i++){
-  const a=anchors[i],d=anchors[i+1],dy=d.y-a.y;
-  // Single sweeping cubic in each section. Both y control points are
-  // monotonic, so the rocket goes down the page without backing up.
-  flightPaths.push({a,d,bow:i%2===0?-bow:bow,
-   b:{y:a.y+dy/3},c:{y:d.y-dy/3}});
+ if(p>chapterCount-.32){
+  const end=rocketEnd(progress),blend=ease((p-(chapterCount-.32))/.32);
+  point.x+=(end.x-point.x)*blend;
+  point.y+=(end.y-point.y)*blend;
  }
- trailSvg.setAttribute('viewBox','0 0 '+w+' '+h);
- pathSize=w+'x'+h;
-}
-function flightSegment(progress){
- const i=clamp(Math.floor(progress),0,chapterCount-1);
- return{segment:flightPaths[i],u:progress>=chapterCount?1:clamp(progress-i)};
-}
-function sampleFlight(progress,mirror=mirrorMix){
- if(!flightPaths.length)return{x:0,y:0};
- const {segment,u}=flightSegment(clamp(progress,0,chapterCount));
- return cubicPoint(segment,u,mirror);
-}
-function flightTangent(progress,mirror=mirrorMix){
- const {segment,u}=flightSegment(clamp(progress,0,chapterCount));
- return cubicTangent(segment,u,mirror);
+ return point;
 }
 function drawFlight(progress){
  if(reduced.matches){tip.style.opacity='0';trailSvg.style.opacity='0';return;}
- if(pathSize!==screen.clientWidth+'x'+screen.clientHeight)buildFlight();
- if(!flightPaths.length)return;
+ const w=screen.clientWidth,h=screen.clientHeight;
+ if(!w||!h)return;
  const now=performance.now(),dt=lastFlightFrame?Math.min(now-lastFlightFrame,50):16;
  lastFlightFrame=now;
  const delta=progress-previousFlightProgress;
  if(Math.abs(delta)>.00015)flightDirection=delta>0?1:-1;
  previousFlightProgress=progress;
- // Return lane mirrors the cubic around its anchors, transitioning smoothly.
  const reverse=flightDirection<0?1:0;
- mirrorMix+=(reverse-mirrorMix)*(1-Math.exp(-dt/180));
- const position=screenFlight(progress),tangent=flightTangent(progress);
- const docking=ease((progress-(chapterCount-.23))/.23);
- // Re-align to the real logo after responsive layout or card motion.
- if(progress>chapterCount-.32){
-  const end=rocketEnd(),reference=screenFlight(chapterCount);
-  const approach=ease((progress-(chapterCount-.32))/.32);
-  position.x+=(end.x-reference.x)*approach;
-  position.y+=(end.y-reference.y)*approach;
- }
- const yaw=clamp(Math.atan2(tangent.x,Math.max(18,tangent.y))*180/Math.PI,-55,55);
- const angle=flightDirection<0?-yaw:180-yaw;
- const launch=.54+.46*ease(progress/.20);
- const size=launch*(1-.48*docking);
- tip.style.transform='translate3d('+(position.x-tip.offsetWidth/2)+'px,'+(position.y-tip.offsetHeight/2)+'px,0) scale('+size+')';
+ mirrorMix+=(reverse-mirrorMix)*(1-Math.exp(-dt/160));
+ const point=flightPoint(progress);
+ const tangent=infinityTangent(progress,w,h,mirrorMix);
+ // In forward flight the rocket faces downward even when the local
+ // infinity curve rises. On rewind, it faces upward, with gentle banking.
+ const bank=clamp(Math.atan2(tangent.x,Math.max(40,Math.abs(tangent.y)))*180/Math.PI,-40,40);
+ const angle=(flightDirection<0?0:180)+bank*(flightDirection<0?-1:1);
+ const docking=ease((progress-(chapterCount-.25))/.25);
+ const launch=.6+.4*ease(progress/.24),size=launch*(1-.48*docking);
+ tip.style.transform='translate3d('+(point.x-tip.offsetWidth/2)+'px,'+(point.y-tip.offsetHeight/2)+'px,0) scale('+size+')';
  tip.querySelector('img').style.transform='rotate('+(angle*(1-docking))+'deg)';
- const depart=ease((progress-.025)/.11);
- tip.style.opacity=String(depart*(1-ease((progress-(chapterCount-.055))/.055)));
- // Tail is always BEHIND the rocket (forward and mirrored return), in the
- // same projected coordinate system as the rocket, fading to transparent.
- const from=flightDirection<0?Math.min(chapterCount,progress+.17):Math.max(0,progress-.17);
- const n=30,points=[];
- for(let j=0;j<=n;j++){
-  const q=from+(progress-from)*j/n;
-  points.push(screenFlight(q));
- }
+ const depart=ease((progress-.025)/.12);
+ tip.style.opacity=String(depart*(1-ease((progress-(chapterCount-.065))/.065)));
+ // The trail is a short, fading slice of the SAME infinity path; reverse
+ // direction samples AHEAD of progress so the old line stays behind the ship.
+ const from=flightDirection<0?Math.min(chapterCount,progress+.16):Math.max(0,progress-.16);
+ const n=32,points=[];
+ for(let j=0;j<=n;j++)points.push(flightPoint(from+(progress-from)*j/n));
+ trailSvg.setAttribute('viewBox','0 0 '+w+' '+h);
  const tail=points[0],head=points[n];
  trailPath.setAttribute('d',points.map((p,j)=>(j?'L ':'M ')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(''));
  trailGradient.setAttribute('x1',tail.x);
  trailGradient.setAttribute('y1',tail.y);
  trailGradient.setAttribute('x2',head.x);
  trailGradient.setAttribute('y2',head.y);
- trailSvg.style.opacity=String(depart*(1-docking*.7));
+ trailSvg.style.opacity=String(depart*(1-docking*.75));
  $('#experience').classList.toggle('rocket-docked',docking>.94);
 }
 function render(){
@@ -415,7 +387,7 @@ function onResize(){
  if(oldH!==stageH&&inStage()){
   window.scrollTo({top:storyTop()+before*stageH,behavior:'instant'});
  }
- buildFlight();
+ layoutRail();
  render();
 }
 function tick(){
@@ -454,7 +426,7 @@ const observer=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting
 observer.observe(screen);
 $('#experience').classList.add('is-scroll');
 sizeRunway();
-buildFlight();
+layoutRail();
 activate(chapterFor(scrollProgress()));
 render();
 frameHandle=requestAnimationFrame(tick);
