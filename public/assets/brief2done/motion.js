@@ -178,6 +178,9 @@ function sendProgress(){
 // sticky over the entire six-chapter journey (and its closing landing).
 // Dragging the scrollbar scrubs the same flight instead of cutting off the stage.
 const chapterCount=shots.length-1;
+// 18% more native-scroll distance per chapter: slow both story and rocket
+// without intercepting wheel/touch input or inserting inert gestures.
+const scrollStretch=1.18;
 let scrollFrame=null,scrollAnim=null,previousFlightProgress=0,flightDirection=1,mirrorMix=0,lastFlightFrame=0;
 let chapterStartedAt=performance.now(),storyHeight=0,stageH=0;
 let stableWidth=0,stableHeight=0;
@@ -194,7 +197,7 @@ function storyTop(){
 }
 function scrollProgress(){
  const h=stageH||Math.max(1,screen.clientHeight);
- return clamp((window.scrollY-storyTop())/h,0,chapterCount);
+ return clamp((window.scrollY-storyTop())/(h*scrollStretch),0,chapterCount);
 }
 function inStage(){
  if(document.body.classList.contains('motion-failed'))return false;
@@ -206,10 +209,10 @@ function sizeRunway(){
  if(stageH!==height){
   const ratio=stageH?scrollProgress()/chapterCount:0;
   stageH=height;
-  storyHeight=stageH*(chapterCount+1);
+  storyHeight=stageH*(chapterCount*scrollStretch+1);
   $('#experience').style.setProperty('--journey-height',storyHeight+'px');
   // A resize must preserve the chapter even when mobile browser chrome changes.
-  if(ratio>0&&inStage())window.scrollTo({top:storyTop()+ratio*chapterCount*stageH,behavior:'instant'});
+  if(ratio>0&&inStage())window.scrollTo({top:storyTop()+ratio*chapterCount*stageH*scrollStretch,behavior:'instant'});
   // No old flight-path cache exists: serpentine geometry reads viewport size directly.
  }
 }
@@ -258,14 +261,16 @@ function activate(next){
 // independent looping y-motion or time-based movement.
 // Wider arcs stay inside both the mobile and desktop viewports.
 // Half a chapter travels from the centre toward a safe side margin.
-function flightAmplitude(w){return Math.min(w*(w<730?.225:.29),w<730?125:390);}
+// Phone retains its established spacious sweep. Desktop is calmer and less
+// horizontal than v9, while using more of the screen's vertical span.
+function flightAmplitude(w){return Math.min(w*(w<730?.225:.225),w<730?125:300);}
 function descentPoint(progress,w,h,mirror=0){
  const p=clamp(progress,0,chapterCount);
  const side=1-2*mirror;
  const swing=flightAmplitude(w);
  return {
   x:w*.5+side*swing*Math.sin(Math.PI*p),
-  y:h*(.28+.45*p/chapterCount)
+  y:h*(.16+.68*p/chapterCount)
  };
 }
 function descentTangent(progress,w,h,mirror=0){
@@ -274,7 +279,7 @@ function descentTangent(progress,w,h,mirror=0){
  const swing=flightAmplitude(w);
  return {
   x:side*swing*Math.PI*Math.cos(Math.PI*p),
-  y:h*.45/chapterCount
+  y:h*.68/chapterCount
  };
 }
 // The SVG rocket's unrotated nose points up: forward down/right needs an
@@ -400,9 +405,9 @@ function scrollToStep(to,focus=false){
  to=clamp(Math.round(to),0,chapterCount);
  if(document.body.classList.contains('motion-failed'))return;
  if(scrollAnim)cancelAnimationFrame(scrollAnim.id);
- const from=window.scrollY,target=storyTop()+to*stageH;
+ const from=window.scrollY,target=storyTop()+to*stageH*scrollStretch;
  const begun=performance.now();
- const duration=reduced.matches?0:460;
+ const duration=reduced.matches?0:520;
  function advance(now){
   const frac=duration?clamp((now-begun)/duration):1;
   // This is the native document scroll, not a separate visual-only counter.
@@ -418,7 +423,7 @@ function setProgress(value){
  const p=clamp(Number(value)||0)*chapterCount;
  if(scrollAnim)cancelAnimationFrame(scrollAnim.id);
  scrollAnim=null;
- window.scrollTo({top:storyTop()+p*stageH,behavior:'instant'});
+ window.scrollTo({top:storyTop()+p*stageH*scrollStretch,behavior:'instant'});
  render();
 }
 // Browser-native wheel and touch scrolling keep every gesture responsive;
@@ -426,7 +431,7 @@ function setProgress(value){
 function onManualScroll(){
  // The document's scrollbar cannot expose the footer until landing has played.
  if(!finalUnlocked&&stageH){
-  const limit=storyTop()+chapterCount*stageH;
+  const limit=storyTop()+chapterCount*stageH*scrollStretch;
   if(window.scrollY>limit+1){window.scrollTo({top:limit,behavior:'instant'});}
  }
  // The scrollbar and keyboard scrollbar controls use the SAME chapter position.
@@ -443,7 +448,7 @@ function onResize(){
  resize();
  sizeRunway();
  stableWidth=area.clientWidth;stableHeight=area.clientHeight;
- if(oldH!==stageH&&inStage())window.scrollTo({top:storyTop()+before*stageH,behavior:'instant'});
+ if(oldH!==stageH&&inStage())window.scrollTo({top:storyTop()+before*stageH*scrollStretch,behavior:'instant'});
  layoutRail();
  render();
 }
