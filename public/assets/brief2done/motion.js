@@ -421,11 +421,13 @@ for(const link of document.querySelectorAll('a[href="#closing"]'))listen(link,'c
 });
 listen(document,'keydown',e=>{
  if(!inStage()||e.altKey||e.ctrlKey||e.metaKey||e.target.closest('a,button,input,textarea,select,[contenteditable]'))return;
- const dir=['ArrowDown','ArrowRight','PageDown',' '].includes(e.key)?1:
-           ['ArrowUp','ArrowLeft','PageUp'].includes(e.key)?-1:0;
- const p=scrollProgress();
- if(!dir||dir<0&&p<.02||dir>0&&p>=chapterCount-.02)return;
- e.preventDefault();if(!scrollAnim)scrollToStep(chapterFor(p)+dir);
+ // ArrowUp/Down, PageUp/Down and Space keep their NATIVE incremental scroll:
+ // they must not snap the rocket to the next chapter.
+ if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+ const dir=e.key==='ArrowRight'?1:-1,p=scrollProgress();
+ if(dir<0&&p<.02||dir>0&&p>=chapterCount-.02)return;
+ e.preventDefault();
+ if(!scrollAnim)scrollToStep(chapterFor(p)+dir);
 });
 const observer=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;},{threshold:.01});
 observer.observe(screen);
