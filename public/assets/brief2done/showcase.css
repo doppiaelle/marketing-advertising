@@ -826,6 +826,9 @@ body { overscroll-behavior-y: none; }
   pointer-events: none;
   isolation: isolate;
 }
+/* The rail is below the two stationary fade layers. The historical
+   #scenes z-index:12 would otherwise cover the overlay (z-index:4). */
+.experience.is-scroll .scene-viewport #scenes { z-index: 1; }
 .experience.is-scroll .scene-viewport #scenes .scene,
 .experience.is-scroll .scene-viewport #scenes .scene.active {
   opacity: 1;
