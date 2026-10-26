@@ -232,7 +232,7 @@ function goTo(i){
  render();
 }
 function requestStep(dir,force=false){
- if(!ready)return;
+ if(!ready){pendingDirection=dir;return;}
  const now=performance.now();
  if(!force&&now<gestureUntil)return;
  gestureUntil=now+620;
@@ -305,7 +305,7 @@ listen($('#story-prev'),'click',()=>requestStep(-1,true));
 listen($('#story-next'),'click',()=>requestStep(1,true));
 for(const link of document.querySelectorAll('a[href="#closing"]'))listen(link,'click',e=>{
  if(document.body.classList.contains('motion-failed')){e.preventDefault();$('.fallback .launch-button').focus();return;}
- e.preventDefault();goTo(shots.length-1);$('.closing-card .launch-button').focus({preventScroll:true});
+ e.preventDefault();goTo(shots.length-1);local=1;chapterStart=performance.now()-shots[index].duration*1000;render();$('.closing-card .launch-button').focus({preventScroll:true});
 });
 listen(document,'keydown',e=>{
  if(!inStage()||e.altKey||e.ctrlKey||e.metaKey||e.target.closest('a,button,input,textarea,select,[contenteditable]'))return;
