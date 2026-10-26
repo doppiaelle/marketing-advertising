@@ -165,6 +165,7 @@ function sendProgress(){
 const chapterCount=shots.length-1;
 let scrollFrame=null,scrollAnim=null,previousFlightProgress=0,flightDirection=1,mirrorMix=0,lastFlightFrame=0;
 let chapterStartedAt=performance.now(),storyHeight=0,stageH=0;
+let stableWidth=0,stableHeight=0;
 let finalUnlocked=false;
 const smoother=t=>{t=clamp(t);return t*t*(3-2*t);};
 const screen=$('.screen-wrap');
@@ -344,29 +345,27 @@ function render(){
  // Consecutive panels are already laid out BELOW each other. Native scroll
  // lifts the entire rail upward pixel-for-pixel; there is NO camera reset.
  sceneRail.style.transform='translate3d(0,'+railOffset(p,h)+'px,0)';
- nodes.forEach((n,i)=>{
-  if(!n.el)return;
-  const distance=Math.abs(p-i);
-  const fade=clamp((1.12-distance)/.15);
-  n.el.style.visibility=distance<1.12?'visible':'hidden';
-  n.el.style.opacity=String(fade);
- });
+ // All panel DOM remains visible within the clipped story stage.
+ // Per-frame visibility/opacity toggles triggered Safari layer flashes.
+ // The native rail transform alone determines what comes into view.
  const closingShift=Math.max(0,chapterCount-p)*screen.clientHeight;
  const endPanel=$('#closing');
  endPanel.style.transform='translate3d(0,'+closingShift+'px,0)';
  endPanel.style.opacity='1';
  // The two shared demo frames ride the current panel and crossfade while
  // ownership changes between adjacent, physically present chapters.
- const distance=Math.abs(p-index);
- composition.style.transform='translate3d(0,'+((index-p)*h)+'px,0)';
- const previewFade=clamp((.48-distance)/.22);
- $('.cursor').classList.remove('visible');
- if(!shots[index].closing){
-  paintTitle(nodes[index],1,shots[index].titleMode);
-  sendProgress();
-  compose(index,.68);
-  composition.style.opacity=String((screensReady()?1:0)*previewFade);
- }else composition.style.opacity='0';
+ if(!mobile){
+  const distance=Math.abs(p-index);
+  composition.style.transform='translate3d(0,'+((index-p)*h)+'px,0)';
+  const previewFade=clamp((.48-distance)/.22);
+  $('.cursor').classList.remove('visible');
+  if(!shots[index].closing){
+   paintTitle(nodes[index],1,shots[index].titleMode);
+   sendProgress();
+   compose(index,.68);
+   composition.style.opacity=String((screensReady()?1:0)*previewFade);
+  }else composition.style.opacity='0';
+ }
  // The closing item rides up from below just like the six preceding panels.
  const entered=clamp((p-(chapterCount-.86))/.86);
  endPanel.inert=entered<.83;
@@ -415,13 +414,15 @@ function onManualScroll(){
  scrollFrame=requestAnimationFrame(()=>{scrollFrame=null;render();});
 }
 function onResize(){
- const before=scrollProgress();
- const oldH=stageH;
+ const area=$('.screen-wrap');
+ // Safari's bottom URL bar changes visualViewport/innerHeight during the
+ // first swipe. Ignore those changes when our stable stage size is unchanged.
+ if(Math.abs(area.clientWidth-stableWidth)<2&&Math.abs(area.clientHeight-stableHeight)<2)return;
+ const before=scrollProgress(),oldH=stageH;
  resize();
  sizeRunway();
- if(oldH!==stageH&&inStage()){
-  window.scrollTo({top:storyTop()+before*stageH,behavior:'instant'});
- }
+ stableWidth=area.clientWidth;stableHeight=area.clientHeight;
+ if(oldH!==stageH&&inStage())window.scrollTo({top:storyTop()+before*stageH,behavior:'instant'});
  layoutRail();
  render();
 }
@@ -472,6 +473,7 @@ if(!window.location.hash&&navigation?.type!=='back_forward'){
 $('#experience').classList.add('is-scroll');
 if(mobile){ready=true;$('#loading').classList.add('hidden');$('#loading').setAttribute('aria-hidden','true');}
 sizeRunway();
+stableWidth=screen.clientWidth;stableHeight=screen.clientHeight;
 layoutRail();
 activate(chapterFor(scrollProgress()));
 render();
